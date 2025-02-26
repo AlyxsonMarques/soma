@@ -27,16 +27,12 @@ export function RegisterForm() {
     userType: z.enum(["mechanic", "budgetist"], {
       required_error: "Por favor, selecione seu tipo de usuário.",
     }),
-    name: z.string().min(1, {
-      message: "Por favor, insira seu nome.",
-    }).trim().transform((name) => {
-      return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+    name: z.string().nonempty("Por favor, insira seu nome.").transform((name) => {
+      return name.trim().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }),
     email: z.string().email({
       message: "Por favor, insira um email válido.",
-    }).min(1, {
-      message: "Por favor, insira seu email.",
-    }).toLowerCase(),
+    }).nonempty("Por favor, insira seu email.").toLowerCase(),
     password: z.string()
       .min(8, {
         message: "A senha deve ter no mínimo 8 caracteres.",
@@ -44,9 +40,7 @@ export function RegisterForm() {
       .regex(/^(?=.*[A-Za-z])(?=.*\d)/, {
         message: "A senha deve conter pelo menos uma letra e um número.",
       }),
-    confirmPassword: z.string().min(1, {
-      message: "Por favor, confirme sua senha.",
-    }),
+    confirmPassword: z.string().nonempty("Por favor, confirme sua senha."),
     birthDate: z.date({
       required_error: "Por favor, insira sua data de nascimento.",
     }),

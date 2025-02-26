@@ -13,12 +13,12 @@ import { z } from "zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 const formSchema = z.object({
-  email: z.string().email({
+  email: z.string()
+  .nonempty("Por favor, insira seu email.")
+  .email({
     message: "Por favor, insira um email válido.",
   }),
-  password: z.string().min(1, {
-    message: "Por favor, insira sua senha.",
-  }),
+  password: z.string().nonempty("Por favor, insira sua senha."),
 })
 
 type LoginFormProps = z.infer<typeof formSchema>
