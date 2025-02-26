@@ -10,21 +10,23 @@ import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 
 const formSchema = z.object({
   email: z.string().email({
-    message: "Email inválido",
+    message: "Por favor, insira um email válido.",
   }).min(1, {
-    message: "Email é obrigatório",
+    message: "Por favor, insira seu email.",
   }),
   password: z.string().min(1, {
-    message: "Senha é obrigatória",
+    message: "Por favor, insira sua senha.",
   }),
 })
 
+type LoginFormProps = z.infer<typeof formSchema>
+
 export function LoginForm() {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<LoginFormProps>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -32,7 +34,7 @@ export function LoginForm() {
     }
   })
 
-  const onSubmit = (data: z.infer<typeof formSchema>) => {
+  const onSubmit = (data: LoginFormProps) => {
     console.log(data)
   }
 
