@@ -159,7 +159,7 @@ export function RegisterForm() {
                 >
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem onClick={() => {
+                      <RadioGroupItem {...field} onClick={() => {
                         setUserType("mechanic")
                         form.reset()
                       }} value="mechanic" />
@@ -171,7 +171,7 @@ export function RegisterForm() {
 
                   <FormItem className="flex items-center space-x-3 space-y-0">
                     <FormControl>
-                      <RadioGroupItem onClick={() => {
+                      <RadioGroupItem {...field} onClick={() => {
                         setUserType("budgetist")
                         form.reset()
                       }} value="budgetist" />
