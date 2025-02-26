@@ -46,10 +46,6 @@ export function RegisterForm() {
       }),
     confirmPassword: z.string().min(1, {
       message: "Por favor, confirme sua senha.",
-    }).refine((confirmPassword): boolean => {
-      return confirmPassword === form.getValues("password")
-    }, {
-      message: "As senhas não coincidem.",
     }),
     birthDate: z.date({
       required_error: "Por favor, insira sua data de nascimento.",
@@ -105,7 +101,15 @@ export function RegisterForm() {
     }, {
       message: "Por favor, selecione sua firma.",
     }),
-  })
+  }).superRefine(({password, confirmPassword}, ctx) => {
+    if(password !== confirmPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "As senhas não coincidem.",
+        path: ["confirmPassword"],
+      })
+    }
+  });
 
   type RegisterFormProps = z.infer<typeof formSchema>
 
