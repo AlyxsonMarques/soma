@@ -15,8 +15,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 const formSchema = z.object({
   email: z.string().email({
     message: "Por favor, insira um email válido.",
-  }).min(1, {
-    message: "Por favor, insira seu email.",
   }),
   password: z.string().min(1, {
     message: "Por favor, insira sua senha.",
@@ -88,7 +86,6 @@ export function LoginForm() {
           )}
         />
             
-
           <Button type="submit" className="w-full">
             Login
           </Button>

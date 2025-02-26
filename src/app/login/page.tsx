@@ -1,6 +1,6 @@
 import { LoginForm } from "@/app/login/components/login-form";
 import { CentralizedView } from "@/components/CentralizedView";
-import DoubleCard from "@/components/DoubleCard";
+import { DoubleCard } from "@/components/DoubleCard";
 import { SideImage } from "@/components/SideImage";
 
 export default function LoginPage() {
