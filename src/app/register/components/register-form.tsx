@@ -29,6 +29,8 @@ export function RegisterForm() {
     }),
     name: z.string().min(1, {
       message: "Por favor, insira seu nome.",
+    }).trim().transform((name) => {
+      return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     }),
     email: z.string().email({
       message: "Por favor, insira um email válido.",
@@ -94,7 +96,7 @@ export function RegisterForm() {
       message: "Por favor, selecione sua base.",
     }),
     assistant: z.boolean().default(false),
-    observations: z.string().optional(),
+    observations: z.string().trim().optional(),
     firm: z.string().refine((firm) => {
       if(userType === "budgetist") {
         return firm.length > 0
