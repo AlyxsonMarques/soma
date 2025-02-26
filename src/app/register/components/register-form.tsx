@@ -34,7 +34,7 @@ export function RegisterForm() {
       message: "Por favor, insira um email válido.",
     }).min(1, {
       message: "Por favor, insira seu email.",
-    }),
+    }).toLowerCase(),
     password: z.string()
       .min(8, {
         message: "A senha deve ter no mínimo 8 caracteres.",
