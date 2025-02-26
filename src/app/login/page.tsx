@@ -1,11 +1,17 @@
-import { LoginForm } from "@/components/login-form";
+import { LoginForm } from "@/app/login/components/login-form";
+import { CentralizedView } from "@/components/CentralizedView";
+import DoubleCard from "@/components/DoubleCard";
+import { SideImage } from "@/components/SideImage";
 
 export default function LoginPage() {
     return (
-        <div className="flex min-h-svh flex-col items-center justify-center bg-background p-6 md:p-10">
+        <CentralizedView>
             <div className="w-full max-w-sm md:max-w-3xl">
-                <LoginForm />
+                <DoubleCard>
+                    <LoginForm />
+                    <SideImage src="/placeholder.svg" />
+                </DoubleCard>
             </div>
-        </div>
+        </CentralizedView>
     )
 }

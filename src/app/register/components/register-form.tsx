@@ -2,23 +2,23 @@
 
 import type React from "react"
 import { useState } from "react"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { SideImage } from "@/components/SideImage"
 
-export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
+import Link from "next/link"
+import DoubleCard from "@/components/DoubleCard"
+
+export function RegisterForm() {
   const [userType, setUserType] = useState<"mechanic" | "budgetist">("mechanic")
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden">
-        <CardContent className="grid p-0 md:grid-cols-2">
+    <DoubleCard>
           <form className="p-6 md:p-8">
             <div className="flex flex-col gap-6">
               <div className="flex flex-col items-center text-center">
@@ -112,18 +112,16 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
               </Button>
               <div className="text-center text-sm">
                 Já tem uma conta?{" "}
-                <a href="/login" className="underline underline-offset-4">
+                <Link
+                className="underline underline-offset-4"
+                href="/login">
                   Faça login
-                </a>
+                </Link>
               </div>
             </div>
           </form>
-          <div className="relative hidden md:block">
-            <img src="/placeholder.svg" alt="Image" className="absolute inset-0 h-full w-full object-cover" />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+          <SideImage src="/placeholder.svg" />
+        </DoubleCard>
   )
 }
 
