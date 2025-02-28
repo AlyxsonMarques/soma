@@ -1,14 +1,14 @@
-import { LoginForm } from "@/app/login/components/login-form";
+import { RegisterForm } from "@/app/(auth)/register/components/register-form";
 import { CentralizedView } from "@/components/CentralizedView";
 import { DoubleCard } from "@/components/DoubleCard";
 import { SideImage } from "@/components/SideImage";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   return (
     <CentralizedView>
-      <div className="w-full max-w-sm md:max-w-3xl">
+      <div className="w-full max-w-sm md:max-w-7xl">
         <DoubleCard>
-          <LoginForm />
+          <RegisterForm />
           <SideImage src="/placeholder.svg" />
         </DoubleCard>
       </div>
