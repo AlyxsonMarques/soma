@@ -8,29 +8,20 @@ import type React from "react";
 import Link from "next/link";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { userLoginSchema, type UserLogin } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-const formSchema = z.object({
-  email: z.string().nonempty("Por favor, insira seu email.").email({
-    message: "Por favor, insira um email válido.",
-  }),
-  password: z.string().nonempty("Por favor, insira sua senha."),
-});
-
-type LoginFormProps = z.infer<typeof formSchema>;
 
 export function LoginForm() {
-  const form = useForm<LoginFormProps>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<UserLogin>({
+    resolver: zodResolver(userLoginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  const onSubmit = (data: LoginFormProps) => {
+  const onSubmit = (data: UserLogin) => {
     console.log(data);
   };
 

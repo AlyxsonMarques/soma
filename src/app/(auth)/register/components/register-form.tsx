@@ -12,14 +12,13 @@ import { useState } from "react";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePickerInput } from "@/components/ui/date-picker-input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { type UserEnumType, type UserRegister, userRegisterSchema } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { userRegisterSchema, UserRegister } from "@/types/user";
-
 
 export function RegisterForm() {
-  const [userType, setUserType] = useState<"mechanic" | "budgetist">("mechanic");
+  const [userType, setUserType] = useState<UserEnumType>("mechanic");
 
   const form = useForm<UserRegister>({
     resolver: zodResolver(userRegisterSchema),
