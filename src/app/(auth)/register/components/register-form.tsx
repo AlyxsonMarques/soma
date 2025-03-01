@@ -1,9 +1,7 @@
 "use client";
 
-import { SideImage } from "@/components/SideImage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
@@ -11,128 +9,19 @@ import { Textarea } from "@/components/ui/textarea";
 import type React from "react";
 import { useState } from "react";
 
-import { DoubleCard } from "@/components/DoubleCard";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DatePickerInput } from "@/components/ui/date-picker-input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { type UserEnumType, type UserRegister, userRegisterSchema } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 export function RegisterForm() {
-  const [userType, setUserType] = useState<"mechanic" | "budgetist">("mechanic");
+  const [userType, setUserType] = useState<UserEnumType>("mechanic");
 
-  const formSchema = z
-    .object({
-      userType: z.enum(["mechanic", "budgetist"], {
-        required_error: "Por favor, selecione seu tipo de usuário.",
-      }),
-      name: z
-        .string()
-        .nonempty("Por favor, insira seu nome.")
-        .transform((name) => {
-          return name
-            .trim()
-            .split(" ")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-        }),
-      email: z
-        .string()
-        .email({
-          message: "Por favor, insira um email válido.",
-        })
-        .nonempty("Por favor, insira seu email.")
-        .toLowerCase(),
-      password: z
-        .string()
-        .min(8, {
-          message: "A senha deve ter no mínimo 8 caracteres.",
-        })
-        .regex(/^(?=.*[A-Za-z])(?=.*\d)/, {
-          message: "A senha deve conter pelo menos uma letra e um número.",
-        }),
-      confirmPassword: z.string().nonempty("Por favor, confirme sua senha."),
-      birthDate: z.date({
-        required_error: "Por favor, insira sua data de nascimento.",
-      }),
-      cpf: z
-        .string()
-        .length(11, {
-          message: "Por favor, insira seu CPF.",
-        })
-        .refine(
-          (cpf) => {
-            // Remove non-numeric characters
-            const cpfWithoutLetters = cpf.replace(/\D/g, "");
-
-            // Check if all digits are the same
-            if (/^(\d)\1{10}$/.test(cpfWithoutLetters)) return false;
-
-            // Validate first digit
-            let sum = 0;
-            for (let i = 0; i < 9; i++) {
-              sum += Number.parseInt(cpfWithoutLetters.charAt(i)) * (10 - i);
-            }
-            let digit = 11 - (sum % 11);
-            if (digit >= 10) digit = 0;
-            if (digit !== Number.parseInt(cpfWithoutLetters.charAt(9))) return false;
-
-            // Validate second digit
-            sum = 0;
-            for (let i = 0; i < 10; i++) {
-              sum += Number.parseInt(cpfWithoutLetters.charAt(i)) * (11 - i);
-            }
-            digit = 11 - (sum % 11);
-            if (digit >= 10) digit = 0;
-            if (digit !== Number.parseInt(cpfWithoutLetters.charAt(10))) return false;
-
-            return true;
-          },
-          {
-            message: "CPF inválido.",
-          },
-        ),
-      base: z.string().refine(
-        (base) => {
-          if (userType === "mechanic") {
-            return base.length > 0;
-          }
-          return true;
-        },
-        {
-          message: "Por favor, selecione sua base.",
-        },
-      ),
-      assistant: z.boolean().default(false),
-      observations: z.string().trim().optional(),
-      firm: z.string().refine(
-        (firm) => {
-          if (userType === "budgetist") {
-            return firm.length > 0;
-          }
-          return true;
-        },
-        {
-          message: "Por favor, selecione sua firma.",
-        },
-      ),
-    })
-    .superRefine(({ password, confirmPassword }, ctx) => {
-      if (password !== confirmPassword) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "As senhas não coincidem.",
-          path: ["confirmPassword"],
-        });
-      }
-    });
-
-  type RegisterFormProps = z.infer<typeof formSchema>;
-
-  const form = useForm<RegisterFormProps>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<UserRegister>({
+    resolver: zodResolver(userRegisterSchema),
     defaultValues: {
       userType: "mechanic",
       name: "",
@@ -148,7 +37,7 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = (data: RegisterFormProps) => {
+  const onSubmit = (data: UserRegister) => {
     console.log(data);
   };
 
