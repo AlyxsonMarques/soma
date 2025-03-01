@@ -1,5 +1,13 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Disclaimer
+
+You should install the project using
+```bash
+npm install --legacy-peer-deps
+```
+That's because ShadcnUI today (02/28/2025) have some incompatibilities between components on NextJS 15 and React 19
+
 ## Getting Started
 
 First, run the development server:
