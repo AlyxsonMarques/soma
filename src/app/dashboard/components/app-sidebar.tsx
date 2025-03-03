@@ -1,15 +1,24 @@
 "use client";
 
-import { AudioWaveform, Command, GalleryVerticalEnd, MapIcon, PieChart, User } from "lucide-react";
+import {
+  AudioWaveform,
+  ChartNoAxesCombined,
+  ClipboardList,
+  Command,
+  FileSpreadsheet,
+  GalleryVerticalEnd,
+  User,
+} from "lucide-react";
 import type * as React from "react";
 
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarRail } from "@/components/ui/sidebar";
+import { dashboardLinks } from "@/store/dashboard-links";
+import { usePathname } from "next/navigation";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-
 // This is sample data.
-const data = {
+export const data = {
   user: {
     name: "Vicente Ribeiro",
     email: "vicente.ribeiro@soma.com",
@@ -32,36 +41,22 @@ const data = {
       plan: "Free",
     },
   ],
-  navMain: [
-    {
-      title: "Business Intelligence",
-      url: "#",
-      icon: PieChart,
-      isActive: true,
-    },
-    {
-      title: "GR's",
-      url: "#",
-      icon: MapIcon,
-      isActive: true,
-    },
-    {
-      title: "Usuários",
-      url: "#",
-      icon: User,
-      isActive: true,
-    },
-  ],
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
+  const navMain = dashboardLinks.map((item) => ({
+    ...item,
+    isActive: pathname === `/dashboard/${item.url}`,
+  }));
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <TeamSwitcher teams={data.teams} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

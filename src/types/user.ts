@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+export const userIdSchema = z.number().positive().int("Por favor, insira um ID válido.");
+
 const userTypeSchema = z.enum(["mechanic", "budgetist"], {
   required_error: "Por favor, selecione seu tipo de usuário.",
 });
@@ -76,25 +78,37 @@ const userCPFSchema = z
     },
   );
 
+const userBaseSchema = z.number().positive().int("Por favor, insira um ID de base válido.");
+
+const userFirmSchema = z.number().positive().int("Por favor, insira um ID de firma válido.");
+
+const userAssistantSchema = z.boolean().default(false);
+
+const userCreatedAtSchema = z.date();
+
+const userUpdatedAtSchema = z.date();
+
 export const userSchema = z.object({
-  id: z.string(),
+  id: userIdSchema,
   userType: userTypeSchema,
   name: userNameSchema,
   email: userEmailSchema,
   password: userPasswordSchema,
   birthDate: userBirthDateSchema,
   cpf: userCPFSchema,
-  base: z.string(),
-  assistant: z.boolean().default(false),
+  base: userBaseSchema,
+  assistant: userAssistantSchema,
   observations: z.string().trim().optional(),
-  firm: z.string(),
+  firm: userFirmSchema,
+  createdAt: userCreatedAtSchema,
+  updatedAt: userUpdatedAtSchema,
 });
 
 export type UserType = z.infer<typeof userSchema>;
 
 export const userLoginSchema = z.object({
   email: userEmailSchema,
-  password: z.string().nonempty("Por favor, insira sua senha."),
+  password: userPasswordSchema,
 });
 
 export type UserLogin = z.infer<typeof userLoginSchema>;
@@ -108,9 +122,9 @@ export const userRegisterSchema = z
     confirmPassword: userPasswordSchema,
     birthDate: userBirthDateSchema,
     cpf: userCPFSchema,
-    base: z.string(),
-    firm: z.string(),
-    assistant: z.boolean().default(false),
+    base: userBaseSchema,
+    firm: userFirmSchema,
+    assistant: userAssistantSchema,
     observations: z.string().trim().optional(),
   })
   .superRefine(({ password, confirmPassword, base, firm, userType }, ctx) => {
@@ -138,3 +152,30 @@ export const userRegisterSchema = z
   });
 
 export type UserRegister = z.infer<typeof userRegisterSchema>;
+
+export const userTableSchema = z.object({
+  id: userIdSchema,
+  userType: userTypeSchema,
+  cpf: userCPFSchema,
+  name: userNameSchema,
+  email: userEmailSchema,
+  base: z.string().optional().transform((base) => {
+    return base
+      ?.trim()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }),
+  firm: z.string().optional().transform((firm) => {
+    return firm
+      ?.trim()
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }),
+  assistant: userAssistantSchema,
+  createdAt: userCreatedAtSchema,
+  updatedAt: userUpdatedAtSchema,
+})
+
+export type UserTableType = z.infer<typeof userTableSchema>;

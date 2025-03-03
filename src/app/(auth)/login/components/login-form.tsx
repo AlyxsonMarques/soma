@@ -8,7 +8,7 @@ import type React from "react";
 import Link from "next/link";
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { userLoginSchema, type UserLogin } from "@/types/user";
+import { type UserLogin, userLoginSchema } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 

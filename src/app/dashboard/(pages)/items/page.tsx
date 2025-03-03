@@ -1,5 +1,5 @@
-import { DashboardHeader } from "./components/dashboard-header";
-export default function DashboardPage() {
+import { DashboardHeader } from "../../components/dashboard-header";
+export default function ItemsPage() {
   return (
     <>
       <DashboardHeader />
