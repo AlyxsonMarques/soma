@@ -27,3 +27,15 @@ export const itemSchema = z.object({
 });
 
 export type ItemSchema = z.infer<typeof itemSchema>;
+
+export const itemAPISchema = itemSchema.extend({
+  id: itemIdSchema,
+  name: itemNameSchema,
+  truckModel: itemTruckModel,
+  value: itemValueSchema,
+  base: itemBaseSchema,
+  createdAt: itemCreatedAtSchema,
+  updatedAt: itemUpdatedAtSchema,
+});
+
+export type ItemAPISchema = z.infer<typeof itemAPISchema>;

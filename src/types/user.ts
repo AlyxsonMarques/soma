@@ -84,8 +84,6 @@ const userCPFSchema = z
 
 const userBaseSchema = z.number().positive().int("Por favor, insira um ID de base válido.");
 
-const userFirmSchema = z.number().positive().int("Por favor, insira um ID de firma válido.");
-
 const userAssistantSchema = z.boolean().default(false);
 
 const userObservationsSchema = z.string().trim().optional();
@@ -106,7 +104,6 @@ export const userSchema = z.object({
   base: userBaseSchema,
   assistant: userAssistantSchema,
   observations: userObservationsSchema,
-  firm: userFirmSchema,
   createdAt: userCreatedAtSchema,
   updatedAt: userUpdatedAtSchema,
 });
@@ -130,11 +127,10 @@ export const userRegisterSchema = z
     birthDate: userBirthDateSchema,
     cpf: userCPFSchema,
     bases: z.array(userBaseSchema),
-    firms: z.array(userFirmSchema),
     assistant: userAssistantSchema,
     observations: z.string().trim().optional(),
   })
-  .superRefine(({ password, confirmPassword, bases, firms, type }, ctx) => {
+  .superRefine(({ password, confirmPassword, bases, type }, ctx) => {
     if (password !== confirmPassword) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -148,12 +144,6 @@ export const userRegisterSchema = z
         code: z.ZodIssueCode.custom,
         message: "Por favor, selecione sua base.",
         path: ["bases"],
-      });
-    } else if (type === "budgetist" && !firms.length) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Por favor, selecione sua firma.",
-        path: ["firms"],
       });
     }
   });
@@ -169,7 +159,6 @@ export const userAPISchema = z.object({
   birthDate: userBirthDateSchema,
   cpf: userCPFSchema,
   bases: z.array(userBaseSchema),
-  firms: z.array(userFirmSchema),
   assistant: userAssistantSchema,
   observations: userObservationsSchema,
   createdAt: userCreatedAtSchema,

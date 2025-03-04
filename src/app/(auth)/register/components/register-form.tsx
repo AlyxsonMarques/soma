@@ -30,10 +30,9 @@ export function RegisterForm() {
       confirmPassword: "",
       birthDate: new Date(),
       cpf: "",
-      base: 0,
+      bases: [],
       assistant: false,
       observations: "",
-      firm: 0,
     },
   });
 
@@ -192,7 +191,7 @@ export function RegisterForm() {
             <>
               <FormField
                 control={form.control}
-                name="base"
+                name="bases"
                 render={({ field }) => (
                   <FormItem className="grid gap-2">
                     <FormLabel>Base</FormLabel>
@@ -240,31 +239,6 @@ export function RegisterForm() {
                 )}
               />
             </>
-          )}
-
-          {userType === "budgetist" && (
-            <FormField
-              control={form.control}
-              name="firm"
-              render={({ field }) => (
-                <FormItem className="grid gap-2">
-                  <FormLabel>Firma</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value.toString()}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione a firma" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">Firma 1</SelectItem>
-                        <SelectItem value="2">Firma 2</SelectItem>
-                        <SelectItem value="3">Firma 3</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           )}
 
           <Button type="submit" className="w-full">

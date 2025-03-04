@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import type { UserAPISchema } from "@/types/user";
+import type { BaseAPISchema } from "@/types/base";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
-export const columns: ColumnDef<UserAPISchema>[] = [
+export const columns: ColumnDef<BaseAPISchema>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -28,7 +28,6 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-
   {
     accessorKey: "id",
     header: ({ column }) => {
@@ -36,40 +35,16 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     },
   },
   {
-    accessorKey: "type",
-    header: "Tipo de usuário",
-    cell: ({ row }) => {
-      return row.original.type === "mechanic" ? "Mecânico" : "Orçamentista";
-    },
-  },
-  {
-    accessorKey: "cpf",
-    header: "CPF",
-    cell: ({ row }) => {
-      return row.original.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    },
-  },
-  {
     accessorKey: "name",
     header: "Nome",
   },
   {
-    accessorKey: "email",
-    header: "Email",
+    accessorKey: "address",
+    header: "Endereço",
   },
   {
-    accessorKey: "birthDate",
-    header: "Data de nascimento",
-    cell: ({ row }) => {
-      return <span>{row.original.birthDate.toLocaleDateString("pt-BR")}</span>;
-    },
-  },
-  {
-    accessorKey: "assistant",
-    header: "Assistente",
-    cell: ({ row }) => {
-      return row.original.assistant ? "Sim" : "Não";
-    },
+    accessorKey: "phone",
+    header: "Telefone",
   },
   {
     accessorKey: "createdAt",

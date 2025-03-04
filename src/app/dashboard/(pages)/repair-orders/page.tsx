@@ -1,18 +1,18 @@
 import { DataTable } from "@/components/data-table/data-table";
 import { DashboardHeader } from "../../components/dashboard-header";
-import { columns } from "./components/items-table-columns";
-import type { ItemAPISchema } from "@/types/item";
+import { columns } from "./components/orders-table-columns";
+import type { RepairOrderAPISchema } from "@/types/repair-order";
 
-export default function ItemsPage() {
+export default function RepairOrder() {
   return (
     <>
       <DashboardHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <DataTable<ItemAPISchema>
+        <DataTable<RepairOrderAPISchema>
           columns={columns}
           data={[]}
-          filterColumn="name"
-          filterPlaceholder="Pesquisar por nome"
+          filterColumn="gcaf"
+          filterPlaceholder="Pesquisar por GCAF"
         />
       </div>
     </>

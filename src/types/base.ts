@@ -6,6 +6,13 @@ const baseNameSchema = z.string().trim().nonempty("Nome é obrigatório");
 
 const baseAddressSchema = addressSchema;
 
+const basePhoneSchema = z
+  .string()
+  .min(10, "Telefone inválido")
+  .max(11, "Telefone inválido")
+  .trim()
+  .nonempty("Telefone é obrigatório");
+
 const baseCreatedAtSchema = z.date();
 
 const baseUpdatedAtSchema = z.date();
@@ -14,6 +21,7 @@ export const baseSchema = z.object({
   id: baseIdSchema,
   name: baseNameSchema,
   address: baseAddressSchema,
+  phone: basePhoneSchema,
   createdAt: baseCreatedAtSchema,
   updatedAt: baseUpdatedAtSchema,
 });
@@ -24,6 +32,7 @@ export const baseAPISchema = z.object({
   id: baseIdSchema,
   name: baseNameSchema,
   address: baseAddressSchema,
+  phone: basePhoneSchema,
   createdAt: baseCreatedAtSchema,
   updatedAt: baseUpdatedAtSchema,
 });

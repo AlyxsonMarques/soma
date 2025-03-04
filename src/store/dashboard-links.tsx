@@ -1,5 +1,5 @@
 import type { DashboardLinkList } from "@/types/dashboard-link";
-import { ChartNoAxesCombined, ClipboardList, FileSpreadsheet, User, UserRoundPlus } from "lucide-react";
+import { ChartNoAxesCombined, ClipboardList, Warehouse, FileSpreadsheet, User, UserRoundPlus } from "lucide-react";
 export const dashboardLinks: DashboardLinkList = [
   {
     id: 1,
@@ -11,7 +11,7 @@ export const dashboardLinks: DashboardLinkList = [
   {
     id: 2,
     title: "GR's",
-    url: "orders",
+    url: "repair-orders",
     icon: ClipboardList,
     isActive: false,
   },
@@ -34,6 +34,13 @@ export const dashboardLinks: DashboardLinkList = [
     title: "Cadastros Pendentes",
     url: "pending-registrations",
     icon: UserRoundPlus,
+    isActive: false,
+  },
+  {
+    id: 6,
+    title: "Bases",
+    url: "bases",
+    icon: Warehouse,
     isActive: false,
   },
 ];

@@ -1,16 +1,16 @@
 "use client";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import type { UserAPISchema } from "@/types/user";
+import type { RepairOrderAPISchema } from "@/types/repair-order";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
-export const columns: ColumnDef<UserAPISchema>[] = [
+export const columns: ColumnDef<RepairOrderAPISchema>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -31,36 +31,46 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "id",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="ID" />;
+    },
+  },
+  {
+    accessorKey: "gcaf",
+    header: "GCAF",
+  },
+  {
+    accessorKey: "base",
+    header: "Base",
+  },
+  {
+    accessorKey: "users",
+    header: "Usuários",
+    cell: ({ row }) => {
+      return <span>{row.original.users.map((user) => user.name).join(", ")}</span>;
+    },
+  },
+  {
+    accessorKey: "truck",
+    header: "Placa",
+  },
+  {
+    accessorKey: "kilometers",
+    header: "Kilometragem",
+  },
+  {
+    accessorKey: "discount",
+    header: "Desconto",
+  },
+  {
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
       const status = row.getValue("status") as string;
       return (
-        <Badge
-          variant={
-            status === "pending"
-              ? "secondary"
-              : status === "revision"
-                ? "outline"
-                : status === "approved"
-                  ? "default"
-                  : status === "partial_approved"
-                    ? "default"
-                    : status === "nf_approved"
-                      ? "default"
-                      : "destructive"
-        }
-        >
-          {status === "pending" ? "Pendente" :
-          status === "revision" ? "Revisão" :
-              status === "approved"
-                ? "Aprovado"
-                : status === "partial_approved"
-                  ? "Aprovado parcialmente"
-                  : status === "nf_approved"
-                    ? "Aprovado NF"
-                    : "Reprovado"
-          }
+        <Badge variant={status === "reproved" ? "outline" : status === "pending" ? "secondary" : "destructive"}>
+          {status === "reproved" ? "Reprovado" : status === "pending" ? "Pendente" : "Inválido"}
         </Badge>
       );
     },
@@ -69,38 +79,21 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     },
   },
   {
-    accessorKey: "id",
+    accessorKey: "createdAt",
     header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="ID" />;
+      return <DataTableColumnHeader column={column} title="Criado em" />;
+    },
+    cell: ({ row }) => {
+      return <span>{row.original.createdAt.toLocaleDateString("pt-BR")}</span>;
     },
   },
   {
-    accessorKey: "type",
-    header: "Tipo de usuário",
-    cell: ({ row }) => {
-      return row.original.type === "mechanic" ? "Mecânico" : "Orçamentista";
+    accessorKey: "updatedAt",
+    header: ({ column }) => {
+      return <DataTableColumnHeader column={column} title="Atualizado em" />;
     },
-  },
-  {
-    accessorKey: "cpf",
-    header: "CPF",
     cell: ({ row }) => {
-      return row.original.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
-    },
-  },
-  {
-    accessorKey: "email",
-    header: "Email",
-  },
-  {
-    accessorKey: "base",
-    header: "Base",
-  },
-  {
-    accessorKey: "assistant",
-    header: "Assistente",
-    cell: ({ row }) => {
-      return row.original.assistant ? "Sim" : "Não";
+      return <span>{row.original.updatedAt.toLocaleDateString("pt-BR")}</span>;
     },
   },
   {
@@ -115,8 +108,6 @@ export const columns: ColumnDef<UserAPISchema>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Aprovar</DropdownMenuItem>
-            <DropdownMenuItem>Rejeitar</DropdownMenuItem>
             <DropdownMenuItem>Editar</DropdownMenuItem>
             <DropdownMenuItem>Excluir</DropdownMenuItem>
           </DropdownMenuContent>

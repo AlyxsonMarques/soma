@@ -36,6 +36,25 @@ export const repairOrderSchema = z.object({
   observations: repairOrderObservationsSchema,
   discount: repairOrderDiscountSchema,
   services: repairOrderServicesSchema,
-  created_at: repairOrderCreatedAtSchema,
-  updated_at: repairOrderUpdatedAtSchema,
+  createdAt: repairOrderCreatedAtSchema,
+  updatedAt: repairOrderUpdatedAtSchema,
 });
+
+export type RepairOrderSchema = z.infer<typeof repairOrderSchema>;
+
+export const repairOrderAPISchema = z.object({
+  id: repairOrderIdSchema,
+  gcaf: repairOrderGcafIdSchema,
+  users: z.array(userSchema),
+  base: baseSchema, //TODO: Create base schema
+  truck: repairOrderPlateSchema, //TODO: Create truck schema (PLATE)
+  kilometers: repairOrderKilometersSchema,
+  status: repairOrderStatusSchema,
+  observations: repairOrderObservationsSchema,
+  discount: repairOrderDiscountSchema,
+  services: repairOrderServicesSchema,
+  createdAt: repairOrderCreatedAtSchema,
+  updatedAt: repairOrderUpdatedAtSchema,
+});
+
+export type RepairOrderAPISchema = z.infer<typeof repairOrderAPISchema>;
