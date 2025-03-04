@@ -6,8 +6,12 @@ const userTypeSchema = z.enum(["mechanic", "budgetist"], {
   required_error: "Por favor, selecione seu tipo de usuário.",
 });
 
-export type UserEnumType = z.infer<typeof userTypeSchema>;
+const userStatusSchema = z.enum(["approved", "reproved", "pending"], {
+  required_error: "Por favor, selecione o status do usuário.",
+});
 
+export type UserEnumType = z.infer<typeof userTypeSchema>;
+export type UserStatusEnumType = z.infer<typeof userStatusSchema>;
 const userNameSchema = z
   .string()
   .nonempty("Por favor, insira seu nome.")
@@ -84,13 +88,16 @@ const userFirmSchema = z.number().positive().int("Por favor, insira um ID de fir
 
 const userAssistantSchema = z.boolean().default(false);
 
+const userObservationsSchema = z.string().trim().optional();
+
 const userCreatedAtSchema = z.date();
 
 const userUpdatedAtSchema = z.date();
 
 export const userSchema = z.object({
   id: userIdSchema,
-  userType: userTypeSchema,
+  status: userStatusSchema,
+  type: userTypeSchema,
   name: userNameSchema,
   email: userEmailSchema,
   password: userPasswordSchema,
@@ -98,7 +105,7 @@ export const userSchema = z.object({
   cpf: userCPFSchema,
   base: userBaseSchema,
   assistant: userAssistantSchema,
-  observations: z.string().trim().optional(),
+  observations: userObservationsSchema,
   firm: userFirmSchema,
   createdAt: userCreatedAtSchema,
   updatedAt: userUpdatedAtSchema,
@@ -115,19 +122,19 @@ export type UserLogin = z.infer<typeof userLoginSchema>;
 
 export const userRegisterSchema = z
   .object({
-    userType: userTypeSchema,
+    type: userTypeSchema,
     name: userNameSchema,
     email: userEmailSchema,
     password: userPasswordSchema,
     confirmPassword: userPasswordSchema,
     birthDate: userBirthDateSchema,
     cpf: userCPFSchema,
-    base: userBaseSchema,
-    firm: userFirmSchema,
+    bases: z.array(userBaseSchema),
+    firms: z.array(userFirmSchema),
     assistant: userAssistantSchema,
     observations: z.string().trim().optional(),
   })
-  .superRefine(({ password, confirmPassword, base, firm, userType }, ctx) => {
+  .superRefine(({ password, confirmPassword, bases, firms, type }, ctx) => {
     if (password !== confirmPassword) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -136,46 +143,37 @@ export const userRegisterSchema = z
       });
     }
 
-    if (userType === "mechanic" && !base) {
+    if (type === "mechanic" && !bases.length) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Por favor, selecione sua base.",
-        path: ["base"],
+        path: ["bases"],
       });
-    } else if (userType === "budgetist" && !firm) {
+    } else if (type === "budgetist" && !firms.length) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Por favor, selecione sua firma.",
-        path: ["firm"],
+        path: ["firms"],
       });
     }
   });
 
 export type UserRegister = z.infer<typeof userRegisterSchema>;
 
-export const userTableSchema = z.object({
+export const userAPISchema = z.object({
   id: userIdSchema,
-  userType: userTypeSchema,
-  cpf: userCPFSchema,
+  status: userStatusSchema,
+  type: userTypeSchema,
   name: userNameSchema,
   email: userEmailSchema,
-  base: z.string().optional().transform((base) => {
-    return base
-      ?.trim()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }),
-  firm: z.string().optional().transform((firm) => {
-    return firm
-      ?.trim()
-      .split(" ")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }),
+  birthDate: userBirthDateSchema,
+  cpf: userCPFSchema,
+  bases: z.array(userBaseSchema),
+  firms: z.array(userFirmSchema),
   assistant: userAssistantSchema,
+  observations: userObservationsSchema,
   createdAt: userCreatedAtSchema,
   updatedAt: userUpdatedAtSchema,
-})
+});
 
-export type UserTableType = z.infer<typeof userTableSchema>;
+export type UserAPISchema = z.infer<typeof userAPISchema>;

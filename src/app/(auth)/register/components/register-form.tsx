@@ -23,17 +23,17 @@ export function RegisterForm() {
   const form = useForm<UserRegister>({
     resolver: zodResolver(userRegisterSchema),
     defaultValues: {
-      userType: "mechanic",
+      type: "mechanic",
       name: "",
       email: "",
       password: "",
       confirmPassword: "",
       birthDate: new Date(),
       cpf: "",
-      base: "",
+      base: 0,
       assistant: false,
       observations: "",
-      firm: "",
+      firm: 0,
     },
   });
 
@@ -58,7 +58,7 @@ export function RegisterForm() {
 
           <FormField
             control={form.control}
-            name="userType"
+            name="type"
             render={({ field }) => (
               <FormItem className="space-y-3">
                 <FormLabel>Tipo de Usuário</FormLabel>
@@ -197,7 +197,7 @@ export function RegisterForm() {
                   <FormItem className="grid gap-2">
                     <FormLabel>Base</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={`${field.value}`}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecione a base" />
                         </SelectTrigger>
@@ -250,14 +250,14 @@ export function RegisterForm() {
                 <FormItem className="grid gap-2">
                   <FormLabel>Firma</FormLabel>
                   <FormControl>
-                    <Select {...field} onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value.toString()}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione a firma" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="firma1">Firma 1</SelectItem>
-                        <SelectItem value="firma2">Firma 2</SelectItem>
-                        <SelectItem value="firma3">Firma 3</SelectItem>
+                        <SelectItem value="1">Firma 1</SelectItem>
+                        <SelectItem value="2">Firma 2</SelectItem>
+                        <SelectItem value="3">Firma 3</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>

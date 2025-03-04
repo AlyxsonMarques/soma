@@ -1,6 +1,7 @@
 "use client";
 
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
@@ -8,6 +9,7 @@ import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/co
 import type { UserAPISchema } from "@/types/user";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
+
 export const columns: ColumnDef<UserAPISchema>[] = [
   {
     id: "select",
@@ -28,7 +30,21 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-
+  {
+    accessorKey: "status",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string;
+      return (
+        <Badge variant={status === "reproved" ? "outline" : status === "pending" ? "secondary" : "destructive"}>
+          {status === "reproved" ? "Reprovado" : status === "pending" ? "Pendente" : "Inválido"}
+        </Badge>
+      );
+    },
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id));
+    },
+  },
   {
     accessorKey: "id",
     header: ({ column }) => {
@@ -50,10 +66,6 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     },
   },
   {
-    accessorKey: "name",
-    header: "Nome",
-  },
-  {
     accessorKey: "email",
     header: "Email",
   },
@@ -62,32 +74,10 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     header: "Base",
   },
   {
-    accessorKey: "firm",
-    header: "Firma",
-  },
-  {
     accessorKey: "assistant",
     header: "Assistente",
     cell: ({ row }) => {
       return row.original.assistant ? "Sim" : "Não";
-    },
-  },
-  {
-    accessorKey: "createdAt",
-    header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="Criado em" />;
-    },
-    cell: ({ row }) => {
-      return <span>{row.original.createdAt.toLocaleDateString("pt-BR")}</span>;
-    },
-  },
-  {
-    accessorKey: "updatedAt",
-    header: ({ column }) => {
-      return <DataTableColumnHeader column={column} title="Atualizado em" />;
-    },
-    cell: ({ row }) => {
-      return <span>{row.original.updatedAt.toLocaleDateString("pt-BR")}</span>;
     },
   },
   {
@@ -102,6 +92,8 @@ export const columns: ColumnDef<UserAPISchema>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
+            <DropdownMenuItem>Aprovar</DropdownMenuItem>
+            <DropdownMenuItem>Rejeitar</DropdownMenuItem>
             <DropdownMenuItem>Editar</DropdownMenuItem>
             <DropdownMenuItem>Excluir</DropdownMenuItem>
           </DropdownMenuContent>
