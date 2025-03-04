@@ -15,19 +15,21 @@ datasource db {
 
 model User {
   id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  cpf       String  @unique
-  email     String  @unique
-  password  String
+  name      String   @db.VarChar(255)
+  cpf       String  @unique @db.VarChar(11)
+  email     String  @unique @db.VarChar(255)
+  password  String  @db.Text
   type      UserType
   status    UserStatus
-  birthDate DateTime
+  birthDate DateTime @db.Date
   bases     Base[]
-  assistant Boolean
-  observations String?
+  assistant Boolean @default(false)
+  observations String? @db.Text
   repairOrders RepairOrder[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([email, cpf])
 }
 
 enum UserType {
@@ -43,69 +45,79 @@ enum UserStatus {
 
 model Base {
   id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  phone     String
+  name      String   @db.VarChar(255)
+  phone     String   @db.VarChar(11)
   users     User[]
-  address   BaseAddress @relation(fields: [addressId], references: [id])
-  addressId String
+  address   BaseAddress @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  addressId String   @db.Uuid
   repairOrderItems RepairOrderItem[]
   repairOrders RepairOrder[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([name, phone])
 }
 
 model BaseAddress {
   id        String   @id @default(uuid()) @db.Uuid
-  street    String
+  street    String   @db.VarChar(255)
   number    Int
-  complement String?
-  neighborhood String
-  city         String
-  state        String
-  zipCode      String
+  complement String? @db.VarChar(255)
+  neighborhood String @db.VarChar(255)
+  city         String @db.VarChar(255)
+  state        String @db.VarChar(2)
+  zipCode      String @db.VarChar(8)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   bases      Base[]
+
+  @@index([zipCode, city, state])
 }
 
 model RepairOrderItem {
   id        String   @id @default(uuid()) @db.Uuid
-  name      String
+  name      String   @db.VarChar(255)
   truckModel TruckModel @relation(fields: [truckModelId], references: [id])
-  truckModelId String
-  value     Float
+  truckModelId String @db.Uuid
+  value     Decimal @db.Decimal(10, 2)
   base      Base @relation(fields: [baseId], references: [id])
-  baseId    String
+  baseId    String @db.Uuid
   repairOrderServices RepairOrderService[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([name, truckModelId, baseId])
 }
 
 model TruckModel {
   id        String   @id @default(uuid()) @db.Uuid
-  name      String
-  brand     String
+  name      String   @db.VarChar(255)
+  brand     String   @db.VarChar(255)
   year      Int
   repairOrderItems RepairOrderItem[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([name, brand, year])
 }
 
 model RepairOrderService {
   id        String   @id @default(uuid()) @db.Uuid
-  item      RepairOrderItem @relation(fields: [itemId], references: [id])
-  itemId    String
-  quantity  Int
-  labor     String
-  duration  BigInt
-  value     Float
-  discount  Float
+  item      RepairOrderItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  itemId    String @db.Uuid
+  quantity  Int @db.SmallInt
+  labor     String @db.VarChar(255)
+  duration  BigInt @db.BigInt
+  value     Decimal @db.Decimal(10, 2)
+  discount  Decimal @db.Decimal(10, 2)
   type      RepairOrderServiceType
   status    RepairOrderServiceStatus
   repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id])
-  repairOrderId String
+  repairOrderId String @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([itemId, repairOrderId])
 }
 
 enum RepairOrderServiceType {
@@ -121,18 +133,20 @@ enum RepairOrderServiceStatus {
 
 model RepairOrder {
   id        String   @id @default(uuid()) @db.Uuid
-  gcaf      BigInt   @unique
+  gcaf      BigInt   @unique @db.BigInt
   users     User[]
-  base      Base @relation(fields: [baseId], references: [id])
-  baseId    String
-  truck     String
+  base      Base @relation(fields: [baseId], references: [id], onDelete: Restrict)
+  baseId    String @db.Uuid
+  plate     String @db.VarChar(7)
   kilometers Int
   status    RepairOrderStatus
-  observations String?
-  discount Float
+  observations String? @db.Text
+  discount Decimal @db.Decimal(10, 2)
   services RepairOrderService[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([gcaf, baseId, plate])
 }
 
 enum RepairOrderStatus {

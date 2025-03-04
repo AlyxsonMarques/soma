@@ -30,7 +30,7 @@ export const repairOrderSchema = z.object({
   gcaf: repairOrderGcafIdSchema,
   user: z.array(userSchema),
   base: baseSchema, //TODO: Create base schema
-  truck: repairOrderPlateSchema, //TODO: Create truck schema (PLATE)
+  plate: repairOrderPlateSchema, //TODO: Create truck schema (PLATE)
   kilometers: repairOrderKilometersSchema,
   status: repairOrderStatusSchema,
   observations: repairOrderObservationsSchema,
@@ -47,7 +47,7 @@ export const repairOrderAPISchema = z.object({
   gcaf: repairOrderGcafIdSchema,
   users: z.array(userSchema),
   base: baseSchema, //TODO: Create base schema
-  truck: repairOrderPlateSchema, //TODO: Create truck schema (PLATE)
+  plate: repairOrderPlateSchema, //TODO: Create truck schema (PLATE)
   kilometers: repairOrderKilometersSchema,
   status: repairOrderStatusSchema,
   observations: repairOrderObservationsSchema,
