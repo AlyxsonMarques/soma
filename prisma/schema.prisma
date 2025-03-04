@@ -19,8 +19,8 @@ model User {
   cpf       String  @unique @db.VarChar(11)
   email     String  @unique @db.VarChar(255)
   password  String  @db.Text
-  type      UserType
-  status    UserStatus
+  type      UserType @default(MECHANIC)
+  status    UserStatus @default(PENDING)
   birthDate DateTime @db.Date
   bases     Base[]
   assistant Boolean @default(false)
@@ -145,7 +145,7 @@ model RepairOrder {
   baseId    String @db.Uuid
   plate     String @db.VarChar(7)
   kilometers Int
-  status    RepairOrderStatus
+  status    RepairOrderStatus @default(PENDING)
   observations String? @db.Text
   discount Decimal @db.Decimal(10, 2)
   services RepairOrderService[]
