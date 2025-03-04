@@ -1,5 +1,5 @@
 import type { DashboardLinkList } from "@/types/dashboard-link";
-import { ChartNoAxesCombined, ClipboardList, Warehouse, FileSpreadsheet, User, UserRoundPlus } from "lucide-react";
+import { ChartNoAxesCombined, ClipboardList, FileSpreadsheet, User, UserRoundPlus, Warehouse } from "lucide-react";
 export const dashboardLinks: DashboardLinkList = [
   {
     id: 1,

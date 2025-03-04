@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { addressSchema } from "@/types/address";
+import { z } from "zod";
 const baseIdSchema = z.number().positive().int("Por favor, insira um ID válido.");
 
 const baseNameSchema = z.string().trim().nonempty("Nome é obrigatório");

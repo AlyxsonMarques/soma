@@ -1,7 +1,7 @@
 import { DataTable } from "@/components/data-table/data-table";
+import type { RepairOrderAPISchema } from "@/types/repair-order";
 import { DashboardHeader } from "../../components/dashboard-header";
 import { columns } from "./components/orders-table-columns";
-import type { RepairOrderAPISchema } from "@/types/repair-order";
 
 export default function RepairOrder() {
   return (

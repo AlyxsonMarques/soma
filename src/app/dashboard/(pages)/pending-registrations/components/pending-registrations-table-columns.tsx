@@ -49,18 +49,19 @@ export const columns: ColumnDef<UserAPISchema>[] = [
                     : status === "nf_approved"
                       ? "default"
                       : "destructive"
-        }
+          }
         >
-          {status === "pending" ? "Pendente" :
-          status === "revision" ? "Revisão" :
-              status === "approved"
+          {status === "pending"
+            ? "Pendente"
+            : status === "revision"
+              ? "Revisão"
+              : status === "approved"
                 ? "Aprovado"
                 : status === "partial_approved"
                   ? "Aprovado parcialmente"
                   : status === "nf_approved"
                     ? "Aprovado NF"
-                    : "Reprovado"
-          }
+                    : "Reprovado"}
         </Badge>
       );
     },

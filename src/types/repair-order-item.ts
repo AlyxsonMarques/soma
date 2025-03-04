@@ -1,6 +1,6 @@
-import { z } from "zod";
-import { truckModelSchema } from "@/types/truck-model";
 import { baseSchema } from "@/types/base";
+import { truckModelSchema } from "@/types/truck-model";
+import { z } from "zod";
 
 const repairOrderItemIdSchema = z.number().positive().int("Por favor, insira um ID válido.");
 

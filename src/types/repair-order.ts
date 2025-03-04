@@ -1,7 +1,7 @@
-import { z } from "zod";
-import { userSchema } from "@/types/user";
 import { baseSchema } from "@/types/base";
 import { repairOrderServiceSchema } from "@/types/repair-order-service";
+import { userSchema } from "@/types/user";
+import { z } from "zod";
 const repairOrderIdSchema = z.number().positive().int("Por favor, insira um ID válido.");
 const repairOrderGcafIdSchema = z.number().positive().int("Por favor, insira um ID GCAF válido.");
 const repairOrderPlateSchema = z.string().trim().nonempty("Placa é obrigatória");
