@@ -28,6 +28,7 @@ model User {
   repairOrders RepairOrder[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 
   @@index([email, cpf])
 }
@@ -54,6 +55,7 @@ model Base {
   repairOrders RepairOrder[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 
   @@index([name, phone])
 }
@@ -67,9 +69,10 @@ model BaseAddress {
   city         String @db.VarChar(255)
   state        String @db.VarChar(2)
   zipCode      String @db.VarChar(8)
+  bases      Base[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  bases      Base[]
+  deletedAt DateTime?
 
   @@index([zipCode, city, state])
 }
@@ -85,6 +88,7 @@ model RepairOrderItem {
   repairOrderServices RepairOrderService[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 
   @@index([name, truckModelId, baseId])
 }
@@ -97,6 +101,7 @@ model TruckModel {
   repairOrderItems RepairOrderItem[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 
   @@index([name, brand, year])
 }
@@ -116,6 +121,7 @@ model RepairOrderService {
   repairOrderId String @db.Uuid
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  deletedAt DateTime?
 
   @@index([itemId, repairOrderId])
 }
@@ -145,7 +151,7 @@ model RepairOrder {
   services RepairOrderService[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  deletedAt DateTime?
   @@index([gcaf, baseId, plate])
 }
 
