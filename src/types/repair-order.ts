@@ -10,8 +10,8 @@ const repairOrderStatusSchema = z.enum([
   "pending",
   "revision",
   "approved",
-  "partial_approved",
-  "nf_approved",
+  "partially_approved",
+  "invoice_approved",
   "cancelled",
 ]);
 

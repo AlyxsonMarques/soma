@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { itemSchema } from "@/types/item";
+import { repairOrderItemSchema } from "@/types/repair-order-item";
 
 export const repairOrderServiceIdSchema = z.number().positive().int("Por favor, insira um ID válido.");
 
-export const repairOrderServiceItemSchema = itemSchema;
+export const repairOrderServiceItemSchema = repairOrderItemSchema;
 
 export const repairOrderServiceQuantitySchema = z.number().positive().int("Por favor, insira uma quantidade válida");
 

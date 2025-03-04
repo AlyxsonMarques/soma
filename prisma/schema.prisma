@@ -1,0 +1,146 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  cpf       String  @unique
+  email     String  @unique
+  password  String
+  type      UserType
+  status    UserStatus
+  birthDate DateTime
+  bases     Base[]
+  assistant Boolean
+  observations String?
+  repairOrders RepairOrder[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum UserType {
+  MECHANIC
+  BUDGETIST
+}
+
+enum UserStatus {
+  APPROVED
+  REPROVED
+  PENDING
+}
+
+model Base {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  phone     String
+  users     User[]
+  address   BaseAddress @relation(fields: [addressId], references: [id])
+  addressId String
+  repairOrderItems RepairOrderItem[]
+  repairOrders RepairOrder[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BaseAddress {
+  id        String   @id @default(uuid()) @db.Uuid
+  street    String
+  number    Int
+  complement String?
+  neighborhood String
+  city         String
+  state        String
+  zipCode      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  bases      Base[]
+}
+
+model RepairOrderItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  truckModel TruckModel @relation(fields: [truckModelId], references: [id])
+  truckModelId String
+  value     Float
+  base      Base @relation(fields: [baseId], references: [id])
+  baseId    String
+  repairOrderServices RepairOrderService[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TruckModel {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  brand     String
+  year      Int
+  repairOrderItems RepairOrderItem[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RepairOrderService {
+  id        String   @id @default(uuid()) @db.Uuid
+  item      RepairOrderItem @relation(fields: [itemId], references: [id])
+  itemId    String
+  quantity  Int
+  labor     String
+  duration  BigInt
+  value     Float
+  discount  Float
+  type      RepairOrderServiceType
+  status    RepairOrderServiceStatus
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id])
+  repairOrderId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum RepairOrderServiceType {
+  PREVENTIVE
+  CORRECTIVE
+}
+
+enum RepairOrderServiceStatus {
+  PENDING
+  APPROVED
+  CANCELLED
+}
+
+model RepairOrder {
+  id        String   @id @default(uuid()) @db.Uuid
+  gcaf      BigInt   @unique
+  users     User[]
+  base      Base @relation(fields: [baseId], references: [id])
+  baseId    String
+  truck     String
+  kilometers Int
+  status    RepairOrderStatus
+  observations String?
+  discount Float
+  services RepairOrderService[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum RepairOrderStatus {
+  PENDING
+  REVISION
+  APPROVED
+  PARTIALLY_APPROVED
+  INVOICE_APPROVED
+  CANCELLED
+}
+

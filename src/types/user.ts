@@ -94,14 +94,14 @@ const userUpdatedAtSchema = z.date();
 
 export const userSchema = z.object({
   id: userIdSchema,
-  status: userStatusSchema,
-  type: userTypeSchema,
   name: userNameSchema,
+  cpf: userCPFSchema,
   email: userEmailSchema,
   password: userPasswordSchema,
+  type: userTypeSchema,
+  status: userStatusSchema,
   birthDate: userBirthDateSchema,
-  cpf: userCPFSchema,
-  base: userBaseSchema,
+  bases: z.array(userBaseSchema),
   assistant: userAssistantSchema,
   observations: userObservationsSchema,
   createdAt: userCreatedAtSchema,
