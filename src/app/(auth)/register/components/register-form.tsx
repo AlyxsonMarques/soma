@@ -50,7 +50,7 @@ export function RegisterForm() {
                 <h1 className="text-2xl font-bold">Criar Conta</h1>
               </CardTitle>
               <CardDescription>
-                <p className="text-balance text-muted-foreground">Registre-se na SOMA</p>
+                <p className="text-balance text-muted-foreground">Registre-se na Start</p>
               </CardDescription>
             </div>
           </CardHeader>

@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Soma",
-  description: "Soma é uma plataforma de controle de Guias de Remessa.",
+  title: "Start",
+  description: "Start é uma plataforma de controle de Guias de Remessa.",
 };
 
 export default function RootLayout({

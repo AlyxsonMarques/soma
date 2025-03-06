@@ -21,7 +21,7 @@ import { TeamSwitcher } from "./team-switcher";
 export const data = {
   user: {
     name: "Vicente Ribeiro",
-    email: "vicente.ribeiro@soma.com",
+    email: "vicente.ribeiro@start.com",
     avatar: "/avatars/shadcn.jpg",
   },
   teams: [

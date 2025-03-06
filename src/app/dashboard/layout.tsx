@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Soma | Dashboard",
-  description: "Soma é uma plataforma de controle de Guias de Remessa.",
+  title: "Start | Dashboard",
+  description: "Start é uma plataforma de controle de Guias de Remessa.",
 };
 
 export default function DashboardLayout({

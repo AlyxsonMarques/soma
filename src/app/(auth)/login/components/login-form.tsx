@@ -35,7 +35,7 @@ export function LoginForm() {
                 <h1 className="text-2xl font-bold">Bem-Vindo de Volta</h1>
               </CardTitle>
               <CardDescription>
-                <p className="text-balance text-muted-foreground">Entre na sua conta SOMA</p>
+                <p className="text-balance text-muted-foreground">Entre na sua conta Start</p>
               </CardDescription>
             </div>
           </CardHeader>
