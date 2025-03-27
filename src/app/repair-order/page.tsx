@@ -10,29 +10,30 @@ import { repairOrderKilometersSchema, repairOrderPlateSchema } from "@/types/rep
 import {
   repairOrderServiceCategorySchema,
   repairOrderServiceDurationSchema,
-  repairOrderServiceIdSchema,
-  repairOrderServiceItemSchema,
   repairOrderServiceLaborSchema,
+  repairOrderServicePhotoSchema,
   repairOrderServiceQuantitySchema,
   repairOrderServiceTypeSchema,
 } from "@/types/repair-order-service";
+
+import { repairOrderServiceItemIdSchema } from "@/types/repair-order-service-item";
+
+import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { zodResolver } from "@hookform/resolvers/zod";
-import type { Base, RepairOrderItem } from "@prisma/client";
+import type { Base, RepairOrderServiceItem } from "@prisma/client";
 import { Camera, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
-
 const formServiceSchema = z.object({
-  id: repairOrderServiceIdSchema,
   quantity: repairOrderServiceQuantitySchema,
-  item: repairOrderServiceItemSchema,
+  item: repairOrderServiceItemIdSchema,
   category: repairOrderServiceCategorySchema,
   type: repairOrderServiceTypeSchema,
   labor: repairOrderServiceLaborSchema,
   duration: repairOrderServiceDurationSchema,
-  photo: z.instanceof(File),
+  photo: repairOrderServicePhotoSchema,
 });
 
 const formSchema = z.object({
@@ -44,7 +45,7 @@ const formSchema = z.object({
 
 export default function GuiaDeRemessa() {
   const [bases, setBases] = useState<Base[]>([]);
-  const [repairOrderItems, setRepairOrderItems] = useState<RepairOrderItem[]>([]);
+  const [repairOrderServiceItems, setRepairOrderServiceItems] = useState<RepairOrderServiceItem[]>([]);
   useEffect(() => {
     const fetchBases = async () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases`);
@@ -57,9 +58,9 @@ export default function GuiaDeRemessa() {
 
   useEffect(() => {
     const fetchItems = async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/items`);
-      const data: RepairOrderItem[] = await res.json();
-      setRepairOrderItems(data);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-service-items`);
+      const data: RepairOrderServiceItem[] = await res.json();
+      setRepairOrderServiceItems(data);
     };
 
     fetchItems();
@@ -73,14 +74,15 @@ export default function GuiaDeRemessa() {
       base: "",
       services: [
         {
-          quantity: 1,
-          item: {
-            id: 1,
-          },
+          quantity: 0,
+          item: "",
           category: "LABOR",
           type: "PREVENTIVE",
           labor: "",
-          duration: 0,
+          duration: {
+            from: new Date(),
+            to: new Date(),
+          },
           photo: undefined,
         },
       ],
@@ -93,7 +95,7 @@ export default function GuiaDeRemessa() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    console.log(JSON.stringify(values, null, 2));
   }
 
   return (
@@ -202,14 +204,14 @@ export default function GuiaDeRemessa() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
-                                    <Select onValueChange={field.onChange}>
+                                    <Select onValueChange={field.onChange} {...field}>
                                       <FormControl>
                                         <SelectTrigger>
                                           <SelectValue placeholder="Selecione o item" />
                                         </SelectTrigger>
                                       </FormControl>
                                       <SelectContent>
-                                        {repairOrderItems.map((item) => (
+                                        {repairOrderServiceItems.map((item) => (
                                           <SelectItem key={item.id} value={item.id}>
                                             {item.name}
                                           </SelectItem>
@@ -217,6 +219,7 @@ export default function GuiaDeRemessa() {
                                       </SelectContent>
                                     </Select>
                                   </FormControl>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -228,7 +231,7 @@ export default function GuiaDeRemessa() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
-                                    <Select onValueChange={field.onChange}>
+                                    <Select onValueChange={field.onChange} {...field}>
                                       <FormControl>
                                         <SelectTrigger>
                                           <SelectValue placeholder="Selecione a categoria" />
@@ -240,6 +243,7 @@ export default function GuiaDeRemessa() {
                                       </SelectContent>
                                     </Select>
                                   </FormControl>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -250,7 +254,7 @@ export default function GuiaDeRemessa() {
                               name={`services.${index}.type`}
                               render={({ field }) => (
                                 <FormItem>
-                                  <Select onValueChange={field.onChange}>
+                                  <Select onValueChange={field.onChange} {...field}>
                                     <FormControl>
                                       <SelectTrigger>
                                         <SelectValue placeholder="Selecione o tipo" />
@@ -261,11 +265,12 @@ export default function GuiaDeRemessa() {
                                       <SelectItem value="CORRECTIVE">Corretivo</SelectItem>
                                     </SelectContent>
                                   </Select>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
                           </TableCell>
-                          <TableCell className="p-2 md:p-4">
+                          <TableCell className="p-2 md:p-4 min-w-[200px]">
                             <FormField
                               control={form.control}
                               name={`services.${index}.labor`}
@@ -274,21 +279,25 @@ export default function GuiaDeRemessa() {
                                   <FormControl>
                                     <Input {...field} placeholder="Ex: Troca de óleo" />
                                   </FormControl>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
                           </TableCell>
-                          <TableCell className="p-2 md:p-4">
+                          <TableCell className="p-2 md:p-4 min-w-[200px]">
                             <FormField
                               control={form.control}
                               name={`services.${index}.duration`}
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <Input {...field} placeholder="HH:MM" />
-                                  </FormControl>
-                                </FormItem>
-                              )}
+                              render={({ field }) => {
+                                return (
+                                  <FormItem>
+                                    <FormControl>
+                                      <DatePickerWithRange field={field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                );
+                              }}
                             />
                           </TableCell>
                           <TableCell className="p-2 md:p-4">
@@ -304,6 +313,7 @@ export default function GuiaDeRemessa() {
                                         variant="outline"
                                         size="icon"
                                         onClick={() => document.getElementById(`foto-${index}`)?.click()}
+                                        className="min-w-8 min-h-8"
                                       >
                                         <Camera className="h-4 w-4" />
                                       </Button>
@@ -340,6 +350,7 @@ export default function GuiaDeRemessa() {
                                       )}
                                     </div>
                                   </FormControl>
+                                  <FormMessage />
                                 </FormItem>
                               )}
                             />
@@ -360,12 +371,15 @@ export default function GuiaDeRemessa() {
                   className="mt-4 w-full sm:w-auto"
                   onClick={() =>
                     append({
-                      quantity: 1,
-                      item: { id: 1 },
+                      quantity: 0,
+                      item: "",
                       category: "LABOR",
                       type: "PREVENTIVE",
                       labor: "",
-                      duration: 0,
+                      duration: {
+                        from: new Date(),
+                        to: new Date(),
+                      },
                       photo: null,
                     })
                   }

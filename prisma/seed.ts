@@ -15,7 +15,7 @@ async function main() {
   await prisma.$transaction([
     prisma.repairOrderService.deleteMany(),
     prisma.repairOrder.deleteMany(),
-    prisma.repairOrderItem.deleteMany(),
+    prisma.repairOrderServiceItem.deleteMany(),
     prisma.truckModel.deleteMany(),
     prisma.user.deleteMany(),
     prisma.base.deleteMany(),
@@ -45,7 +45,7 @@ async function main() {
       return prisma.base.create({
         data: {
           name: faker.company.name(),
-          phone: faker.string.numeric('11'),
+          phone: faker.string.numeric("11"),
           addressId: address.id,
         },
       });
@@ -91,9 +91,9 @@ async function main() {
   );
 
   // Create Repair Order Items
-  const repairOrderItems = await Promise.all(
+  const RepairOrderServiceItem = await Promise.all(
     Array.from({ length: 30 }).map(async () => {
-      return prisma.repairOrderItem.create({
+      return prisma.repairOrderServiceItem.create({
         data: {
           name: faker.commerce.productName(),
           truckModelId: faker.helpers.arrayElement(truckModels).id,
@@ -108,12 +108,12 @@ async function main() {
   const repairOrders = await Promise.all(
     Array.from({ length: 15 }).map(async (_, index) => {
       const status = faker.helpers.arrayElement([
-        'PENDING',
-        'REVISION',
-        'APPROVED',
-        'PARTIALLY_APPROVED',
-        'INVOICE_APPROVED',
-        'CANCELLED',
+        "PENDING",
+        "REVISION",
+        "APPROVED",
+        "PARTIALLY_APPROVED",
+        "INVOICE_APPROVED",
+        "CANCELLED",
       ]) as RepairOrderStatus;
 
       // Generate unique GCAF by using the index
@@ -123,8 +123,8 @@ async function main() {
         data: {
           gcaf,
           baseId: faker.helpers.arrayElement(bases).id,
-          plate: faker.helpers.replaceSymbols('???####').toUpperCase(),
-          kilometers: Number.parseInt(faker.string.numeric('6')),
+          plate: faker.helpers.replaceSymbols("???####").toUpperCase(),
+          kilometers: Number.parseInt(faker.string.numeric("6")),
           status,
           observations: faker.helpers.maybe(() => faker.lorem.paragraph()),
           discount: Number.parseFloat(faker.commerce.price()),
@@ -146,7 +146,7 @@ async function main() {
 
           return prisma.repairOrderService.create({
             data: {
-              itemId: faker.helpers.arrayElement(repairOrderItems).id,
+              itemId: faker.helpers.arrayElement(RepairOrderServiceItem).id,
               quantity: faker.number.int({ min: 1, max: 10 }),
               labor: faker.commerce.productDescription(),
               duration: BigInt(faker.number.int({ min: 1800, max: 28800 })), // 30min to 8h in seconds
