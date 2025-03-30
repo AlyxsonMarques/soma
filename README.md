@@ -16,6 +16,17 @@ First, run the development server:
 npm run dev
 ```
 
+Next, start a postgresql docker instance
+
+```bash
+docker pull postgres
+```
+```bash
+docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+```
+
+The url for the database will be: postgresql://postgres:postgres@localhost:5432/postgres
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
