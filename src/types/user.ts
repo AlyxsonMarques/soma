@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const userIdSchema = z.number().positive().int("Por favor, insira um ID válido.");
 
-const userTypeSchema = z.enum(["mechanic", "budgetist"], {
+const userTypeSchema = z.enum(["MECHANIC", "BUDGETIST"], {
   required_error: "Por favor, selecione seu tipo de usuário.",
 });
 
@@ -126,24 +126,15 @@ export const userRegisterSchema = z
     confirmPassword: userPasswordSchema,
     birthDate: userBirthDateSchema,
     cpf: userCPFSchema,
-    bases: z.array(userBaseSchema),
     assistant: userAssistantSchema,
     observations: z.string().trim().optional(),
   })
-  .superRefine(({ password, confirmPassword, bases, type }, ctx) => {
+  .superRefine(({ password, confirmPassword }, ctx) => {
     if (password !== confirmPassword) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "As senhas não coincidem.",
         path: ["confirmPassword"],
-      });
-    }
-
-    if (type === "mechanic" && !bases.length) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Por favor, selecione sua base.",
-        path: ["bases"],
       });
     }
   });
