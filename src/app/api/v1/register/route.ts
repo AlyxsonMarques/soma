@@ -1,6 +1,6 @@
 import prisma from "@/lib/prisma";
 import { type UserEnumType, type UserRegister, userRegisterSchema } from "@/types/user";
-import argon2 from "argon2";
+import { hash } from "bcrypt-ts";
 import { type NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -14,17 +14,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Dados inválidos", error }, { status: 400 });
   }
 
-  const alreadyExists = await prisma.user.findFirst({
-    where: {
-      OR: [{ email: body.email }, { cpf: body.cpf }],
-    },
+  const cpfExists = await prisma.user.findUnique({
+    where: { cpf: body.cpf },
   });
 
-  if (alreadyExists) {
-    return NextResponse.json({ message: "Usuário já existe" }, { status: 400 });
+  if (cpfExists) {
+    return NextResponse.json({ message: "CPF já cadastrado" }, { status: 400 });
   }
 
-  const hashedPassword = await argon2.hash(body.password);
+  const emailExists = await prisma.user.findUnique({
+    where: { email: body.email },
+  });
+
+  if (emailExists) {
+    return NextResponse.json({ message: "Email já cadastrado" }, { status: 400 });
+  }
+
+  const hashedPassword = await hash(body.password, Number.parseInt(process.env.BCRYPT_ROUNDS || "12"));
 
   const user = await prisma.user.create({
     data: {

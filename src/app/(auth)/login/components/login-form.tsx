@@ -10,8 +10,9 @@ import Link from "next/link";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { type UserLogin, userLoginSchema } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
-
+import { toast } from "sonner";
 export function LoginForm() {
   const form = useForm<UserLogin>({
     resolver: zodResolver(userLoginSchema),
@@ -21,8 +22,20 @@ export function LoginForm() {
     },
   });
 
-  const onSubmit = (data: UserLogin) => {
-    console.log(data);
+  const onSubmit = async (data: UserLogin) => {
+    const response = await fetch("/api/v1/login", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (response.ok) {
+      toast.success(responseData.message);
+      redirect("/dashboard/repair-orders");
+    } else {
+      toast.error(responseData.message);
+    }
   };
 
   return (

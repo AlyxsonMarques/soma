@@ -17,13 +17,8 @@ import { usePathname } from "next/navigation";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { TeamSwitcher } from "./team-switcher";
-// This is sample data.
+
 export const data = {
-  user: {
-    name: "Vicente Ribeiro",
-    email: "vicente.ribeiro@start.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   teams: [
     {
       name: "Boituva",
@@ -45,6 +40,7 @@ export const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
+
   const navMain = dashboardLinks.map((item) => ({
     ...item,
     isActive: pathname === `/dashboard/${item.url}`,
@@ -59,7 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

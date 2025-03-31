@@ -3,10 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import type React from "react";
 import { useState } from "react";
 
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,8 +13,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { type UserEnumType, type UserRegister, userRegisterSchema } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
-
+import { toast } from "sonner";
 export function RegisterForm() {
   const [userType, setUserType] = useState<UserEnumType>("MECHANIC");
 
@@ -35,8 +34,20 @@ export function RegisterForm() {
     },
   });
 
-  const onSubmit = (data: UserRegister) => {
-    console.log(data);
+  const onSubmit = async (data: UserRegister) => {
+    const response = await fetch("/api/v1/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      toast.error(responseData.message);
+      return;
+    }
+
+    toast.success(responseData.message);
   };
 
   return (
