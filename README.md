@@ -14,13 +14,24 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
+
+Next, start a postgresql docker instance
+
+```bash
+docker pull postgres
+```
+```bash
+docker run --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 -d postgres
+```
+```bash
+npx prisma generate
+```
+```bash
+npx prisma db push
+```
+
+The url for the database will be: postgresql://postgres:postgres@localhost:5432/postgres
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
