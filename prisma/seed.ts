@@ -1,164 +1,168 @@
-import { PrismaClient } from "@prisma/client";
+import { faker } from "@faker-js/faker/locale/pt_BR";
+import {
+  PrismaClient,
+  type RepairOrderServiceStatus,
+  type RepairOrderServiceType,
+  type RepairOrderStatus,
+  type UserStatus,
+  type UserType,
+} from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Clear existing data to prevent conflicts
-  await prisma.repairOrderService.deleteMany();
-  await prisma.repairOrderItem.deleteMany();
-  await prisma.repairOrder.deleteMany();
-  await prisma.baseAddress.deleteMany();
-  await prisma.base.deleteMany();
-  await prisma.truckModel.deleteMany();
-  await prisma.user.deleteMany();
+  // Clean up existing data
+  await prisma.$transaction([
+    prisma.repairOrderService.deleteMany(),
+    prisma.repairOrder.deleteMany(),
+    prisma.repairOrderServiceItem.deleteMany(),
+    prisma.truckModel.deleteMany(),
+    prisma.user.deleteMany(),
+    prisma.base.deleteMany(),
+    prisma.baseAddress.deleteMany(),
+  ]);
 
-  // Seed BaseAddresses
-  const baseAddresses = await prisma.baseAddress.createMany({
-    data: [
-      {
-        street: "Av. Industrial",
-        number: 1500,
-        neighborhood: "Distrito Industrial",
-        city: "São Paulo",
-        state: "SP",
-        zipCode: "08090970",
-      },
-      {
-        street: "Rodovia Santos Dumont",
-        number: 3500,
-        neighborhood: "Área Industrial",
-        city: "Campinas",
-        state: "SP",
-        zipCode: "13054970",
-      },
-    ],
-  });
-
-  // Fetch the created base addresses
-  const createdBaseAddresses = await prisma.baseAddress.findMany();
-
-  // Seed Bases
-  const bases = await Promise.all(
-    createdBaseAddresses.map((address) =>
-      prisma.base.create({
+  // Create Base Addresses
+  const baseAddresses = await Promise.all(
+    Array.from({ length: 5 }).map(async () => {
+      return prisma.baseAddress.create({
         data: {
-          name: `Base ${address.city}`,
-          phone: "1199999999",
+          street: faker.location.street(),
+          number: Number.parseInt(faker.location.buildingNumber()),
+          complement: faker.location.secondaryAddress(),
+          neighborhood: faker.location.county(),
+          city: faker.location.city(),
+          state: faker.location.state().substring(0, 2).toUpperCase(),
+          zipCode: faker.location.zipCode("########"),
+        },
+      });
+    }),
+  );
+
+  // Create Bases
+  const bases = await Promise.all(
+    baseAddresses.map(async (address) => {
+      return prisma.base.create({
+        data: {
+          name: faker.company.name(),
+          phone: faker.string.numeric("11"),
           addressId: address.id,
         },
-      }),
-    ),
+      });
+    }),
   );
 
-  // Seed Truck Models
-  const truckModels = await prisma.truckModel.createMany({
-    data: [
-      { name: "Actros", brand: "Mercedes-Benz", year: 2020 },
-      { name: "Scania R", brand: "Scania", year: 2019 },
-      { name: "Volvo FH", brand: "Volvo", year: 2021 },
-    ],
-  });
+  // Create Users
+  const users = await Promise.all(
+    Array.from({ length: 20 }).map(async () => {
+      const userType = faker.helpers.arrayElement(["MECHANIC", "BUDGETIST"]) as UserType;
+      const userStatus = faker.helpers.arrayElement(["APPROVED", "REPROVED", "PENDING"]) as UserStatus;
 
-  // Fetch created truck models
-  const createdTruckModels = await prisma.truckModel.findMany();
-
-  // Seed Users
-  const users = await prisma.user.createMany({
-    data: [
-      {
-        name: "João Silva",
-        cpf: "12345678901",
-        email: "joao.silva@example.com",
-        password: "hashedpassword123", // In real-world, use proper hashing
-        type: "MECHANIC",
-        status: "APPROVED",
-        birthDate: new Date("1990-01-15"),
-        assistant: false,
-      },
-      {
-        name: "Maria Santos",
-        cpf: "98765432109",
-        email: "maria.santos@example.com",
-        password: "hashedpassword456", // In real-world, use proper hashing
-        type: "BUDGETIST",
-        status: "APPROVED",
-        birthDate: new Date("1985-05-20"),
-        assistant: true,
-      },
-    ],
-  });
-
-  // Fetch created users
-  const createdUsers = await prisma.user.findMany();
-
-  // Seed Repair Order Items
-  const repairOrderItems = await Promise.all(
-    createdTruckModels.map((model) =>
-      prisma.repairOrderItem.create({
+      return prisma.user.create({
         data: {
-          name: `Repair Item for ${model.name}`,
-          truckModelId: model.id,
-          value: 500.0,
-          baseId: bases[0].id,
+          name: faker.person.fullName(),
+          cpf: faker.string.numeric("###########"),
+          email: faker.internet.email(),
+          password: faker.internet.password(),
+          type: userType,
+          status: userStatus,
+          birthDate: faker.date.past(),
+          assistant: faker.datatype.boolean(),
+          observations: faker.helpers.maybe(() => faker.lorem.paragraph()),
+          bases: {
+            connect: [{ id: faker.helpers.arrayElement(bases).id }],
+          },
         },
-      }),
-    ),
+      });
+    }),
   );
 
-  // Seed Repair Orders
-  const repairOrders = await prisma.repairOrder.createMany({
-    data: [
-      {
-        gcaf: BigInt(Math.floor(Math.random() * 1000000)),
-        baseId: bases[0].id,
-        plate: "ABC1234",
-        kilometers: 150000,
-        status: "PENDING",
-        discount: 0,
-      },
-      {
-        gcaf: BigInt(Math.floor(Math.random() * 1000000)),
-        baseId: bases[1].id,
-        plate: "DEF5678",
-        kilometers: 200000,
-        status: "REVISION",
-        discount: 50.0,
-      },
-    ],
-  });
+  // Create Truck Models
+  const truckModels = await Promise.all(
+    Array.from({ length: 10 }).map(async () => {
+      return prisma.truckModel.create({
+        data: {
+          name: faker.vehicle.model(),
+          brand: faker.vehicle.manufacturer(),
+          year: Number.parseInt(faker.date.past().getFullYear().toString()),
+        },
+      });
+    }),
+  );
 
-  // Fetch created repair orders
-  const createdRepairOrders = await prisma.repairOrder.findMany();
+  // Create Repair Order Items
+  const RepairOrderServiceItem = await Promise.all(
+    Array.from({ length: 30 }).map(async () => {
+      return prisma.repairOrderServiceItem.create({
+        data: {
+          name: faker.commerce.productName(),
+          truckModelId: faker.helpers.arrayElement(truckModels).id,
+          value: Number.parseFloat(faker.commerce.price()),
+          baseId: faker.helpers.arrayElement(bases).id,
+        },
+      });
+    }),
+  );
 
-  // Seed Repair Order Services
-  await prisma.repairOrderService.createMany({
-    data: [
-      {
-        itemId: repairOrderItems[0].id,
-        quantity: 2,
-        labor: "Engine Maintenance",
-        duration: BigInt(120),
-        value: 1000.0,
-        discount: 50.0,
-        type: "PREVENTIVE",
-        status: "PENDING",
-        repairOrderId: createdRepairOrders[0].id,
-      },
-      {
-        itemId: repairOrderItems[1].id,
-        quantity: 1,
-        labor: "Brake System Repair",
-        duration: BigInt(180),
-        value: 1500.0,
-        discount: 0,
-        type: "CORRECTIVE",
-        status: "APPROVED",
-        repairOrderId: createdRepairOrders[1].id,
-      },
-    ],
-  });
+  // Create Repair Orders
+  const repairOrders = await Promise.all(
+    Array.from({ length: 15 }).map(async (_, index) => {
+      const status = faker.helpers.arrayElement([
+        "PENDING",
+        "REVISION",
+        "APPROVED",
+        "PARTIALLY_APPROVED",
+        "INVOICE_APPROVED",
+        "CANCELLED",
+      ]) as RepairOrderStatus;
 
-  console.log("Database seeded successfully!");
+      // Generate unique GCAF by using the index
+      const gcaf = BigInt(Date.now() + index);
+
+      return prisma.repairOrder.create({
+        data: {
+          gcaf,
+          baseId: faker.helpers.arrayElement(bases).id,
+          plate: faker.helpers.replaceSymbols("???####").toUpperCase(),
+          kilometers: Number.parseInt(faker.string.numeric("6")),
+          status,
+          observations: faker.helpers.maybe(() => faker.lorem.paragraph()),
+          discount: Number.parseFloat(faker.commerce.price()),
+          users: {
+            connect: [{ id: faker.helpers.arrayElement(users).id }],
+          },
+        },
+      });
+    }),
+  );
+
+  // Create Repair Order Services
+  await Promise.all(
+    repairOrders.map(async (repairOrder) => {
+      return Promise.all(
+        Array.from({ length: faker.number.int({ min: 1, max: 5 }) }).map(async () => {
+          const type = faker.helpers.arrayElement(["PREVENTIVE", "CORRECTIVE"]) as RepairOrderServiceType;
+          const status = faker.helpers.arrayElement(["PENDING", "APPROVED", "CANCELLED"]) as RepairOrderServiceStatus;
+
+          return prisma.repairOrderService.create({
+            data: {
+              itemId: faker.helpers.arrayElement(RepairOrderServiceItem).id,
+              quantity: faker.number.int({ min: 1, max: 10 }),
+              labor: faker.commerce.productDescription(),
+              duration: BigInt(faker.number.int({ min: 1800, max: 28800 })), // 30min to 8h in seconds
+              value: Number.parseFloat(faker.commerce.price()),
+              discount: Number.parseFloat(faker.commerce.price({ max: 100 })),
+              type,
+              status,
+              repairOrderId: repairOrder.id,
+            },
+          });
+        }),
+      );
+    }),
+  );
+
+  console.log("Seed completed successfully!");
 }
 
 main()
@@ -169,5 +173,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
-export default main;

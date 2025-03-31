@@ -51,7 +51,7 @@ model Base {
   users     User[]
   address   BaseAddress @relation(fields: [addressId], references: [id], onDelete: Restrict)
   addressId String   @db.Uuid
-  repairOrderItems RepairOrderItem[]
+  RepairOrderServiceItems RepairOrderServiceItem[]
   repairOrders RepairOrder[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -77,7 +77,7 @@ model BaseAddress {
   @@index([zipCode, city, state])
 }
 
-model RepairOrderItem {
+model RepairOrderServiceItem {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @db.VarChar(255)
   truckModel TruckModel @relation(fields: [truckModelId], references: [id])
@@ -98,7 +98,7 @@ model TruckModel {
   name      String   @db.VarChar(255)
   brand     String   @db.VarChar(255)
   year      Int
-  repairOrderItems RepairOrderItem[]
+  RepairOrderServiceItems RepairOrderServiceItem[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -108,7 +108,7 @@ model TruckModel {
 
 model RepairOrderService {
   id        String   @id @default(uuid()) @db.Uuid
-  item      RepairOrderItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  item      RepairOrderServiceItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
   itemId    String @db.Uuid
   quantity  Int @db.SmallInt
   labor     String @db.VarChar(255)

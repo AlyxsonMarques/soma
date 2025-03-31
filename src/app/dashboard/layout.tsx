@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Soma | Dashboard",
-  description: "Soma é uma plataforma de controle de Guias de Remessa.",
+  title: "Start | Dashboard",
+  description: "Start é uma plataforma de controle de Guias de Remessa.",
 };
 
 export default function DashboardLayout({
@@ -26,15 +26,9 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
-          <SidebarProvider>
-            <AppSidebar />
-            <SidebarInset>{children}</SidebarInset>
-          </SidebarProvider>
-        </ThemeProvider>
-      </body>
-    </html>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>{children}</SidebarInset>
+    </SidebarProvider>
   );
 }

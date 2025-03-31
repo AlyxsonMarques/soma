@@ -1,5 +1,5 @@
 import { DataTable } from "@/components/data-table/data-table";
-import type { ItemAPISchema } from "@/types/repair-order-item";
+import type { ItemAPISchema } from "@/types/repair-order-service-item";
 import { DashboardHeader } from "../../components/dashboard-header";
 import { columns } from "./components/items-table-columns";
 

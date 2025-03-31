@@ -3,10 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import type React from "react";
 import { useState } from "react";
 
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,29 +13,41 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { type UserEnumType, type UserRegister, userRegisterSchema } from "@/types/user";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useForm } from "react-hook-form";
-
+import { toast } from "sonner";
 export function RegisterForm() {
-  const [userType, setUserType] = useState<UserEnumType>("mechanic");
+  const [userType, setUserType] = useState<UserEnumType>("MECHANIC");
 
   const form = useForm<UserRegister>({
     resolver: zodResolver(userRegisterSchema),
     defaultValues: {
-      type: "mechanic",
+      type: "MECHANIC",
       name: "",
       email: "",
       password: "",
       confirmPassword: "",
       birthDate: new Date(),
       cpf: "",
-      bases: [],
       assistant: false,
       observations: "",
     },
   });
 
-  const onSubmit = (data: UserRegister) => {
-    console.log(data);
+  const onSubmit = async (data: UserRegister) => {
+    const response = await fetch("/api/v1/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!response.ok) {
+      toast.error(responseData.message);
+      return;
+    }
+
+    toast.success(responseData.message);
   };
 
   return (
@@ -50,7 +60,7 @@ export function RegisterForm() {
                 <h1 className="text-2xl font-bold">Criar Conta</h1>
               </CardTitle>
               <CardDescription>
-                <p className="text-balance text-muted-foreground">Registre-se na SOMA</p>
+                <p className="text-balance text-muted-foreground">Registre-se na Start</p>
               </CardDescription>
             </div>
           </CardHeader>
@@ -73,10 +83,10 @@ export function RegisterForm() {
                         <RadioGroupItem
                           {...field}
                           onClick={() => {
-                            setUserType("mechanic");
+                            setUserType("MECHANIC");
                             form.reset();
                           }}
-                          value="mechanic"
+                          value="MECHANIC"
                         />
                       </FormControl>
                       <FormLabel>Mecânico</FormLabel>
@@ -87,10 +97,10 @@ export function RegisterForm() {
                         <RadioGroupItem
                           {...field}
                           onClick={() => {
-                            setUserType("budgetist");
+                            setUserType("BUDGETIST");
                             form.reset();
                           }}
-                          value="budgetist"
+                          value="BUDGETIST"
                         />
                       </FormControl>
                       <FormLabel>Orçamentista</FormLabel>
@@ -187,31 +197,8 @@ export function RegisterForm() {
             )}
           />
 
-          {userType === "mechanic" && (
+          {userType === "MECHANIC" && (
             <>
-              <FormField
-                control={form.control}
-                name="bases"
-                render={({ field }) => (
-                  <FormItem className="grid gap-2">
-                    <FormLabel>Base</FormLabel>
-                    <FormControl>
-                      <Select onValueChange={field.onChange} defaultValue={`${field.value}`}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione a base" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="base1">Base 1</SelectItem>
-                          <SelectItem value="base2">Base 2</SelectItem>
-                          <SelectItem value="base3">Base 3</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               <FormField
                 control={form.control}
                 name="assistant"
