@@ -8,6 +8,21 @@ import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/co
 import type { UserAPISchema } from "@/types/user";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
+import { toast } from "sonner";
+
+const handleDelete = async (id: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`, {
+    method: "DELETE"
+  });
+  const data = await response.json();
+
+  if(data.error) {
+    toast.error(data.message)
+  } else {
+    toast.success(data.message)
+  }
+}
+
 export const columns: ColumnDef<UserAPISchema>[] = [
   {
     id: "select",
@@ -39,7 +54,7 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     accessorKey: "type",
     header: "Tipo de usuário",
     cell: ({ row }) => {
-      return row.original.type === "mechanic" ? "Mecânico" : "Orçamentista";
+      return row.original.type === "MECHANIC" ? "Mecânico" : "Orçamentista";
     },
   },
   {
@@ -102,7 +117,7 @@ export const columns: ColumnDef<UserAPISchema>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Editar</DropdownMenuItem>
-            <DropdownMenuItem>Excluir</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDelete(row.original.id)}>Excluir</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

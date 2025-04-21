@@ -8,6 +8,22 @@ import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/co
 import type { BaseAPISchema } from "@/types/base";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
+import { toast } from "sonner";
+
+const handleDelete = async (id: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases/${id}`, {
+      method: "DELETE"
+    });
+    const data = await response.json();
+
+    if(data.error) {
+      toast.error(data.message)
+    } else {
+      toast.success(data.message)
+    }
+
+}
+
 export const columns: ColumnDef<BaseAPISchema>[] = [
   {
     id: "select",
@@ -37,10 +53,6 @@ export const columns: ColumnDef<BaseAPISchema>[] = [
   {
     accessorKey: "name",
     header: "Nome",
-  },
-  {
-    accessorKey: "address",
-    header: "Endereço",
   },
   {
     accessorKey: "phone",
@@ -77,7 +89,7 @@ export const columns: ColumnDef<BaseAPISchema>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Editar</DropdownMenuItem>
-            <DropdownMenuItem>Excluir</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDelete(row.original.id)}>Excluir</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

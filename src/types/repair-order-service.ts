@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const repairOrderServiceIdSchema = z.number().positive().int("Por favor, insira um ID válido.");
+export const repairOrderServiceIdSchema = z.string().uuid("Por favor, insira um ID válido.");
 
 export const repairOrderServiceQuantitySchema = z
   .number({

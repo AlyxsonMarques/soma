@@ -37,7 +37,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt: ({ token, user }) => {
+    jwt: async ({ token, user }) => {
       // This runs when a user signs in
       if (user) {
         // Copy all user properties to the token
@@ -51,6 +51,28 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.birthDate = user.birthDate;
         token.createdAt = user.createdAt;
         token.updatedAt = user.updatedAt;
+      } else {
+
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email as string | undefined },
+          });
+  
+          token.id = dbUser?.id;
+          token.name = dbUser?.name;
+          token.email = dbUser?.email;
+          token.type = dbUser?.type;
+          token.status = dbUser?.status;
+          token.assistant = dbUser?.assistant;
+          token.observations = dbUser?.observations;
+          token.birthDate = dbUser?.birthDate;
+          token.createdAt = dbUser?.createdAt;
+          token.updatedAt = dbUser?.updatedAt;
+        } catch (error) {
+
+          console.error(`Error on auth.ts: ${error}`)
+        }
+
       }
       return token;
     },
@@ -70,6 +92,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           updatedAt: token.updatedAt,
         },
       };
-    },
+    }, 
   },
 });

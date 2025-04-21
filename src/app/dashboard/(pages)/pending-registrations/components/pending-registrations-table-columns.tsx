@@ -7,8 +7,29 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { UserAPISchema } from "@/types/user";
+import { UserStatus } from "@prisma/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
+import { toast } from "sonner";
+
+const handleStatusChange = async (id: string, status: "APPROVED" | "REPROVED") => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`, {
+    method: "PATCH",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      status
+    })
+  });
+  const data = await response.json();
+
+  if(data.error) {
+    toast.error(data.message)
+  } else {
+    toast.success(data.message)
+  }
+}
 
 export const columns: ColumnDef<UserAPISchema>[] = [
   {
@@ -34,34 +55,23 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+      const statusVariants = {
+        PENDING: "secondary",
+        APPROVED: "default",
+        REPROVED: "destructive",
+      };
+      
+      const statusLabels = {
+        PENDING: "Pendente",
+        APPROVED: "Aprovado",
+        REPROVED: "Reprovado",
+      };  
+
+      const status: UserStatus = row.getValue("status");  
+
       return (
-        <Badge
-          variant={
-            status === "pending"
-              ? "secondary"
-              : status === "revision"
-                ? "outline"
-                : status === "approved"
-                  ? "default"
-                  : status === "partial_approved"
-                    ? "default"
-                    : status === "nf_approved"
-                      ? "default"
-                      : "destructive"
-          }
-        >
-          {status === "pending"
-            ? "Pendente"
-            : status === "revision"
-              ? "Revisão"
-              : status === "approved"
-                ? "Aprovado"
-                : status === "partial_approved"
-                  ? "Aprovado parcialmente"
-                  : status === "nf_approved"
-                    ? "Aprovado NF"
-                    : "Reprovado"}
+        <Badge variant={statusVariants[status] ?? "destructive"}>
+          {statusLabels[status] ?? "Reprovado"}
         </Badge>
       );
     },
@@ -79,7 +89,7 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     accessorKey: "type",
     header: "Tipo de usuário",
     cell: ({ row }) => {
-      return row.original.type === "mechanic" ? "Mecânico" : "Orçamentista";
+      return row.original.type === "MECHANIC" ? "Mecânico" : "Orçamentista";
     },
   },
   {
@@ -92,10 +102,6 @@ export const columns: ColumnDef<UserAPISchema>[] = [
   {
     accessorKey: "email",
     header: "Email",
-  },
-  {
-    accessorKey: "base",
-    header: "Base",
   },
   {
     accessorKey: "assistant",
@@ -116,10 +122,8 @@ export const columns: ColumnDef<UserAPISchema>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem>Aprovar</DropdownMenuItem>
-            <DropdownMenuItem>Rejeitar</DropdownMenuItem>
-            <DropdownMenuItem>Editar</DropdownMenuItem>
-            <DropdownMenuItem>Excluir</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleStatusChange(row.original.id, "APPROVED")}>Aprovar</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleStatusChange(row.original.id, "REPROVED")}>Rejeitar</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
