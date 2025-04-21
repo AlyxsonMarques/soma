@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-export const userIdSchema = z.number().positive().int("Por favor, insira um ID válido.");
+export const userIdSchema = z.string().uuid("Por favor, insira um ID válido.");
 
 const userTypeSchema = z.enum(["MECHANIC", "BUDGETIST"], {
   required_error: "Por favor, selecione seu tipo de usuário.",
 });
 
-const userStatusSchema = z.enum(["approved", "reproved", "pending"], {
+export const userStatusSchema = z.enum(["APPROVED", "REPROVED", "PENDING"], {
   required_error: "Por favor, selecione o status do usuário.",
 });
 

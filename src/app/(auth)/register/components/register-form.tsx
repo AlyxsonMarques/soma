@@ -48,6 +48,7 @@ export function RegisterForm() {
     }
 
     toast.success(responseData.message);
+    redirect("/login");
   };
 
   return (

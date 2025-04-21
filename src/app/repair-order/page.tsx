@@ -26,6 +26,8 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import * as z from "zod";
+import { toast } from "sonner";
+
 const formServiceSchema = z.object({
   quantity: repairOrderServiceQuantitySchema,
   item: repairOrderServiceItemIdSchema,
@@ -94,8 +96,44 @@ export default function GuiaDeRemessa() {
     name: "services",
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(JSON.stringify(values, null, 2));
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const formData = new FormData();
+
+    formData.append('plate', values.plate)
+    formData.append('kilometers', values.kilometers.toString())
+    formData.append('base', values.base)
+
+    const servicesWithoutPhotos = values.services.map(service => ({
+      quantity: service.quantity,
+      item: service.item,
+      category: service.category,
+      type: service.type,
+      labor: service.labor,
+      duration: {
+        from: service.duration.from.toISOString(),
+        to: service.duration.to.toISOString(),
+      },
+    }));
+    formData.append('services', JSON.stringify(servicesWithoutPhotos));
+
+    values.services.forEach((service, index) => {
+      if (service.photo instanceof File) {
+        formData.append(`photos[${index}]`, service.photo);
+      }
+    });
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders`, {
+      method: 'POST',
+      body: formData,
+    })
+    
+    const data = await response.json();
+
+    if(data.error) {
+      toast.error(data.message)
+    } else {
+      toast.success(data.message)
+    }
   }
 
   return (
@@ -380,7 +418,7 @@ export default function GuiaDeRemessa() {
                         from: new Date(),
                         to: new Date(),
                       },
-                      photo: null,
+                      photo: null as unknown as File,
                     })
                   }
                 >

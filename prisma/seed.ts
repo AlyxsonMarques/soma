@@ -1,6 +1,7 @@
 import { faker } from "@faker-js/faker/locale/pt_BR";
 import {
   PrismaClient,
+  RepairOrderServiceCategory,
   type RepairOrderServiceStatus,
   type RepairOrderServiceType,
   type RepairOrderStatus,
@@ -16,7 +17,6 @@ async function main() {
     prisma.repairOrderService.deleteMany(),
     prisma.repairOrder.deleteMany(),
     prisma.repairOrderServiceItem.deleteMany(),
-    prisma.truckModel.deleteMany(),
     prisma.user.deleteMany(),
     prisma.base.deleteMany(),
     prisma.baseAddress.deleteMany(),
@@ -69,22 +69,6 @@ async function main() {
           birthDate: faker.date.past(),
           assistant: faker.datatype.boolean(),
           observations: faker.helpers.maybe(() => faker.lorem.paragraph()),
-          bases: {
-            connect: [{ id: faker.helpers.arrayElement(bases).id }],
-          },
-        },
-      });
-    }),
-  );
-
-  // Create Truck Models
-  const truckModels = await Promise.all(
-    Array.from({ length: 10 }).map(async () => {
-      return prisma.truckModel.create({
-        data: {
-          name: faker.vehicle.model(),
-          brand: faker.vehicle.manufacturer(),
-          year: Number.parseInt(faker.date.past().getFullYear().toString()),
         },
       });
     }),
@@ -96,7 +80,6 @@ async function main() {
       return prisma.repairOrderServiceItem.create({
         data: {
           name: faker.commerce.productName(),
-          truckModelId: faker.helpers.arrayElement(truckModels).id,
           value: Number.parseFloat(faker.commerce.price()),
           baseId: faker.helpers.arrayElement(bases).id,
         },
@@ -142,6 +125,7 @@ async function main() {
       return Promise.all(
         Array.from({ length: faker.number.int({ min: 1, max: 5 }) }).map(async () => {
           const type = faker.helpers.arrayElement(["PREVENTIVE", "CORRECTIVE"]) as RepairOrderServiceType;
+          const category = faker.helpers.arrayElement(["LABOR", "MATERIAL"]) as RepairOrderServiceCategory;
           const status = faker.helpers.arrayElement(["PENDING", "APPROVED", "CANCELLED"]) as RepairOrderServiceStatus;
 
           return prisma.repairOrderService.create({
@@ -153,6 +137,7 @@ async function main() {
               value: Number.parseFloat(faker.commerce.price()),
               discount: Number.parseFloat(faker.commerce.price({ max: 100 })),
               type,
+              category,
               status,
               repairOrderId: repairOrder.id,
             },

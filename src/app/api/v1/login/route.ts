@@ -1,6 +1,7 @@
 import { signIn } from "@/auth";
 import { redirect } from "next/navigation";
 import { type NextRequest, NextResponse } from "next/server";
+
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
