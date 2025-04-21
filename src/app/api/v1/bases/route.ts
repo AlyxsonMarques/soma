@@ -1,11 +1,11 @@
 import prisma from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
   const bases = await prisma.base.findMany({
-    orderBy: {
-      name: "asc",
-    },
+    include: {
+      address: true
+    }
   });
   return NextResponse.json(bases);
 }

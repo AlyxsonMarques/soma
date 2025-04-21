@@ -5,10 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import type { ItemAPISchema } from "@/types/repair-order-service-item";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
-export const columns: ColumnDef<ItemAPISchema>[] = [
+import { toast } from "sonner";
+
+const handleDelete = async (id: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-service-items/${id}`, {
+    method: "DELETE"
+  });
+  const data = await response.json();
+
+  if(data.error) {
+    toast.error(data.message)
+  } else {
+    toast.success(data.message)
+  }
+}
+
+export const columns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -39,16 +53,15 @@ export const columns: ColumnDef<ItemAPISchema>[] = [
     header: "Nome",
   },
   {
-    accessorKey: "truckModel",
-    header: "Modelo",
-  },
-  {
     accessorKey: "value",
     header: "Valor",
   },
   {
     accessorKey: "base",
     header: "Base",
+    cell: ({ row }) => {
+      return <span>{row.original.base.name}</span>
+    }
   },
   {
     accessorKey: "createdAt",
@@ -81,7 +94,7 @@ export const columns: ColumnDef<ItemAPISchema>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Editar</DropdownMenuItem>
-            <DropdownMenuItem>Excluir</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDelete(row.original.id)}>Excluir</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

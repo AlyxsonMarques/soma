@@ -80,35 +80,19 @@ model BaseAddress {
 model RepairOrderServiceItem {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @db.VarChar(255)
-  truckModel TruckModel @relation(fields: [truckModelId], references: [id])
-  truckModelId String @db.Uuid
   value     Decimal @db.Decimal(10, 2)
-  base      Base @relation(fields: [baseId], references: [id])
+  base      Base @relation(fields: [baseId], references: [id], onDelete: Cascade)
   baseId    String @db.Uuid
   repairOrderServices RepairOrderService[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
 
-  @@index([name, truckModelId, baseId])
+  @@index([name, baseId])
 }
-
-model TruckModel {
-  id        String   @id @default(uuid()) @db.Uuid
-  name      String   @db.VarChar(255)
-  brand     String   @db.VarChar(255)
-  year      Int
-  RepairOrderServiceItems RepairOrderServiceItem[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime?
-
-  @@index([name, brand, year])
-}
-
 model RepairOrderService {
   id        String   @id @default(uuid()) @db.Uuid
-  item      RepairOrderServiceItem @relation(fields: [itemId], references: [id], onDelete: Restrict)
+  item      RepairOrderServiceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
   itemId    String @db.Uuid
   quantity  Int @db.SmallInt
   labor     String @db.VarChar(255)
@@ -116,6 +100,7 @@ model RepairOrderService {
   value     Decimal @db.Decimal(10, 2)
   discount  Decimal @db.Decimal(10, 2)
   type      RepairOrderServiceType
+  category  RepairOrderServiceCategory
   status    RepairOrderServiceStatus
   repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id])
   repairOrderId String @db.Uuid
@@ -129,6 +114,11 @@ model RepairOrderService {
 enum RepairOrderServiceType {
   PREVENTIVE
   CORRECTIVE
+}
+
+enum RepairOrderServiceCategory {
+  LABOR
+  MATERIAL
 }
 
 enum RepairOrderServiceStatus {
