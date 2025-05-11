@@ -11,9 +11,8 @@ import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 
 export default function RegistrationPendingPage() {
-
   return (
-    <CentralizedView> 
+    <CentralizedView>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-2">
@@ -52,9 +51,7 @@ export default function RegistrationPendingPage() {
               <CheckCircle className="h-5 w-5 text-muted-foreground mt-0.5" />
               <div className="space-y-1">
                 <p className="text-sm font-medium">Aprovação final</p>
-                <p className="text-sm text-muted-foreground">
-                  Após a aprovação, você poderá acessar a plataforma
-                </p>
+                <p className="text-sm text-muted-foreground">Após a aprovação, você poderá acessar a plataforma</p>
               </div>
             </div>
           </div>

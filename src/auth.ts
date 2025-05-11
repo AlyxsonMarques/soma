@@ -52,12 +52,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.createdAt = user.createdAt;
         token.updatedAt = user.updatedAt;
       } else {
-
         try {
           const dbUser = await prisma.user.findUnique({
             where: { email: token.email as string | undefined },
           });
-  
+
           token.id = dbUser?.id;
           token.name = dbUser?.name;
           token.email = dbUser?.email;
@@ -69,10 +68,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           token.createdAt = dbUser?.createdAt;
           token.updatedAt = dbUser?.updatedAt;
         } catch (error) {
-
-          console.error(`Error on auth.ts: ${error}`)
+          console.error(`Error on auth.ts: ${error}`);
         }
-
       }
       return token;
     },
@@ -92,6 +89,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           updatedAt: token.updatedAt,
         },
       };
-    }, 
+    },
   },
 });

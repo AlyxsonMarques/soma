@@ -1,7 +1,7 @@
 import { faker } from "@faker-js/faker/locale/pt_BR";
 import {
   PrismaClient,
-  RepairOrderServiceCategory,
+  type RepairOrderServiceCategory,
   type RepairOrderServiceStatus,
   type RepairOrderServiceType,
   type RepairOrderStatus,

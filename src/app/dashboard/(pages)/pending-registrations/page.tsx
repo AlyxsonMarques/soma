@@ -4,7 +4,6 @@ import { DashboardHeader } from "../../components/dashboard-header";
 import { columns } from "./components/pending-registrations-table-columns";
 
 export default async function PendingRegistrationsPage() {
-
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users`);
   const data = await response.json();
 

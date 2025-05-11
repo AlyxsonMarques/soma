@@ -11,16 +11,16 @@ import { toast } from "sonner";
 
 const handleDelete = async (id: string) => {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-service-items/${id}`, {
-    method: "DELETE"
+    method: "DELETE",
   });
   const data = await response.json();
 
-  if(data.error) {
-    toast.error(data.message)
+  if (data.error) {
+    toast.error(data.message);
   } else {
-    toast.success(data.message)
+    toast.success(data.message);
   }
-}
+};
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -60,8 +60,8 @@ export const columns: ColumnDef<any>[] = [
     accessorKey: "base",
     header: "Base",
     cell: ({ row }) => {
-      return <span>{row.original.base.name}</span>
-    }
+      return <span>{row.original.base.name}</span>;
+    },
   },
   {
     accessorKey: "createdAt",

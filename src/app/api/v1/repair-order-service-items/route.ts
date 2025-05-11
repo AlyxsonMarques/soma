@@ -4,8 +4,8 @@ import { NextResponse } from "next/server";
 export async function GET() {
   const repairOrderServiceItems = await prisma.repairOrderServiceItem.findMany({
     include: {
-      base: true
-    }
+      base: true,
+    },
   });
   return NextResponse.json(repairOrderServiceItems);
 }

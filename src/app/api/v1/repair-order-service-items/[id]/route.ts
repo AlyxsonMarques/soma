@@ -1,9 +1,9 @@
-import prisma from "@/lib/prisma";
-import { NextRequest, NextResponse } from "next/server";
 import { ERROR_500_NEXT } from "@/errors/500";
+import prisma from "@/lib/prisma";
 import { repairOrderServiceIdSchema } from "@/types/repair-order-service";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string }}) {
+export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = await params;
     const validatedData = repairOrderServiceIdSchema.safeParse(id);
@@ -15,7 +15,7 @@ export async function DELETE(_: NextRequest, { params }: { params: { id: string 
           error: true,
           details: validatedData.error.errors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -25,10 +25,7 @@ export async function DELETE(_: NextRequest, { params }: { params: { id: string 
     });
 
     if (!existingItem) {
-      return NextResponse.json(
-        { error: "Item não encontrado" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Item não encontrado" }, { status: 404 });
     }
 
     // Realiza o soft delete (atualiza deletedAt)
@@ -42,7 +39,7 @@ export async function DELETE(_: NextRequest, { params }: { params: { id: string 
         message: "Item deletado com sucesso",
         data: deletedItem,
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Erro ao deletar item:", error);

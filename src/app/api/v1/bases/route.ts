@@ -4,8 +4,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET() {
   const bases = await prisma.base.findMany({
     include: {
-      address: true
-    }
+      address: true,
+    },
   });
   return NextResponse.json(bases);
 }

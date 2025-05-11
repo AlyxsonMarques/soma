@@ -22,7 +22,6 @@ model User {
   type      UserType @default(MECHANIC)
   status    UserStatus @default(PENDING)
   birthDate DateTime @db.Date
-  bases     Base[]
   assistant Boolean @default(false)
   observations String? @db.Text
   repairOrders RepairOrder[]
@@ -48,10 +47,9 @@ model Base {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @db.VarChar(255)
   phone     String   @db.VarChar(11)
-  users     User[]
-  address   BaseAddress @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  address   BaseAddress @relation(fields: [addressId], references: [id], onDelete: NoAction)
   addressId String   @db.Uuid
-  RepairOrderServiceItems RepairOrderServiceItem[]
+  repairOrderItems RepairOrderServiceItem[]
   repairOrders RepairOrder[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -81,7 +79,7 @@ model RepairOrderServiceItem {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @db.VarChar(255)
   value     Decimal @db.Decimal(10, 2)
-  base      Base @relation(fields: [baseId], references: [id], onDelete: Cascade)
+  base      Base @relation(fields: [baseId], references: [id], onDelete: NoAction)
   baseId    String @db.Uuid
   repairOrderServices RepairOrderService[]
   createdAt DateTime @default(now())
@@ -90,9 +88,10 @@ model RepairOrderServiceItem {
 
   @@index([name, baseId])
 }
+
 model RepairOrderService {
   id        String   @id @default(uuid()) @db.Uuid
-  item      RepairOrderServiceItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  item      RepairOrderServiceItem @relation(fields: [itemId], references: [id], onDelete: NoAction)
   itemId    String @db.Uuid
   quantity  Int @db.SmallInt
   labor     String @db.VarChar(255)
@@ -100,10 +99,11 @@ model RepairOrderService {
   value     Decimal @db.Decimal(10, 2)
   discount  Decimal @db.Decimal(10, 2)
   type      RepairOrderServiceType
-  category  RepairOrderServiceCategory
   status    RepairOrderServiceStatus
-  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id])
+  category  RepairOrderServiceCategory
+  repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: NoAction)
   repairOrderId String @db.Uuid
+  photo String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -131,7 +131,7 @@ model RepairOrder {
   id        String   @id @default(uuid()) @db.Uuid
   gcaf      BigInt   @unique @db.BigInt
   users     User[]
-  base      Base @relation(fields: [baseId], references: [id], onDelete: Restrict)
+  base      Base @relation(fields: [baseId], references: [id], onDelete: NoAction)
   baseId    String @db.Uuid
   plate     String @db.VarChar(7)
   kilometers Int
@@ -153,4 +153,3 @@ enum RepairOrderStatus {
   INVOICE_APPROVED
   CANCELLED
 }
-

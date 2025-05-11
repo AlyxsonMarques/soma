@@ -11,18 +11,17 @@ import { EllipsisVerticalIcon } from "lucide-react";
 import { toast } from "sonner";
 
 const handleDelete = async (id: string) => {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases/${id}`, {
-      method: "DELETE"
-    });
-    const data = await response.json();
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases/${id}`, {
+    method: "DELETE",
+  });
+  const data = await response.json();
 
-    if(data.error) {
-      toast.error(data.message)
-    } else {
-      toast.success(data.message)
-    }
-
-}
+  if (data.error) {
+    toast.error(data.message);
+  } else {
+    toast.success(data.message);
+  }
+};
 
 export const columns: ColumnDef<BaseAPISchema>[] = [
   {

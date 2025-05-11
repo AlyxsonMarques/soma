@@ -6,11 +6,24 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import type { RepairOrderAPISchema } from "@/types/repair-order";
+import { RepairOrderStatus } from "@prisma/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
+import { toast } from "sonner";
+const handleDelete = async (id: string) => {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders/${id}`, {
+    method: "DELETE",
+  });
+  const data = await response.json();
 
-export const columns: ColumnDef<RepairOrderAPISchema>[] = [
+  if (data.error) {
+    toast.error(data.message);
+  } else {
+    toast.success(data.message);
+  }
+};
+
+export const columns: ColumnDef<any>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -43,16 +56,19 @@ export const columns: ColumnDef<RepairOrderAPISchema>[] = [
   {
     accessorKey: "base",
     header: "Base",
+    cell: ({ row }) => {
+      return <span>{row.original.base?.name}</span>;
+    },
   },
   {
     accessorKey: "users",
     header: "Usuários",
     cell: ({ row }) => {
-      return <span>{row.original.users.map((user) => user.name).join(", ")}</span>;
+      return <span>{row.original.users?.map((user: { name: string }) => user.name).join(", ")}</span>;
     },
   },
   {
-    accessorKey: "truck",
+    accessorKey: "plate",
     header: "Placa",
   },
   {
@@ -67,10 +83,30 @@ export const columns: ColumnDef<RepairOrderAPISchema>[] = [
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+
+      const statusVariants = {
+        PENDING: "outline",
+        REVISION: "outline",
+        APPROVED: "default",
+        PARTIALLY_APPROVED: "secondary",
+        INVOICE_APPROVED: "secondary",
+        CANCELLED: "destructive"
+      };
+
+      const statusLabels = {
+        PENDING: "Pendente",
+        REVISION: "Revisão",
+        APPROVED: "Aprovado",
+        PARTIALLY_APPROVED: "Parcialmente Aprovado",
+        INVOICE_APPROVED: "Aprovado para Nota Fiscal",
+        CANCELLED: "Cancelado"
+      };
+
+      const status = row.getValue("status") as RepairOrderStatus;
+
       return (
-        <Badge variant={status === "reproved" ? "outline" : status === "pending" ? "secondary" : "destructive"}>
-          {status === "reproved" ? "Reprovado" : status === "pending" ? "Pendente" : "Inválido"}
+        <Badge variant={statusVariants[status]}>
+          {statusLabels[status]}
         </Badge>
       );
     },
@@ -84,6 +120,7 @@ export const columns: ColumnDef<RepairOrderAPISchema>[] = [
       return <DataTableColumnHeader column={column} title="Criado em" />;
     },
     cell: ({ row }) => {
+      row.original.createdAt = new Date(row.original.createdAt);
       return <span>{row.original.createdAt.toLocaleDateString("pt-BR")}</span>;
     },
   },
@@ -93,6 +130,7 @@ export const columns: ColumnDef<RepairOrderAPISchema>[] = [
       return <DataTableColumnHeader column={column} title="Atualizado em" />;
     },
     cell: ({ row }) => {
+      row.original.updatedAt = new Date(row.original.updatedAt);
       return <span>{row.original.updatedAt.toLocaleDateString("pt-BR")}</span>;
     },
   },
@@ -109,7 +147,7 @@ export const columns: ColumnDef<RepairOrderAPISchema>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Editar</DropdownMenuItem>
-            <DropdownMenuItem>Excluir</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDelete(row.original.id)}>Excluir</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

@@ -13,29 +13,27 @@ export default auth(async (req) => {
     if (!isAuthenticated) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
-    if(!isApproved) {
+    if (!isApproved) {
       return NextResponse.redirect(new URL("/registration-pending", req.url));
     }
-    if(!isBudgetist) {
-      return NextResponse.redirect(new URL("/repair-orders", req.url));
+    if (!isBudgetist) {
+      return NextResponse.redirect(new URL("/repair-order", req.url));
     }
   }
 
-  if (req.nextUrl.pathname.includes("/register") ||
-      req.nextUrl.pathname.includes("/login")) {
-
-      if(isAuthenticated && isApproved) {
-        return NextResponse.redirect(new URL("/dashboard/repair-orders", req.url));
-      }
+  if (req.nextUrl.pathname.includes("/register") || req.nextUrl.pathname.includes("/login")) {
+    if (isAuthenticated && isApproved) {
+      return NextResponse.redirect(new URL("/dashboard/repair-orders", req.url));
+    }
   }
 
   if (req.nextUrl.pathname.includes("/registration-pending")) {
-      if(!isAuthenticated) {
-        return NextResponse.redirect(new URL ("/login", req.url));
-      }
-      if(isApproved) {
-        return NextResponse.redirect(new URL("/login", req.url));
-      }
+    if (!isAuthenticated) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+    if (isApproved) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
   }
 });
 
@@ -47,6 +45,6 @@ export const config = {
     // Auth routes
     "/login",
     "/register",
-    "/registration-pending"
+    "/registration-pending",
   ],
 };

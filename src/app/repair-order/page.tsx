@@ -25,8 +25,8 @@ import { Camera, Trash2 } from "lucide-react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
-import * as z from "zod";
 import { toast } from "sonner";
+import * as z from "zod";
 
 const formServiceSchema = z.object({
   quantity: repairOrderServiceQuantitySchema,
@@ -99,11 +99,11 @@ export default function GuiaDeRemessa() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
 
-    formData.append('plate', values.plate)
-    formData.append('kilometers', values.kilometers.toString())
-    formData.append('base', values.base)
+    formData.append("plate", values.plate);
+    formData.append("kilometers", values.kilometers.toString());
+    formData.append("base", values.base);
 
-    const servicesWithoutPhotos = values.services.map(service => ({
+    const servicesWithoutPhotos = values.services.map((service) => ({
       quantity: service.quantity,
       item: service.item,
       category: service.category,
@@ -114,26 +114,43 @@ export default function GuiaDeRemessa() {
         to: service.duration.to.toISOString(),
       },
     }));
-    formData.append('services', JSON.stringify(servicesWithoutPhotos));
+    formData.append("services", JSON.stringify(servicesWithoutPhotos));
 
+    // Append each photo with its index to match the backend processing
     values.services.forEach((service, index) => {
       if (service.photo instanceof File) {
         formData.append(`photos[${index}]`, service.photo);
+        console.log(`Appending photo for service ${index}: ${service.photo.name}`);
       }
     });
 
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders`, {
-      method: 'POST',
+      method: "POST",
       body: formData,
-    })
-    
+    });
+
     const data = await response.json();
 
-    if(data.error) {
-      toast.error(data.message)
+    if (data.error) {
+      toast.error(data.message);
     } else {
-      toast.success(data.message)
+      toast.success(data.message);
     }
+
+    form.reset();
+    remove();
+    append({
+      quantity: 0,
+      item: "",
+      category: "LABOR",
+      type: "PREVENTIVE",
+      labor: "",
+      duration: {
+        from: new Date(),
+        to: new Date(),
+      },
+      photo: undefined,
+    });
   }
 
   return (

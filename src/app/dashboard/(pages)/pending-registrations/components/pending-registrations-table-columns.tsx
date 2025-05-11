@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { UserAPISchema } from "@/types/user";
-import { UserStatus } from "@prisma/client";
+import type { UserStatus } from "@prisma/client";
 import type { ColumnDef } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -16,20 +16,20 @@ const handleStatusChange = async (id: string, status: "APPROVED" | "REPROVED") =
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`, {
     method: "PATCH",
     headers: {
-      'Content-Type': 'application/json'
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      status
-    })
+      status,
+    }),
   });
   const data = await response.json();
 
-  if(data.error) {
-    toast.error(data.message)
+  if (data.error) {
+    toast.error(data.message);
   } else {
-    toast.success(data.message)
+    toast.success(data.message);
   }
-}
+};
 
 export const columns: ColumnDef<UserAPISchema>[] = [
   {
@@ -60,20 +60,16 @@ export const columns: ColumnDef<UserAPISchema>[] = [
         APPROVED: "default",
         REPROVED: "destructive",
       };
-      
+
       const statusLabels = {
         PENDING: "Pendente",
         APPROVED: "Aprovado",
         REPROVED: "Reprovado",
-      };  
+      };
 
-      const status: UserStatus = row.getValue("status");  
+      const status: UserStatus = row.getValue("status");
 
-      return (
-        <Badge variant={statusVariants[status] ?? "destructive"}>
-          {statusLabels[status] ?? "Reprovado"}
-        </Badge>
-      );
+      return <Badge variant={statusVariants[status] ?? "destructive"}>{statusLabels[status] ?? "Reprovado"}</Badge>;
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));
@@ -123,7 +119,9 @@ export const columns: ColumnDef<UserAPISchema>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem onClick={() => handleStatusChange(row.original.id, "APPROVED")}>Aprovar</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleStatusChange(row.original.id, "REPROVED")}>Rejeitar</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleStatusChange(row.original.id, "REPROVED")}>
+              Rejeitar
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

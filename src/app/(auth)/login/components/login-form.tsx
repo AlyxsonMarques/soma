@@ -79,7 +79,7 @@ export function LoginForm() {
                   </Link>
                 </div>
                 <FormControl>
-                  <Input {...field} />
+                  <Input type="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
