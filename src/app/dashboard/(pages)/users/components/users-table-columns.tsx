@@ -20,11 +20,8 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
     router.push(`/dashboard/users/${user.id}`);
   };
 
-
-
   // Define the columns specific to users
   const userColumns: ColumnDef<UserAPISchema>[] = [
-
 
   {
     accessorKey: "id",

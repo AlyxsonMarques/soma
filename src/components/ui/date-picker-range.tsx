@@ -5,6 +5,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import * as React from "react";
 import type { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
+import type { DateRange } from "react-day-picker";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -12,17 +13,36 @@ import { FormControl } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
-interface DatePickerRangeProps<T extends FieldValues> {
+interface DatePickerRangeProps<T extends FieldValues = any> {
   className?: string;
-  field: ControllerRenderProps<T, Path<T>>;
+  field?: ControllerRenderProps<T, Path<T>>;
+  date?: {
+    from: Date | undefined;
+    to?: Date | undefined;
+  };
+  setDate?: (date: { from: Date | undefined; to?: Date | undefined }) => void;
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
 }
 
-export function DatePickerWithRange<T extends FieldValues>({
+export function DatePickerWithRange<T extends FieldValues = any>({
   field,
+  date,
+  setDate,
   variant = "outline",
   className,
 }: DatePickerRangeProps<T>) {
+  // Determine which props to use (field or date/setDate)
+  const value = field?.value || date;
+  
+  // Handle the different onChange patterns
+  const handleSelect = (range: DateRange | undefined) => {
+    if (field?.onChange) {
+      field.onChange(range);
+    } else if (setDate && range) {
+      setDate(range);
+    }
+  };
+  
   return (
     <div className={cn("grid gap-2", className)}>
       <Popover>
@@ -30,17 +50,17 @@ export function DatePickerWithRange<T extends FieldValues>({
           <FormControl>
             <Button
               variant={variant}
-              className={cn("w-[300px] justify-start text-left font-normal", !field.value && "text-muted-foreground")}
+              className={cn("w-[300px] justify-start text-left font-normal", !value && "text-muted-foreground")}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {field.value?.from ? (
-                field.value.to ? (
+              {value?.from ? (
+                value.to ? (
                   <>
-                    {format(field.value.from, "dd 'de' MMM 'de' yyyy", { locale: ptBR })} -{" "}
-                    {format(field.value.to, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
+                    {format(value.from, "dd 'de' MMM 'de' yyyy", { locale: ptBR })} -{" "}
+                    {format(value.to, "dd 'de' MMM 'de' yyyy", { locale: ptBR })}
                   </>
                 ) : (
-                  format(field.value.from, "dd 'de' MMM 'de' yyyy", { locale: ptBR })
+                  format(value.from, "dd 'de' MMM 'de' yyyy", { locale: ptBR })
                 )
               ) : (
                 <span>Selecione um período</span>
@@ -52,9 +72,9 @@ export function DatePickerWithRange<T extends FieldValues>({
           <Calendar
             initialFocus
             mode="range"
-            defaultMonth={field.value?.from}
-            selected={field.value}
-            onSelect={field.onChange}
+            defaultMonth={value?.from}
+            selected={value}
+            onSelect={handleSelect}
             numberOfMonths={2}
             locale={ptBR}
           />

@@ -125,8 +125,13 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
       return <DataTableColumnHeader column={column} title="Criado em" />;
     },
     cell: ({ row }) => {
-      row.original.createdAt = new Date(row.original.createdAt);
-      return <span>{row.original.createdAt.toLocaleDateString("pt-BR")}</span>;
+      const date = new Date(row.original.createdAt);
+      return <span>{date.toLocaleDateString("pt-BR")}</span>;
+    },
+    sortingFn: (rowA, rowB, columnId) => {
+      const dateA = new Date(rowA.original.createdAt).getTime();
+      const dateB = new Date(rowB.original.createdAt).getTime();
+      return dateA > dateB ? 1 : dateA < dateB ? -1 : 0;
     },
   },
   {
@@ -135,8 +140,13 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
       return <DataTableColumnHeader column={column} title="Atualizado em" />;
     },
     cell: ({ row }) => {
-      row.original.updatedAt = new Date(row.original.updatedAt);
-      return <span>{row.original.updatedAt.toLocaleDateString("pt-BR")}</span>;
+      const date = new Date(row.original.updatedAt);
+      return <span>{date.toLocaleDateString("pt-BR")}</span>;
+    },
+    sortingFn: (rowA, rowB, columnId) => {
+      const dateA = new Date(rowA.original.updatedAt).getTime();
+      const dateB = new Date(rowB.original.updatedAt).getTime();
+      return dateA > dateB ? 1 : dateA < dateB ? -1 : 0;
     },
   },
 

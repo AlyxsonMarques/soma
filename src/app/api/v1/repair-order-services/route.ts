@@ -2,45 +2,29 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import * as z from "zod";
 
-// Schema para validação da requisição PATCH
-const patchRepairOrderServiceSchema = z.object({
-  quantity: z.coerce.number().min(1).optional(),
-  itemId: z.string().optional(),
-  category: z.enum(["LABOR", "MATERIAL"]).optional(),
-  type: z.enum(["PREVENTIVE", "CORRECTIVE"]).optional(),
+// Schema para validação da requisição POST
+const createRepairOrderServiceSchema = z.object({
+  quantity: z.coerce.number().min(1),
+  itemId: z.string().min(1, "Item é obrigatório"),
+  repairOrderId: z.string().min(1, "Ordem de reparo é obrigatória"),
+  category: z.enum(["LABOR", "MATERIAL"]),
+  type: z.enum(["PREVENTIVE", "CORRECTIVE"]),
   labor: z.string().optional(),
   duration: z.object({
     from: z.string().datetime(),
     to: z.string().datetime(),
-  }).optional(),
+  }),
 });
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: Request) {
   try {
-    // Use params.id only after ensuring params is available
-    const { id } = await params;
-    
-    // Verificar se o serviço existe
-    const existingService = await prisma.repairOrderService.findUnique({
-      where: { id },
-    });
-
-    if (!existingService) {
-      return NextResponse.json(
-        { error: "Serviço não encontrado" },
-        { status: 404 }
-      );
-    }
-
     // Processar dados do formulário
     const formData = await request.formData();
     
     // Extrair campos do formulário
     const quantity = formData.get("quantity") ? Number(formData.get("quantity")) : undefined;
     const itemId = formData.get("itemId")?.toString();
+    const repairOrderId = formData.get("repairOrderId")?.toString();
     const category = formData.get("category")?.toString();
     const type = formData.get("type")?.toString();
     const labor = formData.get("labor")?.toString();
@@ -76,20 +60,16 @@ export async function PATCH(
       const base64 = Buffer.from(photoBytes).toString('base64');
       const mimeType = photo.type || 'image/jpeg';
       photoUrl = `data:${mimeType};base64,${base64}`;
-    } else if (!photo) {
-      // Se não foi enviada uma nova foto, mantém a foto atual
-      photoUrl = existingService.photo;
     }
 
     // Validar dados
-    const result = patchRepairOrderServiceSchema.safeParse({
+    const result = createRepairOrderServiceSchema.safeParse({
       quantity,
       itemId,
+      repairOrderId,
       category,
       type,
       labor,
-      // We're not validating the converted BigInt duration here
-      // as it's already been processed
       duration: durationStr ? JSON.parse(durationStr) : undefined,
     });
 
@@ -100,16 +80,31 @@ export async function PATCH(
       );
     }
 
-    // Atualizar o serviço
-    const updatedService = await prisma.repairOrderService.update({
-      where: { id },
+    // Buscar o item para obter o valor
+    const item = await prisma.repairOrderServiceItem.findUnique({
+      where: { id: itemId },
+    });
+
+    if (!item) {
+      return NextResponse.json(
+        { error: "Item não encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // Criar o serviço
+    const newService = await prisma.repairOrderService.create({
       data: {
-        quantity: quantity,
-        itemId: itemId,
+        quantity: quantity!,
+        itemId: itemId!,
+        repairOrderId: repairOrderId!,
         category: category as "LABOR" | "MATERIAL",
         type: type as "PREVENTIVE" | "CORRECTIVE",
-        labor: labor,
-        duration: durationValue,
+        labor: labor || "",
+        duration: durationValue!,
+        value: item.value,
+        discount: 0,
+        status: "PENDING",
         photo: photoUrl,
       },
       include: {
@@ -119,50 +114,50 @@ export async function PATCH(
 
     // Convert BigInt to string to make it serializable
     const serializedService = JSON.parse(JSON.stringify(
-      updatedService,
+      newService,
       (key, value) => typeof value === 'bigint' ? value.toString() : value
     ));
     
-    return NextResponse.json(serializedService);
+    return NextResponse.json(serializedService, { status: 201 });
   } catch (error) {
-    console.error("Erro ao atualizar serviço:", error);
+    console.error("Erro ao criar serviço:", error);
     return NextResponse.json(
-      { error: "Erro ao atualizar serviço" },
+      { error: "Erro ao criar serviço" },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request) {
   try {
-    // Use params.id only after ensuring params is available
-    const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const repairOrderId = searchParams.get("repairOrderId");
     
-    // Verificar se o serviço existe
-    const existingService = await prisma.repairOrderService.findUnique({
-      where: { id },
+    const where = repairOrderId 
+      ? { repairOrderId, deletedAt: null } 
+      : { deletedAt: null };
+    
+    const services = await prisma.repairOrderService.findMany({
+      where,
+      include: {
+        item: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    if (!existingService) {
-      return NextResponse.json(
-        { error: "Serviço não encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Excluir o serviço
-    await prisma.repairOrderService.delete({
-      where: { id },
-    });
-
-    return NextResponse.json({ success: true });
+    // Convert BigInt to string to make it serializable
+    const serializedServices = JSON.parse(JSON.stringify(
+      services,
+      (key, value) => typeof value === 'bigint' ? value.toString() : value
+    ));
+    
+    return NextResponse.json(serializedServices);
   } catch (error) {
-    console.error("Erro ao excluir serviço:", error);
+    console.error("Erro ao buscar serviços:", error);
     return NextResponse.json(
-      { error: "Erro ao excluir serviço" },
+      { error: "Erro ao buscar serviços" },
       { status: 500 }
     );
   }

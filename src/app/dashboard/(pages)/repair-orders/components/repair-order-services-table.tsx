@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { PlusCircle, MoreHorizontal, Edit, Trash2, Eye, Check } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -23,10 +24,12 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils";
-import { MoreHorizontal, Edit, Trash2, Eye } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { ServiceDetailsDialog } from "./service-details-dialog";
 import { ServiceEditDialog } from "./service-edit-dialog";
+import { ServiceAddDialog } from "./service-add-dialog";
+import { ServiceTableToolbar } from "./service-table-toolbar";
 import type { RepairOrderServiceAPISchema } from "@/types/api-schemas";
 
 interface RepairOrderServicesTableProps {
@@ -39,8 +42,42 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
   const [selectedService, setSelectedService] = useState<RepairOrderServiceAPISchema | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [selectAll, setSelectAll] = useState(false);
+
+  // Effect to handle select all checkbox
+  useEffect(() => {
+    if (selectAll) {
+      setSelectedServices(services.map(service => service.id));
+    } else if (selectedServices.length === services.length) {
+      // If all items are manually selected, update selectAll state
+      setSelectAll(true);
+    }
+  }, [selectAll, services]);
+
+  const handleSelectService = (serviceId: string, isSelected: boolean) => {
+    if (isSelected) {
+      setSelectedServices(prev => [...prev, serviceId]);
+    } else {
+      setSelectedServices(prev => prev.filter(id => id !== serviceId));
+      setSelectAll(false);
+    }
+  };
+
+  const handleSelectAll = (isSelected: boolean) => {
+    setSelectAll(isSelected);
+    if (!isSelected) {
+      setSelectedServices([]);
+    }
+  };
+
+  const clearSelection = () => {
+    setSelectedServices([]);
+    setSelectAll(false);
+  };
 
   const handleDelete = async () => {
     if (!selectedService) return;
@@ -57,6 +94,8 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
 
       toast.success("Serviço excluído com sucesso");
       setIsDeleteDialogOpen(false);
+      // Remove from selected services if it was selected
+      setSelectedServices(prev => prev.filter(id => id !== selectedService.id));
       onRefresh();
     } catch (error) {
       console.error("Erro ao excluir serviço:", error);
@@ -93,11 +132,39 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
 
   return (
     <>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Serviços</h2>
+        <Button
+          onClick={() => setIsAddDialogOpen(true)}
+          className="flex items-center gap-1"
+        >
+          <PlusCircle className="h-4 w-4" />
+          Adicionar Serviço
+        </Button>
+      </div>
+      
+      {/* Toolbar for bulk actions */}
+      <ServiceTableToolbar 
+        selectedServices={selectedServices} 
+        onClearSelection={clearSelection} 
+        onRefresh={onRefresh} 
+      />
+      
       <Card>
         <div className="relative w-full overflow-auto">
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <div className="flex items-center justify-center">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      checked={selectAll}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                    />
+                  </div>
+                </TableHead>
                 <TableHead>Item</TableHead>
                 <TableHead>Quantidade</TableHead>
                 <TableHead>Categoria</TableHead>
@@ -109,14 +176,24 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
             <TableBody>
               {services.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-24 text-center">
+                  <TableCell colSpan={7} className="h-24 text-center">
                     Nenhum serviço encontrado
                   </TableCell>
                 </TableRow>
               ) : (
                 services.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">{service.item?.name || "N/A"}</TableCell>
+                  <TableRow key={service.id} className={selectedServices.includes(service.id) ? "bg-muted/50" : ""}>
+                    <TableCell>
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                          checked={selectedServices.includes(service.id)}
+                          onChange={(e) => handleSelectService(service.id, e.target.checked)}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell>{service.item?.name}</TableCell>
                     <TableCell>{service.quantity}</TableCell>
                     <TableCell>{getCategoryLabel(service.category)}</TableCell>
                     <TableCell>{getTypeLabel(service.type)}</TableCell>
@@ -219,6 +296,17 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Diálogo de adição de serviço */}
+      <ServiceAddDialog
+        isOpen={isAddDialogOpen}
+        onClose={() => setIsAddDialogOpen(false)}
+        repairOrderId={repairOrderId}
+        onSuccess={() => {
+          onRefresh();
+          setIsAddDialogOpen(false);
+        }}
+      />
     </>
   );
 }
