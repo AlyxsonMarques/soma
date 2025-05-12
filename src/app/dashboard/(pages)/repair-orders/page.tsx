@@ -31,10 +31,16 @@ export default function RepairOrder() {
     onRefresh: fetchData
   });
 
+  // @ts-ignore - Acessando a propriedade personalizada do array
+  const EditDialog = columns.EditDialog;
+
   return (
     <>
       <DashboardHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        {/* Renderizar o diálogo de edição */}
+        {EditDialog}
+        
         <EnhancedDataTable<RepairOrderAPISchema>
           columns={columns}
           data={data}

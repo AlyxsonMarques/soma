@@ -16,6 +16,7 @@ export interface RepairOrderAPISchema {
   gcaf: string | null;
   discount: number;
   baseId: string;
+  observations?: string | null;
   base?: {
     id: string;
     name: string;
@@ -24,6 +25,7 @@ export interface RepairOrderAPISchema {
     id: string;
     name: string;
   }>;
+  services?: RepairOrderServiceAPISchema[];
   createdAt: Date;
   updatedAt: Date;
 }

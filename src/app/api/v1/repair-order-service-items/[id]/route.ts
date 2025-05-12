@@ -2,6 +2,83 @@ import { ERROR_500_NEXT } from "@/errors/500";
 import prisma from "@/lib/prisma";
 import { repairOrderServiceIdSchema } from "@/types/repair-order-service";
 import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const itemUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
+  value: z.number().positive().optional(),
+  baseId: z.string().uuid().optional(),
+});
+
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params;
+    const validatedId = repairOrderServiceIdSchema.safeParse(id);
+
+    if (!validatedId.success) {
+      return NextResponse.json(
+        {
+          message: "Não foi possível validar o ID",
+          error: true,
+          details: validatedId.error.errors,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Validar o corpo da requisição
+    const body = await request.json();
+    const validatedData = itemUpdateSchema.safeParse(body);
+
+    if (!validatedData.success) {
+      return NextResponse.json(
+        {
+          message: "Dados inválidos",
+          error: true,
+          details: validatedData.error.format(),
+        },
+        { status: 400 },
+      );
+    }
+
+    // Verificar se o item existe
+    const existingItem = await prisma.repairOrderServiceItem.findUnique({
+      where: { id },
+    });
+
+    if (!existingItem) {
+      return NextResponse.json({ error: true, message: "Item não encontrado" }, { status: 404 });
+    }
+
+    // Verificar se a base existe, se o baseId foi fornecido
+    if (validatedData.data.baseId) {
+      const baseExists = await prisma.base.findUnique({
+        where: { id: validatedData.data.baseId },
+      });
+
+      if (!baseExists) {
+        return NextResponse.json({ error: true, message: "Base não encontrada" }, { status: 404 });
+      }
+    }
+
+    // Atualizar o item
+    const updatedItem = await prisma.repairOrderServiceItem.update({
+      where: { id },
+      data: validatedData.data,
+      include: {
+        base: true,
+      },
+    });
+
+    return NextResponse.json({
+      ...updatedItem,
+      message: "Item atualizado com sucesso",
+    });
+  } catch (error) {
+    console.error("Erro ao atualizar item:", error);
+    return NextResponse.json(ERROR_500_NEXT, { status: 500 });
+  }
+}
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
   try {
