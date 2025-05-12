@@ -71,7 +71,7 @@ export function createTableColumns<TData>({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              {onEdit && editDialogContent && (
+              {onEdit && (
                 <DropdownMenuItem 
                   onSelect={(e) => {
                     e.preventDefault();

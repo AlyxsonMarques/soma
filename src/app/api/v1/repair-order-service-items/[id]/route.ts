@@ -10,6 +10,41 @@ const itemUpdateSchema = z.object({
   baseId: z.string().uuid().optional(),
 });
 
+export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params;
+    const validatedId = repairOrderServiceIdSchema.safeParse(id);
+
+    if (!validatedId.success) {
+      return NextResponse.json(
+        {
+          message: "Não foi possível validar o ID",
+          error: true,
+          details: validatedId.error.errors,
+        },
+        { status: 400 },
+      );
+    }
+
+    // Buscar o item com a base relacionada
+    const item = await prisma.repairOrderServiceItem.findUnique({
+      where: { id },
+      include: {
+        base: true,
+      },
+    });
+
+    if (!item) {
+      return NextResponse.json({ error: true, message: "Item não encontrado" }, { status: 404 });
+    }
+
+    return NextResponse.json(item, { status: 200 });
+  } catch (error) {
+    console.error("Erro ao buscar item:", error);
+    return NextResponse.json(ERROR_500_NEXT, { status: 500 });
+  }
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;

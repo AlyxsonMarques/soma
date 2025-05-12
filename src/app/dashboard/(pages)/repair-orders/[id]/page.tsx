@@ -52,14 +52,20 @@ export default function RepairOrderDetails() {
   };
 
   const getStatusBadge = (status: string) => {
-    const statusMap: Record<string, { label: string; variant: "default" | "destructive" | "outline" | "secondary" | "success" | "warning" }> = {
-      "PENDING": { label: "Pendente", variant: "warning" },
-      "IN_PROGRESS": { label: "Em Andamento", variant: "secondary" },
-      "COMPLETED": { label: "Concluído", variant: "success" },
+    // Define custom type for badge variants that includes all possible values
+    type BadgeVariant = "default" | "destructive" | "outline" | "secondary";
+    
+    // Map status to appropriate badge variant and label
+    const statusMap: Record<string, { label: string; variant: BadgeVariant }> = {
+      "PENDING": { label: "Pendente", variant: "outline" },
+      "REVISION": { label: "Revisão", variant: "outline" },
+      "APPROVED": { label: "Aprovado", variant: "default" },
+      "PARTIALLY_APPROVED": { label: "Parcialmente Aprovado", variant: "secondary" },
+      "INVOICE_APPROVED": { label: "Aprovado para Nota Fiscal", variant: "secondary" },
       "CANCELLED": { label: "Cancelado", variant: "destructive" }
     };
     
-    const statusInfo = statusMap[status] || { label: status, variant: "default" };
+    const statusInfo = statusMap[status] || { label: status, variant: "default" as BadgeVariant };
     
     return (
       <Badge variant={statusInfo.variant}>

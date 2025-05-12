@@ -15,6 +15,39 @@ const userUpdateSchema = z.object({
   status: userStatusSchema.optional(),
 });
 
+export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params;
+
+    const idResult = userIdSchema.safeParse(id);
+    if (!idResult.success) {
+      return NextResponse.json(
+        {
+          error: true,
+          message: idResult.error.issues[0].message || "ID inválido",
+        },
+        { status: 400 },
+      );
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: idResult.data },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: true, message: "Usuário não encontrado" }, { status: 404 });
+    }
+
+    // Remover a senha do objeto antes de retornar
+    const { password, ...userWithoutPassword } = user;
+
+    return NextResponse.json(userWithoutPassword, { status: 200 });
+  } catch (error) {
+    console.error("Erro ao buscar usuário:", error);
+    return ERROR_500_NEXT;
+  }
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const requestBody = await request.json();
@@ -105,7 +138,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
   }
 }
 
-export async function DELETE(_: NextResponse, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = await params;
 

@@ -7,6 +7,32 @@ const baseUpdateSchema = z.object({
   phone: z.string().min(1).optional(),
 });
 
+export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params;
+
+    if (!id) {
+      return NextResponse.json({ error: true, message: "Preencha o parâmetro obrigatório: id" }, { status: 400 });
+    }
+
+    const base = await prisma.base.findUnique({
+      where: { id },
+    });
+
+    if (!base) {
+      return NextResponse.json({ error: true, message: "Base não encontrada" }, { status: 404 });
+    }
+
+    return NextResponse.json(base, { status: 200 });
+  } catch (error: any) {
+    console.error("Erro ao buscar base:", error);
+    return NextResponse.json(
+      { error: true, message: "Oops, ocorreu um erro, tente novamente e aguarde alguns minutos." },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
