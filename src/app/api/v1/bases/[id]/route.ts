@@ -1,5 +1,62 @@
 import prisma from "@/lib/prisma";
 import { type NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+
+const baseUpdateSchema = z.object({
+  name: z.string().min(1).optional(),
+  phone: z.string().min(1).optional(),
+});
+
+export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params;
+
+    if (!id) {
+      return NextResponse.json({ error: true, message: "Preencha o parâmetro obrigatório: id" }, { status: 400 });
+    }
+
+    const body = await request.json();
+    const validationResult = baseUpdateSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: true, message: "Dados inválidos", details: validationResult.error.format() },
+        { status: 400 }
+      );
+    }
+
+    try {
+      const existingBase = await prisma.base.findUnique({
+        where: { id },
+      });
+
+      if (!existingBase) {
+        return NextResponse.json({ error: true, message: "Base não encontrada" }, { status: 404 });
+      }
+
+      const updatedBase = await prisma.base.update({
+        where: { id },
+        data: validationResult.data,
+      });
+
+      return NextResponse.json({
+        ...updatedBase,
+        message: "Base atualizada com sucesso"
+      }, { status: 200 });
+    } catch (prismaError: any) {
+      if (prismaError.code === "P2025") {
+        return NextResponse.json({ error: true, message: "Base não encontrada" }, { status: 404 });
+      }
+      throw prismaError;
+    }
+  } catch (error: any) {
+    console.error("Erro ao atualizar base:", error);
+    return NextResponse.json(
+      { error: true, message: "Oops, ocorreu um erro, tente novamente e aguarde alguns minutos." },
+      { status: 500 }
+    );
+  }
+}
 
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
   try {

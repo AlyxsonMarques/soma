@@ -1,26 +1,59 @@
-import { DataTable } from "@/components/data-table/data-table";
-import type { BaseAPISchema } from "@/types/base";
-import type { Base } from "@prisma/client";
+"use client";
+
+import { EnhancedDataTable } from "@/components/data-table/enhanced-data-table";
+import type { BaseAPISchema } from "@/types/api-schemas";
+import { useEffect, useState } from "react";
 import { DashboardHeader } from "../../components/dashboard-header";
-import { columns } from "./components/bases-table-columns";
-export default async function BasesPage() {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases`);
-  let data = await response.json();
-  data = data.map((base: Base) => ({
-    ...base,
-    createdAt: new Date(base.createdAt),
-    updatedAt: new Date(base.updatedAt),
-  }));
+import { createBaseColumns } from "./components/bases-table-columns";
+
+export default function BasesPage() {
+  const [data, setData] = useState<BaseAPISchema[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases`);
+      const result = await response.json();
+      setData(result);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const columns = createBaseColumns({
+    onRefresh: fetchData
+  });
+
+  // @ts-ignore - Acessando a propriedade personalizada do array
+  const EditDialog = columns.EditDialog;
 
   return (
     <>
       <DashboardHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <DataTable<BaseAPISchema>
+        {/* Renderizar o diálogo de edição */}
+        {EditDialog}
+        
+        <EnhancedDataTable<BaseAPISchema>
           columns={columns}
           data={data}
           filterColumn="name"
           filterPlaceholder="Pesquisar por nome"
+          isLoading={isLoading}
+          endpoint="bases"
+          onRefresh={fetchData}
+          idAccessor="id"
+          deleteConfirmationTitle="Excluir base"
+          deleteConfirmationMessage="Tem certeza que deseja excluir esta base? Esta ação não pode ser desfeita."
+          bulkDeleteConfirmationTitle="Excluir bases"
+          bulkDeleteConfirmationMessage="Tem certeza que deseja excluir todas as bases selecionadas? Esta ação não pode ser desfeita."
         />
       </div>
     </>
