@@ -22,11 +22,15 @@ const formSchema = z.object({
   category: z.enum(["LABOR", "PART", "SERVICE"]),
   type: z.enum(["PREVENTIVE", "CORRECTIVE", "PREDICTIVE"]),
   labor: z.string().optional(),
+  value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0"),
+  discount: z.coerce.number().min(0, "Desconto deve ser maior ou igual a 0"),
   duration: z.object({
     from: z.date(),
     to: z.date(),
   }),
-  photo: z.any().optional(),
+  photo: z.any().refine(val => val instanceof File || val === undefined || val === null, {
+    message: "Foto é obrigatória",
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -71,6 +75,8 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
       category: service.category as "LABOR" | "PART" | "SERVICE",
       type: service.type as "PREVENTIVE" | "CORRECTIVE" | "PREDICTIVE",
       labor: service.labor || "",
+      value: service.value ? Number(service.value) : 0,
+      discount: service.discount ? Number(service.discount) : 0,
       duration: {
         from: service.duration?.from ? new Date(service.duration.from) : new Date(),
         to: service.duration?.to ? new Date(service.duration.to) : new Date(),
@@ -90,14 +96,21 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
       formData.append("category", values.category);
       formData.append("type", values.type);
       formData.append("labor", values.labor || "");
+      formData.append("value", values.value.toString());
+      formData.append("discount", values.discount.toString());
       formData.append("duration", JSON.stringify({
         from: values.duration.from.toISOString(),
         to: values.duration.to.toISOString(),
       }));
       
-      // Adicionar foto se existir
+      // Adicionar foto - obrigatória
       if (values.photo instanceof File) {
         formData.append("photo", values.photo);
+      } else if (service.photo) {
+        // Se não foi alterada, mantém a foto atual
+        formData.append("keepExistingPhoto", "true");
+      } else {
+        throw new Error("Foto é obrigatória");
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-services/${service.id}`, {
@@ -266,10 +279,38 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
 
               <FormField
                 control={form.control}
+                name="value"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Valor do Serviço</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="0,00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="discount"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Desconto do Serviço</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="0,00" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name="photo"
                 render={({ field: { onChange, value, ...field } }) => (
                   <FormItem className="col-span-2">
-                    <FormLabel>Foto</FormLabel>
+                    <FormLabel>Foto <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-4">

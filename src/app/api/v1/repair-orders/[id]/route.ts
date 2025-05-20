@@ -197,7 +197,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const id = params.id;
+    const { id } = await params;
 
     // Buscar a ordem de reparo com todos os dados relacionados
     const repairOrder = await prisma.repairOrder.findUnique({
@@ -241,7 +241,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const id = params.id;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json({ error: true, message: "Preencha o parâmetro obrigatório: id" }, { status: 400 });

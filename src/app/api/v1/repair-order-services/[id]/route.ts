@@ -9,6 +9,8 @@ const patchRepairOrderServiceSchema = z.object({
   category: z.enum(["LABOR", "MATERIAL"]).optional(),
   type: z.enum(["PREVENTIVE", "CORRECTIVE"]).optional(),
   labor: z.string().optional(),
+  value: z.coerce.number().min(0).optional(),
+  discount: z.coerce.number().min(0).optional(),
   duration: z.object({
     from: z.string().datetime(),
     to: z.string().datetime(),
@@ -44,6 +46,8 @@ export async function PATCH(
     const category = formData.get("category")?.toString();
     const type = formData.get("type")?.toString();
     const labor = formData.get("labor")?.toString();
+    const value = formData.get("value") ? Number(formData.get("value")) : undefined;
+    const discount = formData.get("discount") ? Number(formData.get("discount")) : undefined;
     
     // Processar duração (JSON string)
     let durationValue;
@@ -88,6 +92,8 @@ export async function PATCH(
       category,
       type,
       labor,
+      value,
+      discount,
       // We're not validating the converted BigInt duration here
       // as it's already been processed
       duration: durationStr ? JSON.parse(durationStr) : undefined,
@@ -109,6 +115,8 @@ export async function PATCH(
         category: category as "LABOR" | "MATERIAL",
         type: type as "PREVENTIVE" | "CORRECTIVE",
         labor: labor,
+        value: value !== undefined ? value : undefined,
+        discount: discount !== undefined ? discount : undefined,
         duration: durationValue,
         photo: photoUrl,
       },

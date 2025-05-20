@@ -1,9 +1,24 @@
 import { RepairOrderStatus } from "@prisma/client";
 
+export interface BaseAddressAPISchema {
+  id: string;
+  street: string;
+  number: number;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface BaseAPISchema {
   id: string;
   name: string;
   phone: string;
+  address?: BaseAddressAPISchema;
+  addressId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +52,28 @@ export interface RepairOrderServiceItemAPISchema {
   base: {
     id: string;
     name: string;
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface RepairOrderServiceAPISchema {
+  id: string;
+  quantity: number;
+  value: number;
+  discount: number;
+  category: string;
+  type: string;
+  labor?: string;
+  photo?: string;
+  duration?: {
+    from: string;
+    to: string;
+  };
+  item?: {
+    id: string;
+    name: string;
+    value: number;
   };
   createdAt: Date;
   updatedAt: Date;

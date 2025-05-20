@@ -51,6 +51,28 @@ export default function RepairOrderDetails() {
     setIsEditing(!isEditing);
   };
 
+  // Calcular o valor total dos serviços
+  const calculateTotalValue = () => {
+    if (!repairOrder?.services || repairOrder.services.length === 0) {
+      return 0;
+    }
+    
+    return repairOrder.services.reduce((total, service) => {
+      return total + Number(service.value || 0);
+    }, 0);
+  };
+  
+  // Calcular o desconto total dos serviços
+  const calculateTotalDiscount = () => {
+    if (!repairOrder?.services || repairOrder.services.length === 0) {
+      return 0;
+    }
+    
+    return repairOrder.services.reduce((total, service) => {
+      return total + Number(service.discount || 0);
+    }, 0);
+  };
+
   const getStatusBadge = (status: string) => {
     // Define custom type for badge variants that includes all possible values
     type BadgeVariant = "default" | "destructive" | "outline" | "secondary";
@@ -99,7 +121,7 @@ export default function RepairOrderDetails() {
           <Button variant="outline" size="icon" onClick={handleBackClick}>
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl font-bold">Detalhes da Ordem de Reparo</h1>
+          <h1 className="text-2xl font-bold">Detalhes da GR</h1>
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -140,8 +162,8 @@ export default function RepairOrderDetails() {
             ) : (
               <Card>
                 <CardHeader>
-                  <CardTitle>Informações da Ordem</CardTitle>
-                  <CardDescription>Detalhes completos da ordem de reparo</CardDescription>
+                  <CardTitle>Informações da Guia de Remessa</CardTitle>
+                  <CardDescription>Detalhes completos da Guia de Remessa</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -165,8 +187,12 @@ export default function RepairOrderDetails() {
                     <p>{getStatusBadge(repairOrder.status)}</p>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-sm font-medium">Desconto</p>
-                    <p>{formatCurrency(Number(repairOrder.discount || 0))}</p>
+                    <p className="text-sm font-medium">Valor Total</p>
+                    <p>{formatCurrency(calculateTotalValue())}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Desconto Total</p>
+                    <p>{formatCurrency(calculateTotalDiscount())}</p>
                   </div>
                   <div className="space-y-2 col-span-2">
                     <p className="text-sm font-medium">Observações</p>
@@ -193,7 +219,7 @@ export default function RepairOrderDetails() {
           
           <TabsContent value="services" className="space-y-4 pt-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium">Serviços da Ordem</h3>
+              <h3 className="text-lg font-medium">Serviços da Guia de Remessa</h3>
             </div>
             <RepairOrderServicesTable 
               repairOrderId={id} 

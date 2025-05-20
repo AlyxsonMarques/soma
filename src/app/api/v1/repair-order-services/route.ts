@@ -10,6 +10,8 @@ const createRepairOrderServiceSchema = z.object({
   category: z.enum(["LABOR", "MATERIAL"]),
   type: z.enum(["PREVENTIVE", "CORRECTIVE"]),
   labor: z.string().optional(),
+  value: z.coerce.number().min(0),
+  discount: z.coerce.number().min(0),
   duration: z.object({
     from: z.string().datetime(),
     to: z.string().datetime(),
@@ -28,6 +30,8 @@ export async function POST(request: Request) {
     const category = formData.get("category")?.toString();
     const type = formData.get("type")?.toString();
     const labor = formData.get("labor")?.toString();
+    const value = formData.get("value") ? Number(formData.get("value")) : 0;
+    const discount = formData.get("discount") ? Number(formData.get("discount")) : 0;
     
     // Processar duração (JSON string)
     let durationValue;
@@ -70,6 +74,8 @@ export async function POST(request: Request) {
       category,
       type,
       labor,
+      value,
+      discount,
       duration: durationStr ? JSON.parse(durationStr) : undefined,
     });
 
@@ -102,8 +108,8 @@ export async function POST(request: Request) {
         type: type as "PREVENTIVE" | "CORRECTIVE",
         labor: labor || "",
         duration: durationValue!,
-        value: item.value,
-        discount: 0,
+        value: value, // Usar o valor personalizado do serviço
+        discount: discount, // Usar o desconto personalizado do serviço
         status: "PENDING",
         photo: photoUrl,
       },

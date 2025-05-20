@@ -61,17 +61,6 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Conta
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notificações
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOutAction}>
               <LogOut />
               Sair

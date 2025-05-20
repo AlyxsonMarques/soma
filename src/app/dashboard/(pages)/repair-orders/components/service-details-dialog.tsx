@@ -1,11 +1,11 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import Image from "next/image";
-import type { RepairOrderServiceAPISchema } from "@/types/api-schemas";
+import type { RepairOrderServiceAPISchema, RepairOrderServiceItemAPISchema } from "@/types/api-schemas";
 
 interface ServiceDetailsDialogProps {
   isOpen: boolean;
@@ -14,104 +14,138 @@ interface ServiceDetailsDialogProps {
 }
 
 export function ServiceDetailsDialog({ isOpen, onClose, service }: ServiceDetailsDialogProps) {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const [items, setItems] = useState<RepairOrderServiceItemAPISchema[]>([]);
+
+  // Buscar itens para o select (apenas para exibição)
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-service-items`);
+        if (response.ok) {
+          const data = await response.json();
+          setItems(data);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar itens:", error);
+      }
+    };
+
+    if (isOpen) {
+      fetchItems();
+    }
+  }, [isOpen]);
 
   const getCategoryLabel = (category: string) => {
     const categories: Record<string, string> = {
       "LABOR": "Mão de Obra",
       "PART": "Peça",
       "SERVICE": "Serviço",
+      "MATERIAL": "Material"
     };
     return categories[category] || category;
   };
 
   const getTypeLabel = (type: string) => {
-    const types: Record<string, { label: string; variant: "default" | "destructive" | "outline" | "secondary" | "success" | "warning" }> = {
-      "PREVENTIVE": { label: "Preventivo", variant: "success" },
-      "CORRECTIVE": { label: "Corretivo", variant: "warning" },
-      "PREDICTIVE": { label: "Preditivo", variant: "secondary" },
+    const types: Record<string, string> = {
+      "PREVENTIVE": "Preventivo",
+      "CORRECTIVE": "Corretivo",
+      "PREDICTIVE": "Preditivo"
     };
-    
-    const typeInfo = types[type] || { label: type, variant: "default" };
-    
-    return (
-      <Badge variant={typeInfo.variant}>
-        {typeInfo.label}
-      </Badge>
-    );
+    return types[type] || type;
   };
+
+  // Encontrar o item selecionado
+  const selectedItem = items.find(item => item.id === service.item?.id);
+
+  // Preparar os dados de duração para exibição
+  const durationFrom = service.duration?.from ? new Date(service.duration.from) : new Date();
+  const durationTo = service.duration?.to ? new Date(service.duration.to) : new Date();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Detalhes do Serviço</DialogTitle>
           <DialogDescription>
             Informações completas sobre o serviço
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 items-center gap-4">
-            <div className="space-y-1">
+        
+        <div className="grid grid-cols-2 gap-4 py-4">
+            <div className="col-span-1 space-y-2">
               <p className="text-sm font-medium">Item</p>
-              <p className="text-sm">{service.item?.name || "N/A"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Quantidade</p>
-              <p className="text-sm">{service.quantity}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Categoria</p>
-              <p className="text-sm">{getCategoryLabel(service.category)}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Tipo</p>
-              <p className="text-sm">{getTypeLabel(service.type)}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Valor Unitário</p>
-              <p className="text-sm">{service.item?.value ? formatCurrency(Number(service.item.value)) : "N/A"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Valor Total</p>
-              <p className="text-sm">{service.item?.value ? formatCurrency(Number(service.item.value) * service.quantity) : "N/A"}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm font-medium">Mão de Obra</p>
-              <p className="text-sm">{service.labor || "N/A"}</p>
-            </div>
-          </div>
-          
-          <div className="space-y-1">
-            <p className="text-sm font-medium">Período</p>
-            <div className="flex gap-2 text-sm">
-              <span>De: {service.duration?.from ? formatDate(service.duration.from) : "N/A"}</span>
-              <span>Até: {service.duration?.to ? formatDate(service.duration.to) : "N/A"}</span>
-            </div>
-          </div>
-          
-          {service.photo && (
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Foto</p>
-              <div className="relative h-48 w-full overflow-hidden rounded-md">
-                <Image
-                  src={service.photo}
-                  alt="Foto do serviço"
-                  fill
-                  className="object-contain"
-                />
+              <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {selectedItem?.name || service.item?.name || "N/A"}
               </div>
             </div>
-          )}
-        </div>
+
+            <div className="col-span-1 space-y-2">
+              <p className="text-sm font-medium">Quantidade</p>
+              <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {service.quantity}
+              </div>
+            </div>
+
+            <div className="col-span-1 space-y-2">
+              <p className="text-sm font-medium">Categoria</p>
+              <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {getCategoryLabel(service.category)}
+              </div>
+            </div>
+
+            <div className="col-span-1 space-y-2">
+              <p className="text-sm font-medium">Tipo</p>
+              <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {getTypeLabel(service.type)}
+              </div>
+            </div>
+
+            {service.labor && (
+              <div className="col-span-2 space-y-2">
+                <p className="text-sm font-medium">Mão de Obra</p>
+                <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  {service.labor}
+                </div>
+              </div>
+            )}
+
+            <div className="col-span-1 space-y-2">
+              <p className="text-sm font-medium">Valor do Serviço</p>
+              <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {formatCurrency(Number(service.value || 0))}
+              </div>
+            </div>
+
+            <div className="col-span-1 space-y-2">
+              <p className="text-sm font-medium">Desconto do Serviço</p>
+              <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
+                {formatCurrency(Number(service.discount || 0))}
+              </div>
+            </div>
+
+            <div className="col-span-2 space-y-2">
+              <p className="text-sm font-medium">Período</p>
+              <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm flex justify-between">
+                <span>De: {durationFrom.toLocaleDateString('pt-BR')}</span>
+                <span>Até: {durationTo.toLocaleDateString('pt-BR')}</span>
+              </div>
+            </div>
+
+            {service.photo && (
+              <div className="col-span-2 space-y-2">
+                <p className="text-sm font-medium">Foto</p>
+                <div className="relative h-48 w-full overflow-hidden rounded-md border border-input">
+                  <Image
+                    src={service.photo}
+                    alt="Foto do serviço"
+                    fill
+                    className="object-contain"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        
         <DialogFooter>
           <Button onClick={onClose}>Fechar</Button>
         </DialogFooter>

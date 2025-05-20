@@ -117,6 +117,37 @@ export default function BaseDetails() {
                 <p className="text-sm font-medium">Telefone</p>
                 <p>{base.phone || "N/A"}</p>
               </div>
+              
+              {/* Endereço */}
+              <div className="space-y-2 col-span-2">
+                <p className="text-sm font-medium">Endereço</p>
+                {base.address ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 border rounded-md p-3">
+                    <div>
+                      <p className="text-xs font-medium">Rua</p>
+                      <p>{base.address.street}, {base.address.number}</p>
+                      {base.address.complement && (
+                        <p className="text-sm">{base.address.complement}</p>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium">Bairro</p>
+                      <p>{base.address.neighborhood}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium">Cidade/Estado</p>
+                      <p>{base.address.city} - {base.address.state}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium">CEP</p>
+                      <p>{base.address.zipCode.replace(/^(\d{5})(\d{3})$/, "$1-$2")}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <p>Endereço não cadastrado</p>
+                )}
+              </div>
+              
               <div className="space-y-2">
                 <p className="text-sm font-medium">Criado em</p>
                 <p>{new Date(base.createdAt).toLocaleDateString("pt-BR")}</p>

@@ -198,8 +198,8 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
                     <TableCell>{getCategoryLabel(service.category)}</TableCell>
                     <TableCell>{getTypeLabel(service.type)}</TableCell>
                     <TableCell>
-                      {service.item?.value 
-                        ? formatCurrency(Number(service.item.value) * service.quantity) 
+                      {service.value
+                        ? formatCurrency(service.value)
                         : "N/A"}
                     </TableCell>
                     <TableCell className="text-right">

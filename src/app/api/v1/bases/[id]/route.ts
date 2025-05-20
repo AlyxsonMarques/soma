@@ -2,14 +2,25 @@ import prisma from "@/lib/prisma";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+const addressUpdateSchema = z.object({
+  street: z.string().min(1),
+  number: z.number().int().positive(),
+  complement: z.string().optional(),
+  neighborhood: z.string().min(1),
+  city: z.string().min(1),
+  state: z.string().length(2),
+  zipCode: z.string().length(8)
+});
+
 const baseUpdateSchema = z.object({
   name: z.string().min(1).optional(),
   phone: z.string().min(1).optional(),
+  address: addressUpdateSchema.optional()
 });
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json({ error: true, message: "Preencha o parâmetro obrigatório: id" }, { status: 400 });
@@ -17,6 +28,9 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 
     const base = await prisma.base.findUnique({
       where: { id },
+      include: {
+        address: true
+      }
     });
 
     if (!base) {
@@ -35,7 +49,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json({ error: true, message: "Preencha o parâmetro obrigatório: id" }, { status: 400 });
@@ -54,15 +68,37 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     try {
       const existingBase = await prisma.base.findUnique({
         where: { id },
+        include: {
+          address: true
+        }
       });
 
       if (!existingBase) {
         return NextResponse.json({ error: true, message: "Base não encontrada" }, { status: 404 });
       }
-
-      const updatedBase = await prisma.base.update({
-        where: { id },
-        data: validationResult.data,
+      
+      // Extrair dados validados
+      const { address, ...baseData } = validationResult.data;
+      
+      // Atualizar a base e o endereço em uma transação
+      const updatedBase = await prisma.$transaction(async (tx) => {
+        // Se temos dados de endereço para atualizar
+        if (address && existingBase.addressId) {
+          // Atualizar o endereço existente
+          await tx.baseAddress.update({
+            where: { id: existingBase.addressId },
+            data: address
+          });
+        }
+        
+        // Atualizar a base
+        return tx.base.update({
+          where: { id },
+          data: baseData,
+          include: {
+            address: true
+          }
+        });
       });
 
       return NextResponse.json({
