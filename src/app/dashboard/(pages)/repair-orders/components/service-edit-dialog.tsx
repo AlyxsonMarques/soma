@@ -133,8 +133,10 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[550px]">
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) onClose();
+    }}>
+      <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Editar Serviço</DialogTitle>
           <DialogDescription>

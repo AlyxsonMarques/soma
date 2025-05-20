@@ -62,7 +62,9 @@ export function ServiceDetailsDialog({ isOpen, onClose, service }: ServiceDetail
   const durationTo = service.duration?.to ? new Date(service.duration.to) : new Date();
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) onClose();
+    }}>
       <DialogContent className="sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>Detalhes do Serviço</DialogTitle>

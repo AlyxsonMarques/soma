@@ -28,7 +28,7 @@ export default function RepairOrderDetails() {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders/${id}`);
       if (!response.ok) {
-        throw new Error("Failed to fetch repair order");
+        throw new Error("Falha ao buscar a ordem de reparo");
       }
       const data = await response.json();
       setRepairOrder(data);
@@ -75,13 +75,13 @@ export default function RepairOrderDetails() {
 
   const getStatusBadge = (status: string) => {
     // Define custom type for badge variants that includes all possible values
-    type BadgeVariant = "default" | "destructive" | "outline" | "secondary";
+    type BadgeVariant = "default" | "destructive" | "outline" | "secondary" | "success" | "warning";
     
     // Map status to appropriate badge variant and label
     const statusMap: Record<string, { label: string; variant: BadgeVariant }> = {
       "PENDING": { label: "Pendente", variant: "outline" },
       "REVISION": { label: "Revisão", variant: "outline" },
-      "APPROVED": { label: "Aprovado", variant: "default" },
+      "APPROVED": { label: "Aprovado", variant: "success" },
       "PARTIALLY_APPROVED": { label: "Parcialmente Aprovado", variant: "secondary" },
       "INVOICE_APPROVED": { label: "Aprovado para Nota Fiscal", variant: "secondary" },
       "CANCELLED": { label: "Cancelado", variant: "destructive" }
