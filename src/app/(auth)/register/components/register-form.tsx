@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { CPFInput } from "@/components/ui/cpf-input";
 import { useState } from "react";
 
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -191,7 +192,12 @@ export function RegisterForm() {
               <FormItem className="grid gap-2">
                 <FormLabel>CPF</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <CPFInput 
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    name={field.name}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

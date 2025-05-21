@@ -1,6 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Calendar as CalendarIcon } from "lucide-react";
 import * as React from "react";
 import type { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
@@ -31,13 +32,13 @@ export function DatePickerInput<T extends FieldValues>({
             variant={variant}
             className={cn("w-[240px] pl-3 text-left font-normal", !field.value && "text-muted-foreground", className)}
           >
-            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+            {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
             <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
           </Button>
         </FormControl>
       </PopoverTrigger>
 
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="center">
         <Calendar
           mode="single"
           selected={field.value}
