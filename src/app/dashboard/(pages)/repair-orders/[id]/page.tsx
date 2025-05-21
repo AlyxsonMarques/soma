@@ -81,7 +81,7 @@ export default function RepairOrderDetails() {
     const statusMap: Record<string, { label: string; variant: BadgeVariant }> = {
       "PENDING": { label: "Pendente", variant: "outline" },
       "REVISION": { label: "Revisão", variant: "outline" },
-      "APPROVED": { label: "Aprovado", variant: "success" },
+      "APPROVED": { label: "Aprovado", variant: "default" },
       "PARTIALLY_APPROVED": { label: "Parcialmente Aprovado", variant: "secondary" },
       "INVOICE_APPROVED": { label: "Aprovado para Nota Fiscal", variant: "secondary" },
       "CANCELLED": { label: "Cancelado", variant: "destructive" }

@@ -24,14 +24,43 @@ const formSchema = z.object({
   ),
 });
 
-export async function GET(_: NextRequest) {
-  const repairOrders = await prisma.repairOrder.findMany({ include: { users: true, base: true } });
+export async function GET(req: NextRequest) {
+  // Obter parâmetros de consulta
+  const { searchParams } = new URL(req.url);
+  const plate = searchParams.get('plate');
+  
+  // Construir o filtro de consulta
+  const where = plate ? { plate: { contains: plate, mode: 'insensitive' as const } } : {};
+  
+  // Buscar ordens de reparo com filtros aplicados
+  const repairOrders = await prisma.repairOrder.findMany({ 
+    where,
+    include: { 
+      users: true, 
+      base: true,
+      services: {
+        include: {
+          item: true
+        }
+      }
+    },
+    orderBy: {
+      createdAt: 'desc'
+    }
+  });
+  
   return NextResponse.json(
     repairOrders.map((order) => ({
       ...order,
       gcaf: order.gcaf?.toString() ?? null,
       createdAt: new Date(order.createdAt),
       updatedAt: new Date(order.updatedAt),
+      services: order.services.map(service => ({
+        ...service,
+        value: service.value.toString(),
+        discount: service.discount.toString(),
+        duration: service.duration.toString()
+      }))
     })),
   );
 }

@@ -8,6 +8,7 @@ const patchRepairOrderServiceSchema = z.object({
   itemId: z.string().optional(),
   category: z.enum(["LABOR", "MATERIAL"]).optional(),
   type: z.enum(["PREVENTIVE", "CORRECTIVE"]).optional(),
+  status: z.enum(["PENDING", "APPROVED", "CANCELLED"]).optional(),
   labor: z.string().optional(),
   value: z.coerce.number().min(0).optional(),
   discount: z.coerce.number().min(0).optional(),
@@ -45,6 +46,7 @@ export async function PATCH(
     const itemId = formData.get("itemId")?.toString();
     const category = formData.get("category")?.toString();
     const type = formData.get("type")?.toString();
+    const status = formData.get("status")?.toString();
     const labor = formData.get("labor")?.toString();
     const value = formData.get("value") ? Number(formData.get("value")) : undefined;
     const discount = formData.get("discount") ? Number(formData.get("discount")) : undefined;
@@ -91,6 +93,7 @@ export async function PATCH(
       itemId,
       category,
       type,
+      status,
       labor,
       value,
       discount,
@@ -114,6 +117,7 @@ export async function PATCH(
         itemId: itemId,
         category: category as "LABOR" | "MATERIAL",
         type: type as "PREVENTIVE" | "CORRECTIVE",
+        status: status as "PENDING" | "APPROVED" | "CANCELLED",
         labor: labor,
         value: value !== undefined ? value : undefined,
         discount: discount !== undefined ? discount : undefined,

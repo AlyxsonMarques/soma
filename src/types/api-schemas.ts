@@ -1,4 +1,4 @@
-import { RepairOrderStatus } from "@prisma/client";
+import { RepairOrderStatus, RepairOrderServiceStatus } from "@prisma/client";
 
 export interface BaseAddressAPISchema {
   id: string;
@@ -64,6 +64,7 @@ export interface RepairOrderServiceAPISchema {
   discount: number;
   category: string;
   type: string;
+  status: RepairOrderServiceStatus;
   labor?: string;
   photo?: string;
   duration?: {

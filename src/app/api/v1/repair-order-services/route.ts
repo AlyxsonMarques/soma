@@ -9,6 +9,7 @@ const createRepairOrderServiceSchema = z.object({
   repairOrderId: z.string().min(1, "Ordem de reparo é obrigatória"),
   category: z.enum(["LABOR", "MATERIAL"]),
   type: z.enum(["PREVENTIVE", "CORRECTIVE"]),
+  status: z.enum(["PENDING", "APPROVED", "CANCELLED"]).default("PENDING"),
   labor: z.string().optional(),
   value: z.coerce.number().min(0),
   discount: z.coerce.number().min(0),
@@ -29,6 +30,7 @@ export async function POST(request: Request) {
     const repairOrderId = formData.get("repairOrderId")?.toString();
     const category = formData.get("category")?.toString();
     const type = formData.get("type")?.toString();
+    const status = formData.get("status")?.toString() || "PENDING";
     const labor = formData.get("labor")?.toString();
     const value = formData.get("value") ? Number(formData.get("value")) : 0;
     const discount = formData.get("discount") ? Number(formData.get("discount")) : 0;
@@ -73,6 +75,7 @@ export async function POST(request: Request) {
       repairOrderId,
       category,
       type,
+      status,
       labor,
       value,
       discount,
@@ -110,7 +113,7 @@ export async function POST(request: Request) {
         duration: durationValue!,
         value: value, // Usar o valor personalizado do serviço
         discount: discount, // Usar o desconto personalizado do serviço
-        status: "PENDING",
+        status: status as "PENDING" | "APPROVED" | "CANCELLED",
         photo: photoUrl,
       },
       include: {

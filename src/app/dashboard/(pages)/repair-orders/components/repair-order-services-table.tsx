@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { PlusCircle, MoreHorizontal, Edit, Trash2, Eye, Check } from "lucide-react";
+import { PlusCircle, MoreHorizontal, Edit, Trash2, Eye, Check, AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -124,6 +124,27 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
     return categories[category] || category;
   };
 
+  const getServiceStatusBadge = (status: string) => {
+    // Define custom type for badge variants that includes all possible values
+    type BadgeVariant = "default" | "destructive" | "outline" | "secondary" | "success" | "warning";
+    
+    // Map status to appropriate badge variant and label
+    const statusMap: Record<string, { label: string; variant: BadgeVariant; icon: React.ReactNode }> = {
+      "PENDING": { label: "Pendente", variant: "outline", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
+      "APPROVED": { label: "Aprovado", variant: "default", icon: <CheckCircle className="h-3 w-3 mr-1" /> },
+      "CANCELLED": { label: "Cancelado", variant: "destructive", icon: <XCircle className="h-3 w-3 mr-1" /> }
+    };
+    
+    const statusInfo = statusMap[status] || { label: status, variant: "default" as BadgeVariant, icon: <AlertCircle className="h-3 w-3 mr-1" /> };
+    
+    return (
+      <Badge variant={statusInfo.variant} className="flex items-center justify-center">
+        {statusInfo.icon}
+        {statusInfo.label}
+      </Badge>
+    );
+  };
+
   const getTypeLabel = (type: string) => {
     const types: Record<string, { label: string; variant: "default" | "destructive" | "outline" | "secondary" | "success" | "warning" }> = {
       "CORRECTIVE": { label: "Corretivo", variant: "destructive" },
@@ -180,13 +201,14 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
                 <TableHead>Categoria</TableHead>
                 <TableHead>Tipo</TableHead>
                 <TableHead>Valor</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="w-[100px]">Ações</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {services.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-24 text-center">
+                  <TableCell colSpan={8} className="h-24 text-center">
                     Nenhum serviço encontrado
                   </TableCell>
                 </TableRow>
@@ -203,7 +225,7 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
                         />
                       </div>
                     </TableCell>
-                    <TableCell>{service.item?.name}</TableCell>
+                    <TableCell className="font-medium">{service.item?.name || "N/A"}</TableCell>
                     <TableCell>{service.quantity}</TableCell>
                     <TableCell>{getCategoryLabel(service.category)}</TableCell>
                     <TableCell>{getTypeLabel(service.type)}</TableCell>
@@ -211,6 +233,9 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
                       {service.value
                         ? formatCurrency(service.value)
                         : "N/A"}
+                    </TableCell>
+                    <TableCell>
+                      {getServiceStatusBadge(service.status || "PENDING")}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>

@@ -21,6 +21,7 @@ const formSchema = z.object({
   itemId: z.string().min(1, "Item é obrigatório"),
   category: z.enum(["LABOR", "MATERIAL"]),
   type: z.enum(["PREVENTIVE", "CORRECTIVE"]),
+  status: z.enum(["PENDING", "APPROVED", "CANCELLED"]),
   labor: z.string().optional(),
   value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0"),
   discount: z.coerce.number().min(0, "Desconto deve ser maior ou igual a 0"),
@@ -75,6 +76,7 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
       itemId: "",
       category: "LABOR",
       type: "PREVENTIVE",
+      status: "PENDING",
       labor: "",
       value: 0,
       discount: 0,
@@ -97,6 +99,7 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
       formData.append("repairOrderId", repairOrderId);
       formData.append("category", values.category);
       formData.append("type", values.type);
+      formData.append("status", values.status);
       formData.append("labor", values.labor || "");
       formData.append("value", values.value.toString());
       formData.append("discount", values.discount.toString());
@@ -214,16 +217,39 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
                 control={form.control}
                 name="type"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="col-span-1">
                     <FormLabel>Tipo</FormLabel>
                     <FormControl>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione um tipo" />
+                          <SelectValue placeholder="Selecione o tipo" />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="PREVENTIVE">Preventivo</SelectItem>
                           <SelectItem value="CORRECTIVE">Corretivo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>Status</FormLabel>
+                    <FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="PENDING">Pendente</SelectItem>
+                          <SelectItem value="APPROVED">Aprovado</SelectItem>
+                          <SelectItem value="CANCELLED">Cancelado</SelectItem>
                         </SelectContent>
                       </Select>
                     </FormControl>

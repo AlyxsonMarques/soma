@@ -5,6 +5,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { baseIdSchema } from "@/types/base";
 import { repairOrderKilometersSchema, repairOrderPlateSchema } from "@/types/repair-order";
 import {
@@ -21,7 +23,8 @@ import { repairOrderServiceItemIdSchema } from "@/types/repair-order-service-ite
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Base, RepairOrderServiceItem } from "@prisma/client";
-import { Camera, Trash2 } from "lucide-react";
+import { Camera, Trash2, Search, FileText, Calendar, Car } from "lucide-react";
+import { RepairOrderDetailsDialog } from "./components/repair-order-details-dialog";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -45,9 +48,35 @@ const formSchema = z.object({
   services: z.array(formServiceSchema),
 });
 
+// Interface para os resultados da pesquisa de GRs por placa
+interface RepairOrderSearchResult {
+  id: string;
+  gcaf: string;
+  plate: string;
+  kilometers: number;
+  status: string;
+  base: {
+    id: string;
+    name: string;
+  };
+  createdAt: string;
+  services: {
+    id: string;
+    labor: string;
+    category: string;
+    type: string;
+  }[];
+}
+
 export default function GuiaDeRemessa() {
   const [bases, setBases] = useState<Base[]>([]);
   const [repairOrderServiceItems, setRepairOrderServiceItems] = useState<RepairOrderServiceItem[]>([]);
+  
+  // Estados para a funcionalidade de pesquisa
+  const [searchPlate, setSearchPlate] = useState("");
+  const [searchResults, setSearchResults] = useState<RepairOrderSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchPerformed, setSearchPerformed] = useState(false);
   useEffect(() => {
     const fetchBases = async () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases`);
@@ -57,6 +86,37 @@ export default function GuiaDeRemessa() {
 
     fetchBases();
   }, []);
+  
+  // Função para pesquisar GRs por placa
+  const searchRepairOrdersByPlate = async () => {
+    if (!searchPlate.trim()) {
+      toast.error("Por favor, informe uma placa para pesquisar");
+      return;
+    }
+    
+    setIsSearching(true);
+    setSearchPerformed(true);
+    
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders?plate=${searchPlate.trim()}`);
+      
+      if (!res.ok) {
+        throw new Error("Falha ao buscar ordens de reparo");
+      }
+      
+      const data = await res.json();
+      setSearchResults(data);
+      
+      if (data.length === 0) {
+        toast.info("Nenhuma ordem de reparo encontrada para esta placa");
+      }
+    } catch (error) {
+      console.error("Erro ao buscar ordens de reparo:", error);
+      toast.error("Erro ao buscar ordens de reparo. Tente novamente.");
+    } finally {
+      setIsSearching(false);
+    }
+  };
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -153,11 +213,124 @@ export default function GuiaDeRemessa() {
     });
   }
 
+  // Formatar data para exibição
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('pt-BR');
+  };
+  
+  // Função para formatar o status da GR
+  const getStatusLabel = (status: string) => {
+    const statusMap: Record<string, string> = {
+      "PENDING": "Pendente",
+      "REVISION": "Revisão",
+      "APPROVED": "Aprovado",
+      "PARTIALLY_APPROVED": "Parcialmente Aprovado",
+      "INVOICE_APPROVED": "Aprovado para Nota Fiscal",
+      "CANCELLED": "Cancelado"
+    };
+    
+    return statusMap[status] || status;
+  };
+
   return (
     <div className="dark min-h-screen">
       <div className="bg-background text-foreground min-h-screen">
         <div className="container mx-auto p-4 md:p-6 max-w-4xl">
           <h1 className="text-2xl font-bold mb-6 text-center md:text-left">Guia de Remessa</h1>
+          
+          <Tabs defaultValue="new" className="w-full mb-6">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="new">Nova Guia</TabsTrigger>
+              <TabsTrigger value="search">Pesquisar Guias</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="search" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pesquisar Guias de Remessa por Placa</CardTitle>
+                  <CardDescription>Informe a placa do veículo para visualizar todas as guias associadas</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="flex-1">
+                      <Input 
+                        placeholder="Digite a placa (ex: ABC1234)" 
+                        value={searchPlate} 
+                        onChange={(e) => setSearchPlate(e.target.value)}
+                        className="w-full"
+                      />
+                    </div>
+                    <Button 
+                      onClick={searchRepairOrdersByPlate} 
+                      disabled={isSearching}
+                      className="whitespace-nowrap"
+                    >
+                      {isSearching ? "Pesquisando..." : "Pesquisar"}
+                      {!isSearching && <Search className="ml-2 h-4 w-4" />}
+                    </Button>
+                  </div>
+                  
+                  {searchPerformed && (
+                    <div className="mt-6">
+                      <h3 className="text-lg font-medium mb-2">
+                        {searchResults.length > 0 
+                          ? `Resultados para a placa ${searchPlate} (${searchResults.length})` 
+                          : `Nenhum resultado encontrado para a placa ${searchPlate}`}
+                      </h3>
+                      
+                      {searchResults.length > 0 && (
+                        <div className="space-y-4">
+                          {searchResults.map((result) => (
+                            <Card key={result.id} className="overflow-hidden">
+                              <CardHeader className="bg-muted/50 py-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                  <div>
+                                    <div className="flex items-center gap-2">
+                                      <FileText className="h-4 w-4" />
+                                      <CardTitle className="text-base">GCAF: {result.gcaf}</CardTitle>
+                                    </div>
+                                    <CardDescription className="flex items-center gap-1 mt-1">
+                                      <Car className="h-3 w-3" />
+                                      <span>Placa: {result.plate} | {result.kilometers} km</span>
+                                    </CardDescription>
+                                  </div>
+                                  <div className="flex flex-col sm:items-end gap-1">
+                                    <div className="text-sm font-medium">{getStatusLabel(result.status)}</div>
+                                    <div className="flex items-center text-xs text-muted-foreground">
+                                      <Calendar className="h-3 w-3 mr-1" />
+                                      {formatDate(result.createdAt)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </CardHeader>
+                              <CardContent className="py-3">
+                                <div>
+                                  <div className="text-sm font-medium mb-2">Base: {result.base.name}</div>
+                                  <div className="text-sm font-medium">Serviços:</div>
+                                  <ul className="mt-1 space-y-1">
+                                    {result.services.map((service) => (
+                                      <li key={service.id} className="text-sm">
+                                        • {service.labor || "Serviço sem descrição"} ({service.category === "LABOR" ? "Mão de obra" : "Material"})
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                                <div className="mt-3">
+                                  <RepairOrderDetailsDialog repairOrder={result} />
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="new">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -448,6 +621,8 @@ export default function GuiaDeRemessa() {
               </Button>
             </form>
           </Form>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>

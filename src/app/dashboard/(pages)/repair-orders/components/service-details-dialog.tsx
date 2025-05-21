@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import type { RepairOrderServiceAPISchema, RepairOrderServiceItemAPISchema } from "@/types/api-schemas";
 
 interface ServiceDetailsDialogProps {
@@ -43,6 +45,27 @@ export function ServiceDetailsDialog({ isOpen, onClose, service }: ServiceDetail
       "MATERIAL": "Material"
     };
     return categories[category] || category;
+  };
+
+  const getServiceStatusBadge = (status: string) => {
+    // Define custom type for badge variants that includes all possible values
+    type BadgeVariant = "default" | "destructive" | "outline" | "secondary" | "success" | "warning";
+    
+    // Map status to appropriate badge variant and label
+    const statusMap: Record<string, { label: string; variant: BadgeVariant; icon: React.ReactNode }> = {
+      "PENDING": { label: "Pendente", variant: "outline", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
+      "APPROVED": { label: "Aprovado", variant: "success", icon: <CheckCircle className="h-3 w-3 mr-1" /> },
+      "CANCELLED": { label: "Cancelado", variant: "destructive", icon: <XCircle className="h-3 w-3 mr-1" /> }
+    };
+    
+    const statusInfo = statusMap[status] || { label: status, variant: "default" as BadgeVariant, icon: <AlertCircle className="h-3 w-3 mr-1" /> };
+    
+    return (
+      <Badge variant={statusInfo.variant} className="flex items-center justify-center">
+        {statusInfo.icon}
+        {statusInfo.label}
+      </Badge>
+    );
   };
 
   const getTypeLabel = (type: string) => {
@@ -99,6 +122,13 @@ export function ServiceDetailsDialog({ isOpen, onClose, service }: ServiceDetail
               <p className="text-sm font-medium">Tipo</p>
               <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm">
                 {getTypeLabel(service.type)}
+              </div>
+            </div>
+
+            <div className="col-span-1 space-y-2">
+              <p className="text-sm font-medium">Status</p>
+              <div className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm flex items-center">
+                {getServiceStatusBadge(service.status || "PENDING")}
               </div>
             </div>
 
