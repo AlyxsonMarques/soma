@@ -53,16 +53,25 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
       header: ({ column }) => {
         return <DataTableColumnHeader column={column} title="ID" />;
       },
+      meta: {
+        label: "ID"
+      },
   },
   {
     accessorKey: "gcaf",
     header: "GCAF",
+    meta: {
+      label: "GCAF"
+    },
   },
   {
     accessorKey: "base",
     header: "Base",
     cell: ({ row }) => {
       return <span>{row.original.base?.name}</span>;
+    },
+    meta: {
+      label: "Base"
     },
   },
   {
@@ -71,22 +80,37 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
     cell: ({ row }) => {
       return <span>{row.original.users?.map((user: { name: string }) => user.name).join(", ")}</span>;
     },
+    meta: {
+      label: "Usuários"
+    },
   },
   {
     accessorKey: "plate",
     header: "Placa",
+    meta: {
+      label: "Placa"
+    },
   },
   {
     accessorKey: "kilometers",
     header: "Kilometragem",
+    meta: {
+      label: "Kilometragem"
+    },
   },
   {
     accessorKey: "discount",
     header: "Desconto",
+    meta: {
+      label: "Desconto"
+    },
   },
   {
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    meta: {
+      label: "Status"
+    },
     cell: ({ row }) => {
 
       const statusVariants: Record<RepairOrderStatus, "outline" | "default" | "secondary" | "destructive"> = {
@@ -124,6 +148,9 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Criado em" />;
     },
+    meta: {
+      label: "Criado em"
+    },
     cell: ({ row }) => {
       const date = new Date(row.original.createdAt);
       return <span>{date.toLocaleDateString("pt-BR")}</span>;
@@ -138,6 +165,9 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
     accessorKey: "updatedAt",
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="Atualizado em" />;
+    },
+    meta: {
+      label: "Atualizado em"
     },
     cell: ({ row }) => {
       const date = new Date(row.original.updatedAt);

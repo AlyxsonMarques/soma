@@ -30,14 +30,23 @@ export function createBaseColumns({ onRefresh }: CreateBaseColumnsOptions) {
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="ID" />;
     },
+    meta: {
+      label: "ID"
+    },
   },
   {
     accessorKey: "name",
     header: "Nome",
+    meta: {
+      label: "Nome"
+    },
   },
   {
     accessorKey: "phone",
     header: "Telefone",
+    meta: {
+      label: "Telefone"
+    },
   },
   {
     accessorKey: "createdAt",
@@ -53,6 +62,9 @@ export function createBaseColumns({ onRefresh }: CreateBaseColumnsOptions) {
       const dateB = new Date(rowB.original.createdAt).getTime();
       return dateA > dateB ? 1 : dateA < dateB ? -1 : 0;
     },
+    meta: {
+      label: "Criado em"
+    },
   },
   {
     accessorKey: "updatedAt",
@@ -67,6 +79,9 @@ export function createBaseColumns({ onRefresh }: CreateBaseColumnsOptions) {
       const dateA = new Date(rowA.original.updatedAt).getTime();
       const dateB = new Date(rowB.original.updatedAt).getTime();
       return dateA > dateB ? 1 : dateA < dateB ? -1 : 0;
+    },
+    meta: {
+      label: "Atualizado em"
     },
   },
 

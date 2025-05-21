@@ -28,12 +28,18 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="ID" />;
     },
+    meta: {
+      label: "ID"
+    },
   },
   {
     accessorKey: "type",
     header: "Tipo de usuário",
     cell: ({ row }) => {
       return row.original.type === "MECHANIC" ? "Mecânico" : "Orçamentista";
+    },
+    meta: {
+      label: "Tipo de usuário"
     },
   },
   {
@@ -42,14 +48,23 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
     cell: ({ row }) => {
       return row.original.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
     },
+    meta: {
+      label: "CPF"
+    },
   },
   {
     accessorKey: "name",
     header: "Nome",
+    meta: {
+      label: "Nome"
+    },
   },
   {
     accessorKey: "email",
     header: "Email",
+    meta: {
+      label: "Email"
+    },
   },
   {
     accessorKey: "birthDate",
@@ -57,12 +72,18 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
     cell: ({ row }) => {
       return <span>{row.original.birthDate.toLocaleDateString("pt-BR")}</span>;
     },
+    meta: {
+      label: "Data de nascimento"
+    },
   },
   {
     accessorKey: "assistant",
     header: "Assistente",
     cell: ({ row }) => {
       return row.original.assistant ? "Sim" : "Não";
+    },
+    meta: {
+      label: "Assistente"
     },
   },
   {
@@ -73,6 +94,9 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
     cell: ({ row }) => {
       return <span>{row.original.createdAt.toLocaleDateString("pt-BR")}</span>;
     },
+    meta: {
+      label: "Criado em"
+    },
   },
   {
     accessorKey: "updatedAt",
@@ -81,6 +105,9 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
     },
     cell: ({ row }) => {
       return <span>{row.original.updatedAt.toLocaleDateString("pt-BR")}</span>;
+    },
+    meta: {
+      label: "Atualizado em"
     },
   },
 

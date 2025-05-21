@@ -50,12 +50,18 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+    meta: {
+      label: "Selecionar"
+    },
   },
   {
     accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
+    meta: {
+      label: "Status"
+    },
     cell: ({ row }) => {
-      const statusVariants = {
+      const statusVariants: Record<UserStatus, "default" | "destructive" | "outline" | "secondary" | "success" | "warning"> = {
         PENDING: "secondary",
         APPROVED: "default",
         REPROVED: "destructive",
@@ -80,12 +86,18 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="ID" />;
     },
+    meta: {
+      label: "ID"
+    },
   },
   {
     accessorKey: "type",
     header: "Tipo de usuário",
     cell: ({ row }) => {
       return row.original.type === "MECHANIC" ? "Mecânico" : "Orçamentista";
+    },
+    meta: {
+      label: "Tipo de usuário"
     },
   },
   {
@@ -94,10 +106,16 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     cell: ({ row }) => {
       return row.original.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
     },
+    meta: {
+      label: "CPF"
+    },
   },
   {
     accessorKey: "email",
     header: "Email",
+    meta: {
+      label: "Email"
+    },
   },
   {
     accessorKey: "assistant",
@@ -105,10 +123,16 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     cell: ({ row }) => {
       return row.original.assistant ? "Sim" : "Não";
     },
+    meta: {
+      label: "Assistente"
+    },
   },
   {
     accessorKey: "actions",
     header: "Ações",
+    meta: {
+      label: "Ações"
+    },
     cell: ({ row }) => {
       return (
         <DropdownMenu>

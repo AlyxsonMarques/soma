@@ -49,20 +49,32 @@ export function createItemColumns({ onRefresh }: CreateItemColumnsOptions) {
     header: ({ column }) => {
       return <DataTableColumnHeader column={column} title="ID" />;
     },
+    meta: {
+      label: "ID"
+    },
   },
   {
     accessorKey: "name",
     header: "Nome",
+    meta: {
+      label: "Nome"
+    },
   },
   {
     accessorKey: "value",
     header: "Valor",
+    meta: {
+      label: "Valor"
+    },
   },
   {
     accessorKey: "base",
     header: "Base",
     cell: ({ row }) => {
       return <span>{row.original.base.name}</span>;
+    },
+    meta: {
+      label: "Base"
     },
   },
   {
@@ -73,6 +85,9 @@ export function createItemColumns({ onRefresh }: CreateItemColumnsOptions) {
     cell: ({ row }) => {
       return <span>{row.original.createdAt.toLocaleDateString("pt-BR")}</span>;
     },
+    meta: {
+      label: "Criado em"
+    },
   },
   {
     accessorKey: "updatedAt",
@@ -81,6 +96,9 @@ export function createItemColumns({ onRefresh }: CreateItemColumnsOptions) {
     },
     cell: ({ row }) => {
       return <span>{row.original.updatedAt.toLocaleDateString("pt-BR")}</span>;
+    },
+    meta: {
+      label: "Atualizado em"
     },
   },
 
