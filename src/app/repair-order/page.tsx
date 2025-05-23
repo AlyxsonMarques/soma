@@ -77,6 +77,10 @@ export default function GuiaDeRemessa() {
   const [searchResults, setSearchResults] = useState<RepairOrderSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [searchPerformed, setSearchPerformed] = useState(false);
+  
+  // Estados para o histórico de GRs
+  const [historyOrders, setHistoryOrders] = useState<RepairOrderSearchResult[]>([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   useEffect(() => {
     const fetchBases = async () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases`);
@@ -85,7 +89,28 @@ export default function GuiaDeRemessa() {
     };
 
     fetchBases();
+    fetchRepairOrderHistory();
   }, []);
+  
+  // Função para buscar o histórico de GRs
+  const fetchRepairOrderHistory = async () => {
+    setIsLoadingHistory(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders`);
+      
+      if (!res.ok) {
+        throw new Error("Falha ao buscar histórico de ordens de reparo");
+      }
+      
+      const data = await res.json();
+      setHistoryOrders(data);
+    } catch (error) {
+      console.error("Erro ao buscar histórico de ordens de reparo:", error);
+      toast.error("Erro ao carregar o histórico. Tente novamente.");
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
   
   // Função para pesquisar GRs por placa
   const searchRepairOrdersByPlate = async () => {
@@ -195,6 +220,8 @@ export default function GuiaDeRemessa() {
       toast.error(data.message);
     } else {
       toast.success(data.message);
+      // Atualiza o histórico após criar uma nova GR
+      fetchRepairOrderHistory();
     }
 
     form.reset();
@@ -240,9 +267,10 @@ export default function GuiaDeRemessa() {
           <h1 className="text-2xl font-bold mb-6 text-center md:text-left">Guia de Remessa</h1>
           
           <Tabs defaultValue="new" className="w-full mb-6">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="new">Nova Guia</TabsTrigger>
               <TabsTrigger value="search">Pesquisar Guias</TabsTrigger>
+              <TabsTrigger value="history">Histórico</TabsTrigger>
             </TabsList>
             
             <TabsContent value="search" className="space-y-4">
@@ -324,6 +352,70 @@ export default function GuiaDeRemessa() {
                           ))}
                         </div>
                       )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="history" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Histórico de Guias de Remessa</CardTitle>
+                  <CardDescription>Visualize todas as guias de remessa criadas</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingHistory ? (
+                    <div className="flex justify-center items-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                    </div>
+                  ) : historyOrders.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <p>Nenhuma ordem de reparo encontrada no histórico</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {historyOrders.map((order) => (
+                        <Card key={order.id} className="overflow-hidden">
+                          <CardHeader className="bg-muted/50 py-3">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <FileText className="h-4 w-4" />
+                                  <CardTitle className="text-base">GCAF: {order.gcaf}</CardTitle>
+                                </div>
+                                <CardDescription className="flex items-center gap-1 mt-1">
+                                  <Car className="h-3 w-3" />
+                                  <span>Placa: {order.plate} | {order.kilometers} km</span>
+                                </CardDescription>
+                              </div>
+                              <div className="flex flex-col sm:items-end gap-1">
+                                <div className="text-sm font-medium">{getStatusLabel(order.status)}</div>
+                                <div className="flex items-center text-xs text-muted-foreground">
+                                  <Calendar className="h-3 w-3 mr-1" />
+                                  {formatDate(order.createdAt)}
+                                </div>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="py-3">
+                            <div>
+                              <div className="text-sm font-medium mb-2">Base: {order.base.name}</div>
+                              <div className="text-sm font-medium">Serviços:</div>
+                              <ul className="mt-1 space-y-1">
+                                {order.services.map((service) => (
+                                  <li key={service.id} className="text-sm">
+                                    • {service.labor || "Serviço sem descrição"} ({service.category === "LABOR" ? "Mão de obra" : "Material"})
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                            <div className="mt-3">
+                              <RepairOrderDetailsDialog repairOrder={order} />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
                     </div>
                   )}
                 </CardContent>
