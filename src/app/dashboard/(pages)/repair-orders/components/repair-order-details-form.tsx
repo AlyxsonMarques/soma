@@ -176,7 +176,12 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
                 <FormItem>
                   <FormLabel>Kilometragem</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Digite a kilometragem" {...field} />
+                    <div className="relative">
+                      <Input type="number" placeholder="Digite a kilometragem" {...field} />
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
+                        km
+                      </div>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

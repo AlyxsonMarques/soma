@@ -94,6 +94,9 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
   {
     accessorKey: "kilometers",
     header: "Kilometragem",
+    cell: ({ row }) => {
+      return <span>{row.getValue("kilometers")} km</span>;
+    },
     meta: {
       label: "Kilometragem"
     },
