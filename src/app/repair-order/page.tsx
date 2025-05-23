@@ -30,6 +30,7 @@ import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { ItemAddDialog } from "./components/item-add-dialog";
 
 const formServiceSchema = z.object({
   quantity: repairOrderServiceQuantitySchema,
@@ -81,6 +82,10 @@ export default function GuiaDeRemessa() {
   // Estados para o histórico de GRs
   const [historyOrders, setHistoryOrders] = useState<RepairOrderSearchResult[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  
+  // Estado para controlar o diálogo de adicionar item
+  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
+  const [currentServiceIndex, setCurrentServiceIndex] = useState<number | null>(null);
   useEffect(() => {
     const fetchBases = async () => {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases`);
@@ -541,6 +546,21 @@ export default function GuiaDeRemessa() {
                                             {item.name}
                                           </SelectItem>
                                         ))}
+                                        <div className="px-2 py-2 border-t">
+                                          <Button 
+                                            type="button" 
+                                            variant="ghost" 
+                                            className="w-full justify-start text-muted-foreground hover:text-foreground"
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              e.stopPropagation();
+                                              setCurrentServiceIndex(index);
+                                              setIsAddItemDialogOpen(true);
+                                            }}
+                                          >
+                                            + Cadastrar novo item
+                                          </Button>
+                                        </div>
                                       </SelectContent>
                                     </Select>
                                   </FormControl>
@@ -718,6 +738,26 @@ export default function GuiaDeRemessa() {
               </Button>
             </form>
           </Form>
+          
+          {/* Diálogo para adicionar novo item */}
+          {isAddItemDialogOpen && (
+            <ItemAddDialog
+              isOpen={isAddItemDialogOpen}
+              onClose={() => setIsAddItemDialogOpen(false)}
+              onSuccess={(newItem) => {
+                // Adicionar o novo item à lista de itens
+                setRepairOrderServiceItems(prev => [...prev, newItem as any]);
+                
+                // Se temos um índice de serviço selecionado, atualizar o valor do item para esse serviço
+                if (currentServiceIndex !== null) {
+                  form.setValue(`services.${currentServiceIndex}.item`, newItem.id);
+                  setCurrentServiceIndex(null);
+                }
+                
+                toast.success(`Item "${newItem.name}" adicionado com sucesso!`);
+              }}
+            />
+          )}
             </TabsContent>
           </Tabs>
         </div>

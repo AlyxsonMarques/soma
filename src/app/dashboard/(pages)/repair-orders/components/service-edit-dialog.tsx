@@ -8,12 +8,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
-import type { RepairOrderServiceAPISchema, RepairOrderServiceItemAPISchema } from "@/types/api-schemas";
+import type { BaseAPISchema, RepairOrderServiceAPISchema, RepairOrderServiceItemAPISchema } from "@/types/api-schemas";
 
 // Schema para validação do formulário
 const formSchema = z.object({
@@ -48,6 +49,10 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [items, setItems] = useState<RepairOrderServiceItemAPISchema[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(service.photo || null);
+  
+  // Estados para o diálogo de adicionar item
+  const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
+  const [bases, setBases] = useState<BaseAPISchema[]>([]);
 
   // Buscar itens para o select
   useEffect(() => {
@@ -64,8 +69,22 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
       }
     };
 
+    const fetchBases = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/bases`);
+        if (response.ok) {
+          const data = await response.json();
+          setBases(data);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar bases:", error);
+        toast.error("Erro ao carregar bases");
+      }
+    };
+
     fetchItems();
-  }, []);
+    fetchBases();
+  }, [isAddItemDialogOpen]);
 
   // Configurar o formulário com os valores iniciais
   const form = useForm<FormValues>({
@@ -106,314 +125,450 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
         to: values.duration.to.toISOString(),
       }));
       
-      // Adicionar foto - obrigatória
+      // Adicionar foto se foi selecionada
       if (values.photo instanceof File) {
         formData.append("photo", values.photo);
-      } else if (service.photo) {
-        // Se não foi alterada, mantém a foto atual
-        formData.append("keepExistingPhoto", "true");
-      } else {
-        throw new Error("Foto é obrigatória");
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-services/${service.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders/${repairOrderId}/services/${service.id}`, {
         method: "PATCH",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error("Falha ao atualizar serviço");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Erro ao atualizar o serviço");
       }
 
-      toast.success("Serviço atualizado com sucesso");
+      toast.success("Serviço atualizado com sucesso!");
       onSuccess();
+      onClose();
     } catch (error) {
       console.error("Erro ao atualizar serviço:", error);
-      toast.error("Erro ao atualizar serviço");
+      toast.error(error instanceof Error ? error.message : "Erro ao atualizar o serviço");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) onClose();
-    }}>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Editar Serviço</DialogTitle>
-          <DialogDescription>
-            Atualize as informações do serviço
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="itemId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Item</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+    <>
+      <Dialog 
+        open={isOpen} 
+        onOpenChange={(open) => {
+          // Garante que o diálogo principal seja fechado corretamente
+          if (!open) onClose();
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Serviço</DialogTitle>
+            <DialogDescription>
+              Modifique os detalhes do serviço conforme necessário.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="itemId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Item</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um item" />
-                        </SelectTrigger>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um item" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {items.map((item) => (
+                              <SelectItem key={item.id} value={item.id}>
+                                {item.name}
+                              </SelectItem>
+                            ))}
+                            <div className="px-2 py-2 border-t">
+                              <Button 
+                                type="button" 
+                                variant="ghost" 
+                                className="w-full justify-start text-muted-foreground hover:text-foreground"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  // Pequeno atraso para evitar problemas de interação
+                                  setTimeout(() => {
+                                    setIsAddItemDialogOpen(true);
+                                  }, 100);
+                                }}
+                              >
+                                + Cadastrar novo item
+                              </Button>
+                            </div>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
-                      <SelectContent>
-                        {items.map((item) => (
-                          <SelectItem key={item.id} value={item.id}>
-                            {item.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="quantity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Quantidade</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="1" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Categoria</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                    >
+                <FormField
+                  control={form.control}
+                  name="quantity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quantidade</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione uma categoria" />
-                        </SelectTrigger>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="LABOR">Mão de Obra</SelectItem>
-                        <SelectItem value="PART">Peça</SelectItem>
-                        <SelectItem value="SERVICE">Serviço</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>Tipo</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Categoria</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o tipo" />
-                        </SelectTrigger>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione uma categoria" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="LABOR">Mão de Obra</SelectItem>
+                            <SelectItem value="PART">Peça</SelectItem>
+                            <SelectItem value="SERVICE">Serviço</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="PREVENTIVE">Preventivo</SelectItem>
-                        <SelectItem value="CORRECTIVE">Corretivo</SelectItem>
-                        <SelectItem value="PREDICTIVE">Preditivo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione o status" />
-                        </SelectTrigger>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o tipo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PREVENTIVE">Preventivo</SelectItem>
+                            <SelectItem value="CORRECTIVE">Corretivo</SelectItem>
+                            <SelectItem value="PREDICTIVE">Preditivo</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="PENDING">Pendente</SelectItem>
-                        <SelectItem value="APPROVED">Aprovado Integralmente</SelectItem>
-                        <SelectItem value="CANCELLED">Cancelado</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="labor"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Mão de Obra</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Descrição da mão de obra" {...field} value={field.value || ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <FormControl>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione o status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="PENDING">Pendente</SelectItem>
+                            <SelectItem value="APPROVED">Aprovado Integralmente</SelectItem>
+                            <SelectItem value="CANCELLED">Cancelado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="duration"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Período</FormLabel>
-                    <FormControl>
-                      <DatePickerWithRange
-                        date={{
-                          from: field.value.from,
-                          to: field.value.to,
-                        }}
-                        setDate={(range) => {
-                          field.onChange({
-                            from: range.from || new Date(),
-                            to: range.to || new Date(),
-                          });
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="labor"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Descrição da Mão de Obra</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Ex: Troca de óleo" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="value"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>Valor do Serviço</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input type="number" placeholder="0,00" {...field} />
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-                          R$
-                        </div>
-                        <div className="pl-8">
-                          {/* This div adds padding to push the input text after the R$ prefix */}
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Duração</FormLabel>
+                      <FormControl>
+                        <DatePickerWithRange field={field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="discount"
-                render={({ field }) => (
-                  <FormItem className="col-span-1">
-                    <FormLabel>Desconto do Serviço</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input type="number" placeholder="0,00" {...field} />
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-                          R$
+                <FormField
+                  control={form.control}
+                  name="value"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1">
+                      <FormLabel>Valor do Serviço</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                            R$
+                          </div>
+                          <Input type="number" placeholder="0,00" {...field} className="pl-8" />
                         </div>
-                        <div className="pl-8">
-                          {/* This div adds padding to push the input text after the R$ prefix */}
-                        </div>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="photo"
-                render={({ field: { onChange, value, ...field } }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Foto <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <div className="flex flex-col gap-4">
-                        <div className="flex items-center gap-4">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => document.getElementById("service-photo")?.click()}
-                          >
-                            <Camera className="mr-2 h-4 w-4" />
-                            Selecionar Foto
-                          </Button>
-                          <Input
-                            id="service-photo"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) {
-                                onChange(file);
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                  if (e.target?.result) {
-                                    setPhotoPreview(e.target.result as string);
-                                  }
-                                };
-                                reader.readAsDataURL(file);
-                              }
-                            }}
-                            {...field}
-                          />
+                <FormField
+                  control={form.control}
+                  name="discount"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1">
+                      <FormLabel>Desconto do Serviço</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                            R$
+                          </div>
+                          <Input type="number" placeholder="0,00" {...field} className="pl-8" />
                         </div>
-                        {photoPreview && (
-                          <div className="relative h-48 w-full overflow-hidden rounded-md">
-                            <Image
-                              src={photoPreview}
-                              alt="Prévia da foto"
-                              fill
-                              className="object-contain"
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="photo"
+                  render={({ field: { onChange, value, ...field } }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Foto <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-center gap-4">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => document.getElementById("service-photo")?.click()}
+                            >
+                              <Camera className="mr-2 h-4 w-4" />
+                              Selecionar Foto
+                            </Button>
+                            <Input
+                              id="service-photo"
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  onChange(file);
+                                  const reader = new FileReader();
+                                  reader.onload = (e) => {
+                                    if (e.target?.result) {
+                                      setPhotoPreview(e.target.result as string);
+                                    }
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                              {...field}
                             />
                           </div>
-                        )}
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                          {photoPreview && (
+                            <div className="relative h-48 w-full overflow-hidden rounded-md">
+                              <Image
+                                src={photoPreview}
+                                alt="Prévia da foto"
+                                fill
+                                className="object-contain"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={onClose}>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={onClose}>
+                  Cancelar
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Salvar Alterações
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Diálogo para adicionar novo item */}
+      {isAddItemDialogOpen && (
+        <Dialog 
+          open={isAddItemDialogOpen} 
+          onOpenChange={(open) => {
+            // Garante que o diálogo seja fechado corretamente
+            if (!open) {
+              // Fecha o diálogo com um pequeno atraso para evitar problemas de interação
+              setTimeout(() => {
+                setIsAddItemDialogOpen(false);
+              }, 100);
+            }
+          }}
+        >
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Novo Item</DialogTitle>
+              <DialogDescription>
+                Preencha os dados para cadastrar um novo item.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-item-name">Nome do Item</Label>
+                <Input id="new-item-name" placeholder="Ex: Troca de óleo" />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="new-item-value">Valor do Item</Label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                    R$
+                  </div>
+                  <Input 
+                    id="new-item-value" 
+                    type="number" 
+                    placeholder="0,00" 
+                    className="pl-8" 
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="new-item-base">Base</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma base" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {bases.map((base) => (
+                      <SelectItem key={base.id} value={base.id}>
+                        {base.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <DialogFooter className="mt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  // Fecha o diálogo com um pequeno atraso para evitar problemas de interação
+                  setTimeout(() => {
+                    setIsAddItemDialogOpen(false);
+                  }, 100);
+                }}
+              >
                 Cancelar
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Salvar Alterações
+              <Button 
+                type="button"
+                onClick={async () => {
+                  const nameInput = document.getElementById('new-item-name') as HTMLInputElement;
+                  const valueInput = document.getElementById('new-item-value') as HTMLInputElement;
+                  const baseSelect = document.querySelector('[data-value]') as HTMLElement;
+                  
+                  if (!nameInput?.value) {
+                    toast.error("Nome do item é obrigatório");
+                    return;
+                  }
+                  
+                  if (!baseSelect?.getAttribute('data-value')) {
+                    toast.error("Selecione uma base");
+                    return;
+                  }
+                  
+                  try {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-service-items`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        name: nameInput.value,
+                        value: parseFloat(valueInput.value) || 0,
+                        baseId: baseSelect.getAttribute('data-value')
+                      })
+                    });
+                    
+                    if (!response.ok) {
+                      throw new Error("Erro ao criar o item");
+                    }
+                    
+                    const newItem = await response.json();
+                    // Atualiza a lista de itens e seleciona o novo item
+                    setItems(prev => [...prev, newItem]);
+                    form.setValue('itemId', newItem.id);
+                    toast.success(`Item "${newItem.name}" adicionado com sucesso!`);
+                    
+                    // Fecha o diálogo e reseta o estado para evitar problemas de interação
+                    setTimeout(() => {
+                      setIsAddItemDialogOpen(false);
+                    }, 100);
+                  } catch (error) {
+                    console.error("Erro ao criar item:", error);
+                    toast.error("Erro ao criar o item. Tente novamente.");
+                  }
+                }}
+              >
+                Cadastrar Item
               </Button>
             </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
   );
 }
