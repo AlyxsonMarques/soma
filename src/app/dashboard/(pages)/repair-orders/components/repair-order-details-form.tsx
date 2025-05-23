@@ -17,12 +17,12 @@ import type { RepairOrderAPISchema, BaseAPISchema, UserAPISchema } from "@/types
 
 // Schema para validação do formulário
 const formSchema = z.object({
-  gcaf: z.string().min(1, "GCAF é obrigatório"),
+  gcaf: z.coerce.number().int().positive("GCAF deve ser um número positivo"),
   baseId: z.string().min(1, "Base é obrigatória"),
   userIds: z.array(z.string()).optional(),
   plate: z.string().min(1, "Placa é obrigatória"),
   kilometers: z.coerce.number().min(0, "Kilometragem deve ser maior ou igual a 0"),
-  status: z.enum(["PENDING", "IN_PROGRESS", "COMPLETED", "CANCELLED"]),
+  status: z.enum(["PENDING", "REVISION", "APPROVED", "PARTIALLY_APPROVED", "INVOICE_APPROVED", "CANCELLED"]),
   observations: z.string().optional(),
   discount: z.coerce.number().min(0, "Desconto deve ser maior ou igual a 0").optional(),
 });
@@ -68,12 +68,12 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      gcaf: repairOrder.gcaf || "",
+      gcaf: Number(repairOrder.gcaf) || 0,
       baseId: repairOrder.base?.id || "",
       userIds: repairOrder.users?.map(user => user.id) || [],
       plate: repairOrder.plate || "",
       kilometers: repairOrder.kilometers || 0,
-      status: repairOrder.status as "PENDING" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED",
+      status: repairOrder.status as "PENDING" | "REVISION" | "APPROVED" | "PARTIALLY_APPROVED" | "INVOICE_APPROVED" | "CANCELLED",
       observations: repairOrder.observations || "",
       discount: Number(repairOrder.discount) || 0,
     },
@@ -120,7 +120,12 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
                 <FormItem>
                   <FormLabel>GCAF</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite o GCAF" {...field} />
+                    <Input 
+                      type="number" 
+                      {...field} 
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                      placeholder="Digite o GCAF" 
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,8 +215,10 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="PENDING">Pendente</SelectItem>
-                      <SelectItem value="IN_PROGRESS">Em Andamento</SelectItem>
-                      <SelectItem value="COMPLETED">Concluído</SelectItem>
+                      <SelectItem value="REVISION">Revisão</SelectItem>
+                      <SelectItem value="APPROVED">Aprovado Integralmente</SelectItem>
+                      <SelectItem value="PARTIALLY_APPROVED">Aprovado Parcialmente</SelectItem>
+                      <SelectItem value="INVOICE_APPROVED">Aprovado para Nota Fiscal</SelectItem>
                       <SelectItem value="CANCELLED">Cancelado</SelectItem>
                     </SelectContent>
                   </Select>
@@ -227,7 +234,19 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
                 <FormItem>
                   <FormLabel>Desconto</FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="Digite o valor do desconto" {...field} />
+                    <div className="relative">
+                      <Input 
+                        type="number" 
+                        placeholder="Digite o valor do desconto" 
+                        {...field} 
+                      />
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                        R$
+                      </div>
+                      <div className="pl-8">
+                        {/* This div adds padding to push the input text after the R$ prefix */}
+                      </div>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

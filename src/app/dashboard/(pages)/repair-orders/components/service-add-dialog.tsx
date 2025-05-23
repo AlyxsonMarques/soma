@@ -248,7 +248,7 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="PENDING">Pendente</SelectItem>
-                          <SelectItem value="APPROVED">Aprovado</SelectItem>
+                          <SelectItem value="APPROVED">Aprovado Integralmente</SelectItem>
                           <SelectItem value="CANCELLED">Cancelado</SelectItem>
                         </SelectContent>
                       </Select>
@@ -304,7 +304,15 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
                   <FormItem className="col-span-1">
                     <FormLabel>Valor do Serviço</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0,00" {...field} />
+                      <div className="relative">
+                        <Input type="number" placeholder="0,00" {...field} />
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                          R$
+                        </div>
+                        <div className="pl-8">
+                          {/* This div adds padding to push the input text after the R$ prefix */}
+                        </div>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -318,7 +326,15 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
                   <FormItem className="col-span-1">
                     <FormLabel>Desconto do Serviço</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="0,00" {...field} />
+                      <div className="relative">
+                        <Input type="number" placeholder="0,00" {...field} />
+                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                          R$
+                        </div>
+                        <div className="pl-8">
+                          {/* This div adds padding to push the input text after the R$ prefix */}
+                        </div>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

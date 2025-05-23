@@ -76,12 +76,12 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
   },
   {
     accessorKey: "users",
-    header: "Usuários",
+    header: "Mecânicos Responsáveis",
     cell: ({ row }) => {
       return <span>{row.original.users?.map((user: { name: string }) => user.name).join(", ")}</span>;
     },
     meta: {
-      label: "Usuários"
+      label: "Mecânicos Responsáveis"
     },
   },
   {
@@ -107,6 +107,10 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
   {
     accessorKey: "discount",
     header: "Desconto",
+    cell: ({ row }) => {
+      const discount = row.getValue("discount");
+      return <span>R$ {Number(discount || 0).toFixed(2)}</span>;
+    },
     meta: {
       label: "Desconto"
     },
@@ -131,7 +135,7 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
       const statusLabels = {
         PENDING: "Pendente",
         REVISION: "Revisão",
-        APPROVED: "Aprovado",
+        APPROVED: "Aprovado Integralmente",
         PARTIALLY_APPROVED: "Parcialmente Aprovado",
         INVOICE_APPROVED: "Aprovado para Nota Fiscal",
         CANCELLED: "Cancelado"

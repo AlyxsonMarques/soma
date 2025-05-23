@@ -17,7 +17,7 @@ const userUpdateSchema = z.object({
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
 
     const idResult = userIdSchema.safeParse(id);
     if (!idResult.success) {

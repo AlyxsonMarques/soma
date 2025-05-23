@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { BaseAPISchema, RepairOrderServiceItemAPISchema } from "@/types/api-schemas";
 import { Loader2 } from "lucide-react";
 
@@ -45,7 +46,7 @@ export function ItemDetailsForm({ item, onSuccess, onCancel }: ItemDetailsFormPr
     fetchBases();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
     
     if (name === 'value') {
@@ -53,6 +54,10 @@ export function ItemDetailsForm({ item, onSuccess, onCancel }: ItemDetailsFormPr
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleBaseChange = (value: string) => {
+    setFormData(prev => ({ ...prev, baseId: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,21 +128,21 @@ export function ItemDetailsForm({ item, onSuccess, onCancel }: ItemDetailsFormPr
 
             <div className="space-y-2">
               <Label htmlFor="baseId">Base</Label>
-              <select
-                id="baseId"
-                name="baseId"
+              <Select
                 value={formData.baseId}
-                onChange={handleInputChange}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                required
+                onValueChange={handleBaseChange}
               >
-                <option value="">Selecione uma base</option>
-                {bases.map((base) => (
-                  <option key={base.id} value={base.id}>
-                    {base.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione uma base" />
+                </SelectTrigger>
+                <SelectContent>
+                  {bases.map((base) => (
+                    <SelectItem key={base.id} value={base.id}>
+                      {base.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </CardContent>

@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { UserAPISchema } from "@/types/api-schemas";
 import { Loader2 } from "lucide-react";
 
@@ -43,15 +44,19 @@ export function UserDetailsForm({ user, onSuccess, onCancel }: UserDetailsFormPr
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type } = e.target;
     
     if (type === 'checkbox') {
-      const checked = (e.target as HTMLInputElement).checked;
+      const checked = e.target.checked;
       setFormData(prev => ({ ...prev, [name]: checked }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleTypeChange = (value: string) => {
+    setFormData(prev => ({ ...prev, type: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,16 +111,18 @@ export function UserDetailsForm({ user, onSuccess, onCancel }: UserDetailsFormPr
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="type">Tipo de Usuário</Label>
-              <select
-                id="type"
-                name="type"
+              <Select
                 value={formData.type}
-                onChange={handleInputChange}
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                onValueChange={handleTypeChange}
               >
-                <option value="MECHANIC">Mecânico</option>
-                <option value="BUDGET_ANALYST">Orçamentista</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo de usuário" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MECHANIC">Mecânico</SelectItem>
+                  <SelectItem value="BUDGET_ANALYST">Orçamentista</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

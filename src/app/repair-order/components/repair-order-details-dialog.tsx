@@ -58,7 +58,7 @@ export function RepairOrderDetailsDialog({ repairOrder }: RepairOrderDetailsProp
     const statusMap: Record<string, string> = {
       "PENDING": "Pendente",
       "REVISION": "Revisão",
-      "APPROVED": "Aprovado",
+      "APPROVED": "Aprovado Integralmente",
       "PARTIALLY_APPROVED": "Parcialmente Aprovado",
       "INVOICE_APPROVED": "Aprovado para Nota Fiscal",
       "CANCELLED": "Cancelado"

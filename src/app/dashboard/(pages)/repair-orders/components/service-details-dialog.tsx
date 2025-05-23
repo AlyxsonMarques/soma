@@ -54,7 +54,7 @@ export function ServiceDetailsDialog({ isOpen, onClose, service }: ServiceDetail
     // Map status to appropriate badge variant and label
     const statusMap: Record<string, { label: string; variant: BadgeVariant; icon: React.ReactNode }> = {
       "PENDING": { label: "Pendente", variant: "outline", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
-      "APPROVED": { label: "Aprovado", variant: "success", icon: <CheckCircle className="h-3 w-3 mr-1" /> },
+      "APPROVED": { label: "Aprovado Integralmente", variant: "success", icon: <CheckCircle className="h-3 w-3 mr-1" /> },
       "CANCELLED": { label: "Cancelado", variant: "destructive", icon: <XCircle className="h-3 w-3 mr-1" /> }
     };
     

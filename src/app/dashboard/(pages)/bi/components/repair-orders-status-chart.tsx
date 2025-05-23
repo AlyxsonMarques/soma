@@ -27,7 +27,7 @@ export function RepairOrdersStatusChart() {
         const statusMap: Record<string, { label: string, color: string }> = {
           "PENDING": { label: "Pendente", color: "#f59e0b" },
           "REVISION": { label: "Revisão", color: "#3b82f6" },
-          "APPROVED": { label: "Aprovado", color: "#10b981" },
+          "APPROVED": { label: "Aprovado Integralmente", color: "#10b981" },
           "PARTIALLY_APPROVED": { label: "Parcialmente Aprovado", color: "#6366f1" },
           "INVOICE_APPROVED": { label: "Aprovado para Nota Fiscal", color: "#8b5cf6" },
           "CANCELLED": { label: "Cancelado", color: "#ef4444" }

@@ -12,7 +12,7 @@ const itemUpdateSchema = z.object({
 
 export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const validatedId = repairOrderServiceIdSchema.safeParse(id);
 
     if (!validatedId.success) {
@@ -47,7 +47,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const validatedId = repairOrderServiceIdSchema.safeParse(id);
 
     if (!validatedId.success) {
