@@ -7,7 +7,8 @@ export const repairOrderPlateSchema = z
   .trim()
   .nonempty("Placa é obrigatória")
   .min(7, "Placa inválida")
-  .max(8, "Placa inválida");
+  .max(8, "Placa inválida")
+  .transform(val => val.toUpperCase());
 export const repairOrderKilometersSchema = z
   .number()
   .positive("Por favor, insira um valor válido para quilometragem")

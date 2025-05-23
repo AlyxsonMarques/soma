@@ -87,6 +87,9 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
   {
     accessorKey: "plate",
     header: "Placa",
+    cell: ({ row }) => {
+      return <span>{String(row.getValue("plate")).toUpperCase()}</span>;
+    },
     meta: {
       label: "Placa"
     },

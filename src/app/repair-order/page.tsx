@@ -284,8 +284,8 @@ export default function GuiaDeRemessa() {
                     <div className="flex-1">
                       <Input 
                         placeholder="Digite a placa (ex: ABC1234)" 
-                        value={searchPlate} 
-                        onChange={(e) => setSearchPlate(e.target.value)}
+                        value={searchPlate.toUpperCase()} 
+                        onChange={(e) => setSearchPlate(e.target.value.toUpperCase())}
                         className="w-full"
                       />
                     </div>
@@ -320,7 +320,7 @@ export default function GuiaDeRemessa() {
                                     </div>
                                     <CardDescription className="flex items-center gap-1 mt-1">
                                       <Car className="h-3 w-3" />
-                                      <span>Placa: {result.plate} | {result.kilometers} km</span>
+                                      <span>Placa: {result.plate.toUpperCase()} | {result.kilometers} km</span>
                                     </CardDescription>
                                   </div>
                                   <div className="flex flex-col sm:items-end gap-1">
@@ -386,7 +386,7 @@ export default function GuiaDeRemessa() {
                                 </div>
                                 <CardDescription className="flex items-center gap-1 mt-1">
                                   <Car className="h-3 w-3" />
-                                  <span>Placa: {order.plate} | {order.kilometers} km</span>
+                                  <span>Placa: {order.plate.toUpperCase()} | {order.kilometers} km</span>
                                 </CardDescription>
                               </div>
                               <div className="flex flex-col sm:items-end gap-1">
@@ -433,7 +433,12 @@ export default function GuiaDeRemessa() {
                     <FormItem>
                       <FormLabel>Placa</FormLabel>
                       <FormControl>
-                        <Input placeholder="RIO2A18 / ABC-1234" {...field} />
+                        <Input 
+                          placeholder="RIO2A18 / ABC-1234" 
+                          {...field} 
+                          value={field.value.toUpperCase()}
+                          onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

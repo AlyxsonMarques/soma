@@ -162,7 +162,12 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
                 <FormItem>
                   <FormLabel>Placa</FormLabel>
                   <FormControl>
-                    <Input placeholder="Digite a placa" {...field} />
+                    <Input 
+                      placeholder="Digite a placa" 
+                      {...field} 
+                      value={field.value.toUpperCase()}
+                      onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

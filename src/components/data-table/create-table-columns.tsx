@@ -78,7 +78,7 @@ export function createTableColumns<TData>({
                     onEdit(row.original);
                   }}
                 >
-                  Editar
+                  Editar/Ver Detalhes
                 </DropdownMenuItem>
               )}
               {additionalActions && additionalActions(row.original)}
