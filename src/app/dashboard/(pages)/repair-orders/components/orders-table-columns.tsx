@@ -78,7 +78,16 @@ export function createRepairOrderColumns({ onRefresh }: CreateRepairOrderColumns
     accessorKey: "users",
     header: "Mecânicos Responsáveis",
     cell: ({ row }) => {
-      return <span>{row.original.users?.map((user: { name: string }) => user.name).join(", ")}</span>;
+      // Garantir que o mecânico responsável (primeiro usuário) seja exibido primeiro,
+      // seguido pelo mecânico assistente (segundo usuário), se houver
+      if (!row.original.users || row.original.users.length === 0) {
+        return <span>-</span>;
+      }
+      
+      // Como a API já retorna na ordem correta (responsável, assistente),
+      // apenas exibimos os nomes na ordem que vierem
+      const userNames = row.original.users.map((user: { name: string }) => user.name);
+      return <span>{userNames.join(", ")}</span>;
     },
     meta: {
       label: "Mecânicos Responsáveis"

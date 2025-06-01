@@ -26,7 +26,7 @@ export const repairOrderServiceDurationSchema = z.object(
   },
 );
 
-export const repairOrderServicePhotoSchema = z.instanceof(File, { message: "A foto é obrigatória" });
+export const repairOrderServicePhotoSchema = z.instanceof(File, { message: "A foto é obrigatória" }).optional();
 
 export const repairOrderServiceValueSchema = z.number().positive().int("Por favor, insira um valor válido");
 

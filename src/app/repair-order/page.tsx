@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -29,6 +29,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import * as z from "zod";
 import { ItemAddDialog } from "./components/item-add-dialog";
@@ -47,6 +48,11 @@ const formSchema = z.object({
   plate: repairOrderPlateSchema,
   kilometers: repairOrderKilometersSchema,
   base: baseIdSchema,
+  userId: z.string().uuid("ID do usuário deve ser um UUID válido"),
+  assistantId: z.union([
+    z.literal("none"),
+    z.string().uuid("ID do mecânico assistente deve ser um UUID válido")
+  ]),
   services: z.array(formServiceSchema),
 });
 
@@ -73,6 +79,8 @@ interface RepairOrderSearchResult {
 export default function GuiaDeRemessa() {
   const [bases, setBases] = useState<Base[]>([]);
   const [repairOrderServiceItems, setRepairOrderServiceItems] = useState<RepairOrderServiceItem[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const { data: session } = useSession();
   
   // Estados para a funcionalidade de pesquisa
   const [searchPlate, setSearchPlate] = useState("");
@@ -94,9 +102,18 @@ export default function GuiaDeRemessa() {
       setBases(data);
     };
 
+    const fetchUsers = async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users`);
+      const data = await res.json();
+      setUsers(data);
+    };
+
     fetchBases();
+    fetchUsers();
     fetchRepairOrderHistory();
   }, []);
+  
+
   
   // Função para buscar o histórico de GRs
   const fetchRepairOrderHistory = async () => {
@@ -165,6 +182,8 @@ export default function GuiaDeRemessa() {
       plate: "",
       kilometers: 0,
       base: "",
+      userId: session?.user?.id || "",
+      assistantId: "none",
       services: [
         {
           quantity: 0,
@@ -186,6 +205,23 @@ export default function GuiaDeRemessa() {
     control: form.control,
     name: "services",
   });
+  
+  // Atualizar o campo de usuário responsável quando a sessão for carregada
+  useEffect(() => {
+    if (session?.user?.id) {
+      form.setValue("userId", session.user.id);
+      
+      // Garantir que o valor do userId seja sempre o ID do usuário logado
+      // mesmo se o usuário tentar alterar o campo de alguma forma
+      const subscription = form.watch((value, { name }) => {
+        if (name === "userId" && value.userId !== session.user.id) {
+          form.setValue("userId", session.user.id);
+        }
+      });
+      
+      return () => subscription.unsubscribe();
+    }
+  }, [session, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData();
@@ -193,6 +229,10 @@ export default function GuiaDeRemessa() {
     formData.append("plate", values.plate);
     formData.append("kilometers", values.kilometers.toString());
     formData.append("base", values.base);
+    formData.append("userId", values.userId);
+    
+    // Sempre enviar o assistantId, mesmo que seja "none"
+    formData.append("assistantId", values.assistantId);
 
     const servicesWithoutPhotos = values.services.map((service) => ({
       quantity: service.quantity,
@@ -504,6 +544,42 @@ export default function GuiaDeRemessa() {
                               </SelectItem>
                             );
                           })}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* O campo userId é definido automaticamente como o ID do usuário logado */}
+
+                <FormField
+                  control={form.control}
+                  name="assistantId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mecânico Assistente (Opcional)</FormLabel>
+                      <FormDescription>
+                        Você pode selecionar um mecânico assistente ou deixar como "Nenhum"
+                      </FormDescription>
+                      <Select 
+                        onValueChange={field.onChange}
+                        defaultValue={field.value || ""}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um mecânico assistente (opcional)" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">Nenhum</SelectItem>
+                          {users
+                            .filter(user => user.id !== session?.user?.id)
+                            .map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.name}
+                              </SelectItem>
+                            ))}
                         </SelectContent>
                       </Select>
                       <FormMessage />

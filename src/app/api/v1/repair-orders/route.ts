@@ -10,6 +10,11 @@ const formSchema = z.object({
   plate: z.string().min(1, "Placa é obrigatória").max(7, "Placa deve ter no máximo 7 caracteres").transform(val => val.toUpperCase()),
   kilometers: z.number().int().min(0, "Quilometragem deve ser um número inteiro positivo"),
   base: z.string().uuid("ID da base deve ser um UUID válido"),
+  userId: z.string().uuid("ID do usuário deve ser um UUID válido"),
+  assistantId: z.union([
+    z.literal("none"),
+    z.string().uuid("ID do mecânico assistente deve ser um UUID válido")
+  ]),
   services: z.array(
     z.object({
       quantity: z.number().int().min(0, "Quantidade deve ser um número inteiro positivo"),
@@ -73,6 +78,8 @@ export async function POST(req: NextRequest) {
     const plate = formData.get("plate") as string;
     const kilometers = Number(formData.get("kilometers"));
     const base = formData.get("base") as string;
+    const userId = formData.get("userId") as string;
+    const assistantId = formData.get("assistantId") as string || undefined;
     const servicesRaw = formData.get("services") as string;
     const services = JSON.parse(servicesRaw);
 
@@ -81,6 +88,8 @@ export async function POST(req: NextRequest) {
       plate,
       kilometers,
       base,
+      userId,
+      assistantId,
       services,
     });
 
@@ -137,6 +146,11 @@ export async function POST(req: NextRequest) {
         status: "PENDING", // Status padrão
         gcaf: BigInt(Date.now()), // Exemplo simples, substitua por lógica real
         discount: 0, // Valor padrão, ajuste conforme necessário
+        users: {
+          connect: validatedData.assistantId === "none" 
+            ? [{ id: validatedData.userId }] 
+            : [{ id: validatedData.userId }, { id: validatedData.assistantId }]
+        }
       },
     });
     
