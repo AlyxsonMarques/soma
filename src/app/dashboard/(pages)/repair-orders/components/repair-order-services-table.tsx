@@ -36,9 +36,10 @@ interface RepairOrderServicesTableProps {
   repairOrderId: string;
   services: RepairOrderServiceAPISchema[];
   onRefresh: () => void;
+  onServiceEdit?: () => void;
 }
 
-export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }: RepairOrderServicesTableProps) {
+export function RepairOrderServicesTable({ repairOrderId, services, onRefresh, onServiceEdit }: RepairOrderServicesTableProps) {
   // Definir um serviço padrão para evitar erros quando nenhum serviço é selecionado
   const defaultService = services.length > 0 ? services[0] : null;
   
@@ -250,9 +251,9 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => {
-                              // Primeiro definir o serviço selecionado, depois abrir o modal
+                              // Definir o serviço selecionado e abrir o modal imediatamente
                               setSelectedService(service);
-                              setTimeout(() => setIsViewDialogOpen(true), 0);
+                              setIsViewDialogOpen(true);
                             }}
                           >
                             <Eye className="mr-2 h-4 w-4" />
@@ -260,9 +261,9 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
-                              // Primeiro definir o serviço selecionado, depois abrir o modal
+                              // Definir o serviço selecionado e abrir o modal imediatamente
                               setSelectedService(service);
-                              setTimeout(() => setIsEditDialogOpen(true), 0);
+                              setIsEditDialogOpen(true);
                             }}
                           >
                             <Edit className="mr-2 h-4 w-4" />
@@ -294,10 +295,7 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
         <ServiceDetailsDialog
           key={`view-${selectedService.id}`}
           isOpen={isViewDialogOpen}
-          onClose={() => {
-            // Fechar o modal com um pequeno atraso para evitar problemas
-            setTimeout(() => setIsViewDialogOpen(false), 0);
-          }}
+          onClose={() => setIsViewDialogOpen(false)}
           service={selectedService}
         />
       )}
@@ -307,15 +305,13 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
         <ServiceEditDialog
           key={`edit-${selectedService.id}`}
           isOpen={isEditDialogOpen}
-          onClose={() => {
-            // Fechar o modal com um pequeno atraso para evitar problemas
-            setTimeout(() => setIsEditDialogOpen(false), 0);
-          }}
+          onClose={() => setIsEditDialogOpen(false)}
           service={selectedService}
           repairOrderId={repairOrderId}
           onSuccess={() => {
             onRefresh();
-            setTimeout(() => setIsEditDialogOpen(false), 0);
+            // Não fechamos o diálogo aqui, pois isso já é feito pelo próprio componente ServiceEditDialog
+            if (onServiceEdit) onServiceEdit();
           }}
         />
       )}
@@ -346,14 +342,11 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh }:
       <ServiceAddDialog
         key="add-service-dialog"
         isOpen={isAddDialogOpen}
-        onClose={() => {
-          // Fechar o modal com um pequeno atraso para evitar problemas
-          setTimeout(() => setIsAddDialogOpen(false), 0);
-        }}
+        onClose={() => setIsAddDialogOpen(false)}
         repairOrderId={repairOrderId}
         onSuccess={() => {
           onRefresh();
-          setTimeout(() => setIsAddDialogOpen(false), 0);
+          setIsAddDialogOpen(false);
         }}
       />
     </>

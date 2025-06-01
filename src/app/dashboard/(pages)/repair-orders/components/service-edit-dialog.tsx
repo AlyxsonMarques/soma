@@ -20,8 +20,8 @@ import type { BaseAPISchema, RepairOrderServiceAPISchema, RepairOrderServiceItem
 const formSchema = z.object({
   quantity: z.coerce.number().min(1, "Quantidade deve ser maior que 0"),
   itemId: z.string().min(1, "Item é obrigatório"),
-  category: z.enum(["LABOR", "PART", "SERVICE"]),
-  type: z.enum(["PREVENTIVE", "CORRECTIVE", "PREDICTIVE"]),
+  category: z.enum(["LABOR", "MATERIAL"]),
+  type: z.enum(["PREVENTIVE", "CORRECTIVE", "HELP"]),
   status: z.enum(["PENDING", "APPROVED", "CANCELLED"]),
   labor: z.string().optional(),
   value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0"),
@@ -50,9 +50,23 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
   const [items, setItems] = useState<RepairOrderServiceItemAPISchema[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(service.photo || null);
   
+  // Estado para controlar o fechamento do diálogo após o envio com sucesso
+  const [shouldClose, setShouldClose] = useState(false);
+  
   // Estados para o diálogo de adicionar item
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [bases, setBases] = useState<BaseAPISchema[]>([]);
+  
+  // Efeito para lidar com o fechamento do diálogo após o envio
+  useEffect(() => {
+    if (shouldClose && !isSubmitting) {
+      // Primeiro chama onSuccess e depois fecha o diálogo
+      onSuccess();
+      onClose();
+      // Reseta o estado
+      setShouldClose(false);
+    }
+  }, [shouldClose, isSubmitting, onSuccess, onClose]);
 
   // Buscar itens para o select
   useEffect(() => {
@@ -92,8 +106,8 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
     defaultValues: {
       quantity: service.quantity || 1,
       itemId: service.item?.id || "",
-      category: service.category as "LABOR" | "PART" | "SERVICE",
-      type: service.type as "PREVENTIVE" | "CORRECTIVE" | "PREDICTIVE",
+      category: service.category as "LABOR" | "MATERIAL",
+      type: service.type as "PREVENTIVE" | "CORRECTIVE" | "HELP",
       status: service.status || "PENDING",
       labor: service.labor || "",
       value: service.value ? Number(service.value) : 0,
@@ -108,6 +122,8 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
 
   // Função para enviar o formulário
   const onSubmit = async (values: FormValues) => {
+    if (isSubmitting) return;
+    
     setIsSubmitting(true);
     
     try {
@@ -130,7 +146,7 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
         formData.append("photo", values.photo);
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders/${repairOrderId}/services/${service.id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-services/${service.id}`, {
         method: "PATCH",
         body: formData,
       });
@@ -141,8 +157,8 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
       }
 
       toast.success("Serviço atualizado com sucesso!");
-      onSuccess();
-      onClose();
+      // Marcar que o diálogo deve ser fechado
+      setShouldClose(true);
     } catch (error) {
       console.error("Erro ao atualizar serviço:", error);
       toast.error(error instanceof Error ? error.message : "Erro ao atualizar o serviço");
@@ -156,8 +172,10 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
       <Dialog 
         open={isOpen} 
         onOpenChange={(open) => {
-          // Garante que o diálogo principal seja fechado corretamente
-          if (!open) onClose();
+          // Só permite fechar o diálogo manualmente quando não estiver enviando dados
+          if (!open && !isSubmitting) {
+            onClose();
+          }
         }}
       >
         <DialogContent>
@@ -198,10 +216,8 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  // Pequeno atraso para evitar problemas de interação
-                                  setTimeout(() => {
-                                    setIsAddItemDialogOpen(true);
-                                  }, 100);
+                                  // Abrir o diálogo sem setTimeout para evitar problemas de interação
+                                  setIsAddItemDialogOpen(true);
                                 }}
                               >
                                 + Cadastrar novo item
@@ -249,8 +265,7 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="LABOR">Mão de Obra</SelectItem>
-                            <SelectItem value="PART">Peça</SelectItem>
-                            <SelectItem value="SERVICE">Serviço</SelectItem>
+                            <SelectItem value="MATERIAL">Material</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -273,7 +288,7 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
                           <SelectContent>
                             <SelectItem value="PREVENTIVE">Preventivo</SelectItem>
                             <SelectItem value="CORRECTIVE">Corretivo</SelectItem>
-                            <SelectItem value="PREDICTIVE">Preditivo</SelectItem>
+                            <SelectItem value="HELP">Ajuda</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
@@ -448,10 +463,8 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
           onOpenChange={(open) => {
             // Garante que o diálogo seja fechado corretamente
             if (!open) {
-              // Fecha o diálogo com um pequeno atraso para evitar problemas de interação
-              setTimeout(() => {
-                setIsAddItemDialogOpen(false);
-              }, 100);
+              // Fecha o diálogo diretamente
+              setIsAddItemDialogOpen(false);
             }
           }}
         >
@@ -505,10 +518,8 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
                 type="button" 
                 variant="outline" 
                 onClick={() => {
-                  // Fecha o diálogo com um pequeno atraso para evitar problemas de interação
-                  setTimeout(() => {
-                    setIsAddItemDialogOpen(false);
-                  }, 100);
+                  // Fecha o diálogo diretamente
+                  setIsAddItemDialogOpen(false);
                 }}
               >
                 Cancelar
@@ -553,10 +564,8 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
                     form.setValue('itemId', newItem.id);
                     toast.success(`Item "${newItem.name}" adicionado com sucesso!`);
                     
-                    // Fecha o diálogo e reseta o estado para evitar problemas de interação
-                    setTimeout(() => {
-                      setIsAddItemDialogOpen(false);
-                    }, 100);
+                    // Fecha o diálogo diretamente
+                    setIsAddItemDialogOpen(false);
                   } catch (error) {
                     console.error("Erro ao criar item:", error);
                     toast.error("Erro ao criar o item. Tente novamente.");

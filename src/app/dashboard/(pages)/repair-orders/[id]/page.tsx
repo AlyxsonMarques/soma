@@ -22,6 +22,7 @@ export default function RepairOrderDetails() {
   const [repairOrder, setRepairOrder] = useState<RepairOrderAPISchema | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState("details");
 
   const fetchRepairOrder = async () => {
     setLoading(true);
@@ -143,7 +144,7 @@ export default function RepairOrderDetails() {
           </div>
         </div>
 
-        <Tabs defaultValue="details" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} defaultValue="details" className="w-full">
           <TabsList>
             <TabsTrigger value="details">Detalhes</TabsTrigger>
             <TabsTrigger value="services">Serviços</TabsTrigger>
@@ -224,7 +225,8 @@ export default function RepairOrderDetails() {
             <RepairOrderServicesTable 
               repairOrderId={id} 
               services={repairOrder.services || []} 
-              onRefresh={fetchRepairOrder} 
+              onRefresh={fetchRepairOrder}
+              onServiceEdit={() => setActiveTab("services")}
             />
           </TabsContent>
         </Tabs>

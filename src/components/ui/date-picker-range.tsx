@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X } from "lucide-react";
 import * as React from "react";
 import type { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
 import type { DateRange } from "react-day-picker";
@@ -10,7 +10,7 @@ import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { FormControl } from "@/components/ui/form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger, PopoverClose } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface DatePickerRangeProps<T extends FieldValues = any> {
@@ -68,16 +68,30 @@ export function DatePickerWithRange<T extends FieldValues = any>({
             </Button>
           </FormControl>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={value?.from}
-            selected={value}
-            onSelect={handleSelect}
-            numberOfMonths={2}
-            locale={ptBR}
-          />
+        <PopoverContent className="w-auto p-0" align="start" onPointerDownOutside={(e) => e.preventDefault()} onInteractOutside={(e) => e.preventDefault()}>
+          <div className="relative p-0">
+            <div className="absolute right-2 top-2 z-10">
+              <PopoverClose asChild>
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  className="h-6 w-6 rounded-full p-0 border-0"
+                >
+                  <X className="h-3 w-3" />
+                  <span className="sr-only">Fechar</span>
+                </Button>
+              </PopoverClose>
+            </div>
+            <Calendar
+              initialFocus
+              mode="range"
+              defaultMonth={value?.from}
+              selected={value}
+              onSelect={handleSelect}
+              numberOfMonths={2}
+              locale={ptBR}
+            />
+          </div>
         </PopoverContent>
       </Popover>
     </div>
