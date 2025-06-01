@@ -8,26 +8,42 @@ import { DropdownMenu } from "@/components/ui/dropdown-menu";
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { UserAPISchema } from "@/types/user";
 import type { UserStatus } from "@prisma/client";
-import type { ColumnDef } from "@tanstack/react-table";
+import type { ColumnDef, Row } from "@tanstack/react-table";
 import { EllipsisVerticalIcon } from "lucide-react";
 import { toast } from "sonner";
 
-const handleStatusChange = async (id: string, status: "APPROVED" | "REPROVED") => {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      status,
-    }),
-  });
-  const data = await response.json();
-
-  if (data.error) {
-    toast.error(data.message);
-  } else {
-    toast.success(data.message);
+// Função para atualizar o status do usuário
+const handleStatusChange = async (id: string, status: "APPROVED" | "REPROVED", onRefresh?: () => void) => {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        status,
+      }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Erro ao atualizar status do usuário");
+    }
+    
+    const data = await response.json();
+    
+    toast.success(status === "APPROVED" ? "Usuário aprovado com sucesso!" : "Usuário reprovado com sucesso!");
+    
+    // Atualizar a tabela se a função onRefresh foi fornecida
+    if (onRefresh) {
+      onRefresh();
+    }
+    
+    return true;
+  } catch (error) {
+    console.error("Erro ao mudar status:", error);
+    toast.error(error instanceof Error ? error.message : "Erro ao atualizar status do usuário");
+    return false;
   }
 };
 
@@ -133,7 +149,11 @@ export const columns: ColumnDef<UserAPISchema>[] = [
     meta: {
       label: "Ações"
     },
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      // Obter o contexto da tabela para acessar a função onRefresh
+      // @ts-ignore - Acessando a propriedade options do meta que contém onRefresh
+      const onRefresh = table.options.meta?.onRefresh;
+      
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -142,8 +162,20 @@ export const columns: ColumnDef<UserAPISchema>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => handleStatusChange(row.original.id, "APPROVED")}>Aprovar</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleStatusChange(row.original.id, "REPROVED")}>
+            <DropdownMenuItem 
+              onClick={async () => {
+                const success = await handleStatusChange(row.original.id, "APPROVED", onRefresh);
+                // A função handleStatusChange já chama onRefresh se for fornecida
+              }}
+            >
+              Aprovar
+            </DropdownMenuItem>
+            <DropdownMenuItem 
+              onClick={async () => {
+                const success = await handleStatusChange(row.original.id, "REPROVED", onRefresh);
+                // A função handleStatusChange já chama onRefresh se for fornecida
+              }}
+            >
               Rejeitar
             </DropdownMenuItem>
           </DropdownMenuContent>

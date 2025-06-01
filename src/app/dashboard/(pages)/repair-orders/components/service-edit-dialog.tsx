@@ -152,9 +152,9 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
 
       toast.success("Serviço atualizado com sucesso!");
       
-      // Importante: Primeiro notificar o sucesso e depois deixar o componente pai lidar com o fechamento
-      // Isso evita problemas de temporização e estado inconsistente
+      // Notificar o sucesso e fechar o diálogo
       onSuccess();
+      onClose(); // Fechar explicitamente o diálogo após o sucesso
     } catch (error) {
       console.error("Erro ao atualizar serviço:", error);
       toast.error(error instanceof Error ? error.message : "Erro ao atualizar o serviço");
@@ -168,8 +168,15 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
       <Dialog 
         open={isOpen} 
         onOpenChange={(open) => {
-          // Passa o controle para o componente pai
-          if (!open && !isSubmitting) {
+          // Garante que o diálogo só pode ser fechado se não estiver em submissão
+          if (!open) {
+            if (isSubmitting) {
+              // Se estiver em submissão, não permite fechar
+              return;
+            }
+            // Resetar o formulário para evitar estado inconsistente
+            form.reset();
+            // Notificar o componente pai para fechar o diálogo
             onClose();
           }
         }}
@@ -439,7 +446,16 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
               </div>
 
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={onClose}>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    // Garantir que o diálogo seja fechado mesmo se estiver em estado de submissão
+                    form.reset(); // Resetar o formulário para evitar estado inconsistente
+                    onClose();
+                  }}
+                  disabled={isSubmitting}
+                >
                   Cancelar
                 </Button>
                 <Button type="submit" disabled={isSubmitting}>

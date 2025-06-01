@@ -77,6 +77,10 @@ export function EnhancedDataTable<TData>({
       columnVisibility,
       rowSelection,
     },
+    // Passar a função onRefresh para o contexto da tabela para que as colunas possam acessá-la
+    meta: {
+      onRefresh,
+    },
   });
 
   const handleBulkDelete = async () => {
