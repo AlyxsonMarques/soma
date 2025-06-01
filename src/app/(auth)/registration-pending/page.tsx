@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle, HelpCircle, Mail } from "lucide-react";
 import Link from "next/link";
 
 import { CentralizedView } from "@/components/CentralizedView";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +14,9 @@ import { useEffect } from "react";
 export default function RegistrationPendingPage() {
   return (
     <CentralizedView>
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center mb-2">

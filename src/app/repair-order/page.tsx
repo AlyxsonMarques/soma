@@ -25,6 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { Base, RepairOrderServiceItem } from "@prisma/client";
 import { Camera, Trash2, Search, FileText, Calendar, Car } from "lucide-react";
 import { RepairOrderDetailsDialog } from "./components/repair-order-details-dialog";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -266,7 +267,15 @@ export default function GuiaDeRemessa() {
   };
 
   return (
-    <div className="dark min-h-screen">
+    <div className="container mx-auto p-4 md:p-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Guia de Remessa</h1>
+        </div>
+        <div>
+          <ThemeToggle />
+        </div>
+      </div>
       <div className="bg-background text-foreground min-h-screen">
         <div className="container mx-auto p-4 md:p-6 max-w-4xl">
           <h1 className="text-2xl font-bold mb-6 text-center md:text-left">Guia de Remessa</h1>
