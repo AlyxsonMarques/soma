@@ -608,6 +608,7 @@ export default function GuiaDeRemessa() {
                                     <SelectContent>
                                       <SelectItem value="PREVENTIVE">Preventivo</SelectItem>
                                       <SelectItem value="CORRECTIVE">Corretivo</SelectItem>
+                                      <SelectItem value="HELP">Socorro</SelectItem>
                                     </SelectContent>
                                   </Select>
                                   <FormMessage />

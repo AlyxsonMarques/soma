@@ -74,7 +74,12 @@ export function RepairOrderDetailsDialog({ repairOrder }: RepairOrderDetailsProp
 
   // Função para formatar o tipo do serviço
   const getTypeLabel = (type: string) => {
-    return type === "PREVENTIVE" ? "Preventivo" : "Corretivo";
+    const typeMap: Record<string, string> = {
+      "PREVENTIVE": "Preventivo",
+      "CORRECTIVE": "Corretivo",
+      "HELP": "Socorro"
+    };
+    return typeMap[type] || type;
   };
 
   // Calcular o valor total dos serviços

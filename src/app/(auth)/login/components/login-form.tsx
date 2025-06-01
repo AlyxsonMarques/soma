@@ -74,9 +74,9 @@ export function LoginForm() {
               <FormItem className="grid gap-2">
                 <div className="flex items-center">
                   <FormLabel>Senha</FormLabel>
-                  <Link className="ml-auto text-sm underline-offset-2 hover:underline" href="/forgot-password">
+                  {/*<Link className="ml-auto text-sm underline-offset-2 hover:underline" href="/forgot-password">
                     Esqueceu sua senha?
-                  </Link>
+                  </Link>*/}
                 </div>
                 <FormControl>
                   <Input type="password" {...field} />

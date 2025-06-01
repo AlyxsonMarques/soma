@@ -36,7 +36,7 @@ export const repairOrderServiceCategorySchema = z.enum(["LABOR", "MATERIAL"], {
   required_error: "Por favor, insira uma categoria válida",
 });
 
-export const repairOrderServiceTypeSchema = z.enum(["PREVENTIVE", "CORRECTIVE"], {
+export const repairOrderServiceTypeSchema = z.enum(["PREVENTIVE", "CORRECTIVE", "HELP"], {
   required_error: "Por favor, insira um tipo válido",
 });
 

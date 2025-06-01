@@ -7,10 +7,7 @@ export default function LoginPage() {
   return (
     <CentralizedView>
       <div className="w-full max-w-sm md:max-w-3xl">
-        <DoubleCard>
           <LoginForm />
-          <SideImage src="/placeholder.svg" />
-        </DoubleCard>
       </div>
     </CentralizedView>
   );

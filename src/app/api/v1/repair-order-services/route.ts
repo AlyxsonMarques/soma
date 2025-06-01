@@ -8,7 +8,7 @@ const createRepairOrderServiceSchema = z.object({
   itemId: z.string().min(1, "Item é obrigatório"),
   repairOrderId: z.string().min(1, "Ordem de reparo é obrigatória"),
   category: z.enum(["LABOR", "MATERIAL"]),
-  type: z.enum(["PREVENTIVE", "CORRECTIVE"]),
+  type: z.enum(["PREVENTIVE", "CORRECTIVE", "HELP"]),
   status: z.enum(["PENDING", "APPROVED", "CANCELLED"]).default("PENDING"),
   labor: z.string().optional(),
   value: z.coerce.number().min(0),
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
         itemId: itemId!,
         repairOrderId: repairOrderId!,
         category: category as "LABOR" | "MATERIAL",
-        type: type as "PREVENTIVE" | "CORRECTIVE",
+        type: type as "PREVENTIVE" | "CORRECTIVE" | "HELP",
         labor: labor || "",
         duration: durationValue!,
         value: value, // Usar o valor personalizado do serviço

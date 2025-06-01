@@ -114,6 +114,7 @@ model RepairOrderService {
 enum RepairOrderServiceType {
   PREVENTIVE
   CORRECTIVE
+  HELP
 }
 
 enum RepairOrderServiceCategory {
