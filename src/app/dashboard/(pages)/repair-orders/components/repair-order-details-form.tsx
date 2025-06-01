@@ -71,7 +71,7 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
       gcaf: Number(repairOrder.gcaf) || 0,
       baseId: repairOrder.base?.id || "",
       userIds: repairOrder.users?.map(user => user.id) || [],
-      plate: repairOrder.plate || "",
+      plate: (repairOrder.plate || "").toUpperCase(),
       kilometers: repairOrder.kilometers || 0,
       status: repairOrder.status as "PENDING" | "REVISION" | "APPROVED" | "PARTIALLY_APPROVED" | "INVOICE_APPROVED" | "CANCELLED",
       observations: repairOrder.observations || "",
@@ -168,7 +168,7 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
                   <FormLabel>Placa</FormLabel>
                   <FormControl>
                     <Input 
-                      placeholder="Digite a placa" 
+                      placeholder="Digite a placa do veículo" 
                       {...field} 
                       value={field.value.toUpperCase()}
                       onChange={(e) => field.onChange(e.target.value.toUpperCase())}

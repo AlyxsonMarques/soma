@@ -7,7 +7,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const formSchema = z.object({
-  plate: z.string().min(1, "Placa é obrigatória").max(7, "Placa deve ter no máximo 7 caracteres"),
+  plate: z.string().min(1, "Placa é obrigatória").max(7, "Placa deve ter no máximo 7 caracteres").transform(val => val.toUpperCase()),
   kilometers: z.number().int().min(0, "Quilometragem deve ser um número inteiro positivo"),
   base: z.string().uuid("ID da base deve ser um UUID válido"),
   services: z.array(

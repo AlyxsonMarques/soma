@@ -9,7 +9,7 @@ const repairOrderUpdateSchema = z.object({
   gcaf: z.number().int().positive().optional(),
   baseId: z.string().uuid().optional(),
   userIds: z.array(z.string().uuid()).optional(),
-  plate: z.string().min(1).max(7).optional(),
+  plate: z.string().min(1).max(7).transform(val => val.toUpperCase()).optional(),
   kilometers: z.number().int().nonnegative().optional(),
   status: z.enum([
     "PENDING",
@@ -91,7 +91,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     // Copiar campos simples
     if (updateData.gcaf !== undefined) updateOrderData.gcaf = updateData.gcaf;
     if (updateData.baseId !== undefined) updateOrderData.baseId = updateData.baseId;
-    if (updateData.plate !== undefined) updateOrderData.plate = updateData.plate;
+    if (updateData.plate !== undefined) updateOrderData.plate = updateData.plate.toUpperCase();
     if (updateData.kilometers !== undefined) updateOrderData.kilometers = updateData.kilometers;
     if (updateData.status !== undefined) updateOrderData.status = updateData.status;
     if (updateData.observations !== undefined) updateOrderData.observations = updateData.observations;
