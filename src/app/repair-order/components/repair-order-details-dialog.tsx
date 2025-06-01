@@ -27,6 +27,10 @@ interface RepairOrderDetailsProps {
     createdAt: string;
     discount: string;
     observation?: string;
+    users: {
+      id: string;
+      name: string;
+    }[];
     services: {
       id: string;
       labor: string;
@@ -126,6 +130,14 @@ export function RepairOrderDetailsDialog({ repairOrder }: RepairOrderDetailsProp
             <div className="flex items-center gap-1">
               <MapPin className="h-4 w-4" />
               <span>Base: {repairOrder.base.name}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Wrench className="h-4 w-4" />
+              <span>
+                Mecânicos: {repairOrder.users && repairOrder.users.length > 0 
+                  ? repairOrder.users.map(user => user.name).join(", ") 
+                  : "Não informado"}
+              </span>
             </div>
             <div className="flex items-center gap-1">
               <Calendar className="h-4 w-4" />

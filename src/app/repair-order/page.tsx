@@ -74,6 +74,10 @@ interface RepairOrderSearchResult {
     category: string;
     type: string;
   }[];
+  users: {
+    id: string;
+    name: string;
+  }[];
 }
 
 export default function GuiaDeRemessa() {
@@ -389,6 +393,11 @@ export default function GuiaDeRemessa() {
                               <CardContent className="py-3">
                                 <div>
                                   <div className="text-sm font-medium mb-2">Base: {result.base.name}</div>
+                                  <div className="text-sm font-medium mb-2">
+                                    Mecânicos: {result.users && result.users.length > 0 
+                                      ? result.users.map(user => user.name).join(", ") 
+                                      : "Não informado"}
+                                  </div>
                                   <div className="text-sm font-medium">Serviços:</div>
                                   <ul className="mt-1 space-y-1">
                                     {result.services.map((service) => (
@@ -455,6 +464,11 @@ export default function GuiaDeRemessa() {
                           <CardContent className="py-3">
                             <div>
                               <div className="text-sm font-medium mb-2">Base: {order.base.name}</div>
+                              <div className="text-sm font-medium mb-2">
+                                Mecânicos: {order.users && order.users.length > 0 
+                                  ? order.users.map(user => user.name).join(", ") 
+                                  : "Não informado"}
+                              </div>
                               <div className="text-sm font-medium">Serviços:</div>
                               <ul className="mt-1 space-y-1">
                                 {order.services.map((service) => (
