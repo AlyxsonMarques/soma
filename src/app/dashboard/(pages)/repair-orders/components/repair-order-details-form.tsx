@@ -19,12 +19,12 @@ import type { RepairOrderAPISchema, BaseAPISchema, UserAPISchema } from "@/types
 const formSchema = z.object({
   gcaf: z.coerce.number().int().positive("GCAF deve ser um número positivo"),
   baseId: z.string().min(1, "Base é obrigatória"),
-  userIds: z.array(z.string()).optional(),
+  userIds: z.array(z.string()).default([]),
   plate: z.string().min(1, "Placa é obrigatória"),
   kilometers: z.coerce.number().min(0, "Kilometragem deve ser maior ou igual a 0"),
   status: z.enum(["PENDING", "REVISION", "APPROVED", "PARTIALLY_APPROVED", "INVOICE_APPROVED", "CANCELLED"]),
   observations: z.string().optional(),
-  discount: z.coerce.number().min(0, "Desconto deve ser maior ou igual a 0").optional(),
+  discount: z.coerce.number().min(0, "Desconto deve ser maior ou igual a 0").default(0),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -244,17 +244,15 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
                   <FormLabel>Desconto</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input 
-                        type="number" 
-                        placeholder="Digite o valor do desconto" 
-                        {...field} 
-                      />
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
                         R$
                       </div>
-                      <div className="pl-8">
-                        {/* This div adds padding to push the input text after the R$ prefix */}
-                      </div>
+                      <Input 
+                        type="number" 
+                        placeholder="Digite o valor do desconto" 
+                        className="pl-8" 
+                        {...field} 
+                      />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -267,16 +265,16 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
               name="userIds"
               render={({ field }) => (
                 <FormItem className="col-span-2">
-                  <FormLabel>Usuários</FormLabel>
+                  <FormLabel>Mecânicos Responsáveis</FormLabel>
                   <FormControl>
                     <MultiSelect
                       options={users.map(user => ({
                         label: user.name,
                         value: user.id
                       }))}
-                      selected={field.value || []}
+                      selected={Array.isArray(field.value) ? field.value : []}
                       onChange={field.onChange}
-                      placeholder="Selecione os usuários"
+                      placeholder="Selecione os mecânicos responsáveis"
                     />
                   </FormControl>
                   <FormMessage />

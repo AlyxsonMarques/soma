@@ -199,7 +199,7 @@ export default function RepairOrderDetails() {
                     <p>{repairOrder.observations || "Nenhuma observação"}</p>
                   </div>
                   <div className="space-y-2 col-span-2">
-                    <p className="text-sm font-medium">Usuários Associados</p>
+                    <p className="text-sm font-medium">Mecânicos Responsáveis</p>
                     <div className="flex flex-wrap gap-2">
                       {repairOrder.users && repairOrder.users.length > 0 ? (
                         repairOrder.users.map((user) => (

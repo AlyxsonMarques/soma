@@ -97,13 +97,17 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     if (updateData.observations !== undefined) updateOrderData.observations = updateData.observations;
     if (updateData.discount !== undefined) updateOrderData.discount = updateData.discount;
     
-    // Atualizar usuários relacionados se fornecidos
-    if (updateData.userIds) {
-      // Desconectar todos os usuários existentes e conectar os novos
+    // Atualizar usuários relacionados (sempre tratar este campo, mesmo quando vazio)
+    if (updateData.userIds !== undefined) {
+      // Desconectar todos os usuários existentes
       updateOrderData.users = {
         disconnect: existingOrder.users.map(user => ({ id: user.id })),
-        connect: updateData.userIds.map(userId => ({ id: userId }))
       };
+      
+      // Conectar os novos usuários (se houver)
+      if (updateData.userIds.length > 0) {
+        updateOrderData.users.connect = updateData.userIds.map(userId => ({ id: userId }));
+      }
     }
     
     // Atualizar a ordem de reparo
