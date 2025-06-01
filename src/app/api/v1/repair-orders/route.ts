@@ -7,24 +7,24 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 const formSchema = z.object({
-  plate: z.string().min(1, "Placa é obrigatória").max(7, "Placa deve ter no máximo 7 caracteres").transform(val => val.toUpperCase()),
-  kilometers: z.number().int().min(0, "Quilometragem deve ser um número inteiro positivo"),
-  base: z.string().uuid("ID da base deve ser um UUID válido"),
-  userId: z.string().uuid("ID do usuário deve ser um UUID válido"),
+  plate: z.string().min(1, "Por favor, informe a placa do veículo").max(7, "A placa deve ter no máximo 7 caracteres").transform(val => val.toUpperCase()),
+  kilometers: z.number().int().min(0, "Por favor, informe uma quilometragem válida (número positivo)"),
+  base: z.string().uuid("Por favor, selecione uma base válida"),
+  userId: z.string().uuid("Por favor, selecione um usuário válido"),
   assistantId: z.union([
     z.literal("none"),
-    z.string().uuid("ID do mecânico assistente deve ser um UUID válido")
+    z.string().uuid("Por favor, selecione um mecânico assistente válido")
   ]),
   services: z.array(
     z.object({
-      quantity: z.number().int().min(0, "Quantidade deve ser um número inteiro positivo"),
-      item: z.string().uuid("ID do item deve ser um UUID válido"),
-      category: z.enum(["LABOR", "MATERIAL"], { message: "Categoria deve ser LABOR ou MATERIAL" }),
-      type: z.enum(["PREVENTIVE", "CORRECTIVE", "HELP"], { message: "Tipo deve ser PREVENTIVE, CORRECTIVE ou HELP" }),
-      labor: z.string().min(1, "Mão de obra é obrigatória"),
+      quantity: z.number().int().min(0, "Por favor, informe uma quantidade válida"),
+      item: z.string().uuid("Por favor, selecione um item válido"),
+      category: z.enum(["LABOR", "MATERIAL"], { message: "Por favor, selecione uma categoria válida (Mão de obra ou Material)" }),
+      type: z.enum(["PREVENTIVE", "CORRECTIVE", "HELP"], { message: "Por favor, selecione um tipo válido (Preventivo, Corretivo ou Ajuda)" }),
+      labor: z.string().min(1, "Por favor, descreva a mão de obra realizada"),
       duration: z.object({
-        from: z.string().datetime({ message: "Data inicial deve estar no formato ISO" }),
-        to: z.string().datetime({ message: "Data final deve estar no formato ISO" }),
+        from: z.string().datetime({ message: "Por favor, informe uma data inicial válida" }),
+        to: z.string().datetime({ message: "Por favor, informe uma data final válida" }),
       }),
     }),
   ),

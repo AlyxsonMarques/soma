@@ -1,18 +1,18 @@
 import { z } from "zod";
 
-export const repairOrderIdSchema = z.string().uuid("Por favor, insira um ID válido.");
-export const repairOrderGcafIdSchema = z.number().positive().int("Por favor, insira um ID GCAF válido.");
+export const repairOrderIdSchema = z.string().uuid("Por favor, selecione uma ordem de reparo válida.");
+export const repairOrderGcafIdSchema = z.number().positive().int("Por favor, informe um número GCAF válido.");
 export const repairOrderPlateSchema = z
   .string()
   .trim()
-  .nonempty("Placa é obrigatória")
-  .min(7, "Placa inválida")
-  .max(8, "Placa inválida")
+  .nonempty("Por favor, informe a placa do veículo")
+  .min(7, "A placa informada é muito curta, verifique se está completa")
+  .max(8, "A placa informada é muito longa, verifique se está correta")
   .transform(val => val.toUpperCase());
 export const repairOrderKilometersSchema = z
   .number()
-  .positive("Por favor, insira um valor válido para quilometragem")
-  .int("Por favor, insira um valor válido para quilometragem");
+  .int("Por favor, informe a quilometragem sem casas decimais")
+  .nonnegative("A quilometragem não pode ser negativa");
 export const repairOrderStatusSchema = z.enum([
   "pending",
   "revision",

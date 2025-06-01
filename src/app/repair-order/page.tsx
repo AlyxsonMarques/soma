@@ -48,10 +48,10 @@ const formSchema = z.object({
   plate: repairOrderPlateSchema,
   kilometers: repairOrderKilometersSchema,
   base: baseIdSchema,
-  userId: z.string().uuid("ID do usuário deve ser um UUID válido"),
+  userId: z.string().uuid("Por favor, selecione um usuário válido"),
   assistantId: z.union([
     z.literal("none"),
-    z.string().uuid("ID do mecânico assistente deve ser um UUID válido")
+    z.string().uuid("Por favor, selecione um mecânico assistente válido")
   ]),
   services: z.array(formServiceSchema),
 });

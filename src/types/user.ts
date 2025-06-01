@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const userIdSchema = z.string().uuid("Por favor, insira um ID válido.");
+export const userIdSchema = z.string().uuid("Por favor, selecione um usuário válido");
 
 const userTypeSchema = z.enum(["MECHANIC", "BUDGETIST"], {
   required_error: "Por favor, selecione seu tipo de usuário.",
@@ -47,7 +47,7 @@ const userBirthDateSchema = z.date({
 const userCPFSchema = z
   .string()
   .length(11, {
-    message: "Por favor, insira seu CPF.",
+    message: "O CPF deve ter exatamente 11 dígitos, sem pontos ou traços",
   })
   .refine(
     (cpf) => {

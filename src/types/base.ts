@@ -1,17 +1,17 @@
 import { addressSchema } from "@/types/address";
 import { z } from "zod";
-export const baseIdSchema = z.string().uuid("Por favor, insira um valor válido");
+export const baseIdSchema = z.string().uuid("Por favor, selecione uma base válida");
 
-const baseNameSchema = z.string().trim().nonempty("Nome é obrigatório");
+const baseNameSchema = z.string().trim().nonempty("Por favor, informe o nome da base");
 
 const baseAddressSchema = addressSchema;
 
 const basePhoneSchema = z
   .string()
-  .min(10, "Telefone inválido")
-  .max(11, "Telefone inválido")
+  .min(10, "O telefone deve ter pelo menos 10 dígitos")
+  .max(11, "O telefone deve ter no máximo 11 dígitos")
   .trim()
-  .nonempty("Telefone é obrigatório");
+  .nonempty("Por favor, informe o telefone da base");
 
 const baseCreatedAtSchema = z.date();
 
