@@ -8,7 +8,7 @@ const userUpdateSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
   cpf: z.string().optional(),
-  type: z.enum(["MECHANIC", "BUDGET_ANALYST"]).optional(),
+  type: z.enum(["MECHANIC", "BUDGETIST"]).optional(), // Corrigido para corresponder ao enum do Prisma
   birthDate: z.string().optional(),
   assistant: z.boolean().optional(),
   password: z.string().optional(),
@@ -99,13 +99,13 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
     // Converter a data de nascimento para o formato correto se fornecida
     if (updateData.birthDate) {
-      updateData.birthDate = new Date(updateData.birthDate);
+      updateData.birthDate = new Date(updateData.birthDate) as any;
     }
     
     // Converter o tipo para o formato esperado pelo Prisma
     if (updateData.type) {
       // Garantir que o tipo seja um dos valores válidos
-      if (updateData.type !== "MECHANIC" && updateData.type !== "BUDGET_ANALYST") {
+      if (updateData.type !== "MECHANIC" && updateData.type !== "BUDGETIST") {
         return NextResponse.json({ error: true, message: "Tipo de usuário inválido" }, { status: 400 });
       }
     }

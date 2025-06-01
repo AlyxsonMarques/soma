@@ -301,17 +301,27 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh, o
       )}
 
       {/* Diálogo de edição */}
-      {selectedService && (
+      {selectedService && isEditDialogOpen && (
         <ServiceEditDialog
           key={`edit-${selectedService.id}`}
-          isOpen={isEditDialogOpen}
-          onClose={() => setIsEditDialogOpen(false)}
+          isOpen={true}
+          onClose={() => {
+            // Primeiro fechamos o diálogo localmente
+            setIsEditDialogOpen(false);
+            // Limpamos a seleção após um pequeno atraso para evitar problemas de renderização
+            setTimeout(() => {
+              setSelectedService(null);
+            }, 300);
+          }}
           service={selectedService}
           repairOrderId={repairOrderId}
           onSuccess={() => {
+            // Primeiro atualizamos os dados
             onRefresh();
-            // Não fechamos o diálogo aqui, pois isso já é feito pelo próprio componente ServiceEditDialog
+            // Depois mudamos para a aba de serviços se necessário
             if (onServiceEdit) onServiceEdit();
+            // Fechamos o diálogo após todas as ações
+            setIsEditDialogOpen(false);
           }}
         />
       )}

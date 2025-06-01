@@ -73,19 +73,51 @@ export function UserDetailsForm({ user, onSuccess, onCancel }: UserDetailsFormPr
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${user.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(dataToSend)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao atualizar o usuário");
+      // Usar try/catch para capturar erros de rede
+      let response;
+      try {
+        response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/${user.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(dataToSend)
+        });
+      } catch (networkError) {
+        console.error("Erro de rede ao atualizar usuário:", networkError);
+        throw new Error("Erro de conexão. Verifique sua internet e tente novamente.");
       }
 
+      if (!response.ok) {
+        // Se a resposta não for ok, tentar extrair a mensagem de erro
+        let errorMessage = `Erro ao atualizar o usuário (${response.status})`;
+        
+        // Clonar a resposta para poder ler o corpo
+        const responseClone = response.clone();
+        
+        try {
+          // Tentar ler como texto primeiro
+          const text = await responseClone.text();
+          
+          if (text && text.trim()) {
+            // Se tiver texto, tentar parsear como JSON
+            try {
+              const errorData = JSON.parse(text);
+              errorMessage = errorData.message || errorData.error || errorData.msg || errorMessage;
+            } catch (jsonError) {
+              // Se não for JSON válido, usar o texto como mensagem de erro
+              console.warn("Resposta não é um JSON válido:", text);
+              if (text.length < 100) errorMessage = text; // Usar o texto como mensagem se for curto
+            }
+          }
+        } catch (parseError) {
+          console.error("Erro ao processar resposta:", parseError);
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      // Se chegou aqui, a operação foi bem-sucedida
       onSuccess();
     } catch (error) {
       console.error("Error updating user:", error);
@@ -120,7 +152,7 @@ export function UserDetailsForm({ user, onSuccess, onCancel }: UserDetailsFormPr
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="MECHANIC">Mecânico</SelectItem>
-                  <SelectItem value="BUDGET_ANALYST">Orçamentista</SelectItem>
+                  <SelectItem value="BUDGETIST">Orçamentista</SelectItem>
                 </SelectContent>
               </Select>
             </div>

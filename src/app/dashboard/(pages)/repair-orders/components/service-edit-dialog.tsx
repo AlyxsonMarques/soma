@@ -50,23 +50,9 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
   const [items, setItems] = useState<RepairOrderServiceItemAPISchema[]>([]);
   const [photoPreview, setPhotoPreview] = useState<string | null>(service.photo || null);
   
-  // Estado para controlar o fechamento do diálogo após o envio com sucesso
-  const [shouldClose, setShouldClose] = useState(false);
-  
   // Estados para o diálogo de adicionar item
   const [isAddItemDialogOpen, setIsAddItemDialogOpen] = useState(false);
   const [bases, setBases] = useState<BaseAPISchema[]>([]);
-  
-  // Efeito para lidar com o fechamento do diálogo após o envio
-  useEffect(() => {
-    if (shouldClose && !isSubmitting) {
-      // Primeiro chama onSuccess e depois fecha o diálogo
-      onSuccess();
-      onClose();
-      // Reseta o estado
-      setShouldClose(false);
-    }
-  }, [shouldClose, isSubmitting, onSuccess, onClose]);
 
   // Buscar itens para o select
   useEffect(() => {
@@ -127,7 +113,9 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
     setIsSubmitting(true);
     
     try {
+      // Criar FormData para enviar multipart/form-data (necessário para a imagem)
       const formData = new FormData();
+      
       formData.append("quantity", values.quantity.toString());
       formData.append("itemId", values.itemId);
       formData.append("category", values.category);
@@ -152,13 +140,21 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao atualizar o serviço");
+        let errorMessage = "Erro ao atualizar o serviço";
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          console.error("Erro ao processar resposta:", parseError);
+        }
+        throw new Error(errorMessage);
       }
 
       toast.success("Serviço atualizado com sucesso!");
-      // Marcar que o diálogo deve ser fechado
-      setShouldClose(true);
+      
+      // Importante: Primeiro notificar o sucesso e depois deixar o componente pai lidar com o fechamento
+      // Isso evita problemas de temporização e estado inconsistente
+      onSuccess();
     } catch (error) {
       console.error("Erro ao atualizar serviço:", error);
       toast.error(error instanceof Error ? error.message : "Erro ao atualizar o serviço");
@@ -172,7 +168,7 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
       <Dialog 
         open={isOpen} 
         onOpenChange={(open) => {
-          // Só permite fechar o diálogo manualmente quando não estiver enviando dados
+          // Passa o controle para o componente pai
           if (!open && !isSubmitting) {
             onClose();
           }
