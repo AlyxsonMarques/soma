@@ -465,7 +465,20 @@ export default function GuiaDeRemessa() {
                     <FormItem>
                       <FormLabel>Kilometragem</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <div className="relative">
+                          <Input 
+                            type="number" 
+                            {...field} 
+                            onChange={(e) => {
+                              // Convert to number to remove leading zeros
+                              const value = e.target.value === '' ? 0 : Number(e.target.value);
+                              field.onChange(value);
+                            }}
+                          />
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
+                            km
+                          </div>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -528,7 +541,11 @@ export default function GuiaDeRemessa() {
                                     <Input
                                       type="number"
                                       {...field}
-                                      onChange={(e) => field.onChange(Number(e.target.value))}
+                                      onChange={(e) => {
+                                        // Convert to number to remove leading zeros
+                                        const value = e.target.value === '' ? 0 : Number(e.target.value);
+                                        field.onChange(value);
+                                      }}
                                     />
                                   </FormControl>
                                   <FormMessage />

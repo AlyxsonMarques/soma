@@ -187,7 +187,16 @@ export function RepairOrderDetailsForm({ repairOrder, onSuccess, onCancel }: Rep
                   <FormLabel>Kilometragem</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Input type="number" placeholder="Digite a kilometragem" {...field} />
+                      <Input 
+                        type="number" 
+                        placeholder="Digite a kilometragem" 
+                        {...field} 
+                        onChange={(e) => {
+                          // Convert to number to remove leading zeros
+                          const value = e.target.value === '' ? 0 : Number(e.target.value);
+                          field.onChange(value);
+                        }}
+                      />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-muted-foreground">
                         km
                       </div>
