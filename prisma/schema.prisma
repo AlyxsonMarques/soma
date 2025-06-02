@@ -103,7 +103,7 @@ model RepairOrderService {
   category  RepairOrderServiceCategory
   repairOrder RepairOrder @relation(fields: [repairOrderId], references: [id], onDelete: NoAction)
   repairOrderId String @db.Uuid
-  photo String?
+  photo String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?

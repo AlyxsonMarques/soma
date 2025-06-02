@@ -26,7 +26,7 @@ export const repairOrderServiceDurationSchema = z.object(
   },
 );
 
-export const repairOrderServicePhotoSchema = z.instanceof(File, { message: "Por favor, adicione uma foto do serviço realizado" }).optional();
+export const repairOrderServicePhotoSchema = z.instanceof(File, { message: "Por favor, adicione uma foto do serviço realizado" });
 
 export const repairOrderServiceValueSchema = z.number().positive("O valor deve ser maior que zero").int("O valor deve ser um número inteiro");
 

@@ -188,20 +188,7 @@ export default function GuiaDeRemessa() {
       base: "",
       userId: session?.user?.id || "",
       assistantId: "none",
-      services: [
-        {
-          quantity: 0,
-          item: "",
-          category: "LABOR",
-          type: "PREVENTIVE",
-          labor: "",
-          duration: {
-            from: new Date(),
-            to: new Date(),
-          },
-          photo: undefined,
-        },
-      ],
+      services: [],
     },
   });
 
@@ -228,6 +215,13 @@ export default function GuiaDeRemessa() {
   }, [session, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    // Verificar se todos os serviços têm fotos antes de enviar
+    const missingPhotos = values.services.some(service => !(service.photo instanceof File));
+    if (missingPhotos) {
+      toast.error("Todos os serviços devem ter uma foto. Por favor, adicione fotos para todos os serviços.");
+      return;
+    }
+    
     const formData = new FormData();
 
     formData.append("plate", values.plate);
@@ -272,22 +266,11 @@ export default function GuiaDeRemessa() {
       toast.success(data.message);
       // Atualiza o histórico após criar uma nova GR
       fetchRepairOrderHistory();
+      
+      // Resetar o formulário
+      form.reset();
+      remove();
     }
-
-    form.reset();
-    remove();
-    append({
-      quantity: 0,
-      item: "",
-      category: "LABOR",
-      type: "PREVENTIVE",
-      labor: "",
-      duration: {
-        from: new Date(),
-        to: new Date(),
-      },
-      photo: undefined,
-    });
   }
 
   // Formatar data para exibição
@@ -831,9 +814,11 @@ export default function GuiaDeRemessa() {
                   type="button"
                   variant="outline"
                   className="mt-4 w-full sm:w-auto"
-                  onClick={() =>
+                  onClick={() => {
+                    // Mostrar uma mensagem informando que a foto é obrigatória
+                    toast.info("Lembre-se de adicionar uma foto para cada serviço. A foto é obrigatória.");
                     append({
-                      quantity: 0,
+                      quantity: 1,
                       item: "",
                       category: "LABOR",
                       type: "PREVENTIVE",
@@ -842,9 +827,10 @@ export default function GuiaDeRemessa() {
                         from: new Date(),
                         to: new Date(),
                       },
-                      photo: null as unknown as File,
-                    })
-                  }
+                      // Inicializa sem foto, mas o usuário será obrigado a adicionar uma antes de enviar
+                      photo: undefined as unknown as File,
+                    });
+                  }}
                 >
                   Adicionar Serviço
                 </Button>

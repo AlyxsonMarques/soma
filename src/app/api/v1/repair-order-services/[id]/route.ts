@@ -71,9 +71,10 @@ export async function PATCH(
       }
     }
 
-    // Processar foto
+    // Processar foto - obrigatória
     const photo = formData.get("photo") as File | null;
-    let photoUrl;
+    const photoUrl = formData.get("photoUrl")?.toString();
+    let finalPhotoUrl;
 
     if (photo && photo.size > 0) {
       // Em um ambiente real, você faria upload da foto para um serviço de armazenamento
@@ -81,10 +82,19 @@ export async function PATCH(
       const photoBytes = await photo.arrayBuffer();
       const base64 = Buffer.from(photoBytes).toString('base64');
       const mimeType = photo.type || 'image/jpeg';
-      photoUrl = `data:${mimeType};base64,${base64}`;
-    } else if (!photo) {
-      // Se não foi enviada uma nova foto, mantém a foto atual
-      photoUrl = existingService.photo;
+      finalPhotoUrl = `data:${mimeType};base64,${base64}`;
+    } else if (photoUrl) {
+      // Se foi enviada uma URL de foto existente
+      finalPhotoUrl = photoUrl;
+    } else if (existingService.photo) {
+      // Se não foi enviada uma nova foto nem URL, mantém a foto atual
+      finalPhotoUrl = existingService.photo;
+    } else {
+      // Se não há foto, retorna erro
+      return NextResponse.json(
+        { error: "Foto é obrigatória" },
+        { status: 400 }
+      );
     }
 
     // Validar dados
@@ -122,7 +132,7 @@ export async function PATCH(
         value: value !== undefined ? value : undefined,
         discount: discount !== undefined ? discount : undefined,
         duration: durationValue,
-        photo: photoUrl,
+        photo: finalPhotoUrl,
       },
       include: {
         item: true,

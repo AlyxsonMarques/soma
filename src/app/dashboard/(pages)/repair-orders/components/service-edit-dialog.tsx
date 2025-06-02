@@ -30,7 +30,7 @@ const formSchema = z.object({
     from: z.date(),
     to: z.date(),
   }),
-  photo: z.any().refine(val => val instanceof File || val === undefined || val === null, {
+  photo: z.any().refine(val => val instanceof File || (typeof val === 'string' && val.length > 0), {
     message: "Foto é obrigatória",
   }),
 });
@@ -129,9 +129,15 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
         to: values.duration.to.toISOString(),
       }));
       
-      // Adicionar foto se foi selecionada
+      // Adicionar foto - é obrigatória
       if (values.photo instanceof File) {
         formData.append("photo", values.photo);
+      } else if (typeof values.photo === 'string' && values.photo.length > 0) {
+        // Se a foto já existe e não foi alterada, enviar o URL existente
+        formData.append("photoUrl", values.photo);
+      } else {
+        // Se não há foto, não permitir a submissão
+        throw new Error("Foto é obrigatória");
       }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-services/${service.id}`, {

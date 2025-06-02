@@ -55,7 +55,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // Processar foto
+    // Processar foto - obrigatória
     const photo = formData.get("photo") as File | null;
     let photoUrl;
 
@@ -66,6 +66,12 @@ export async function POST(request: Request) {
       const base64 = Buffer.from(photoBytes).toString('base64');
       const mimeType = photo.type || 'image/jpeg';
       photoUrl = `data:${mimeType};base64,${base64}`;
+    } else {
+      // Se não há foto, retorna erro
+      return NextResponse.json(
+        { error: "Foto é obrigatória" },
+        { status: 400 }
+      );
     }
 
     // Validar dados

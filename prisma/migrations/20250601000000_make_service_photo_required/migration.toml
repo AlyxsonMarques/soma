@@ -1,0 +1,4 @@
+# This is an empty migration.toml file
+# It's required for Prisma to recognize this as a valid migration
+
+migration_name = "20250601000000_make_service_photo_required"
