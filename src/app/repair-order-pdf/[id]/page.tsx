@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, use } from 'react';
 import { notFound } from 'next/navigation';
-import { PdfViewer } from '@/components/pdf/pdf-viewer';
-import { RepairOrderTemplate } from '@/components/pdf/repair-order-template';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Sun, Moon, Laptop, ChevronDown } from 'lucide-react';
+import { EnhancedPdfViewer } from '@/components/pdf/enhanced-pdf-viewer';
+import { RepairOrderTemplate } from '@/components/pdf/repair-order-template';
 
 // Importar diretamente a função em vez de usar o módulo
 async function getRepairOrderById(id: string) {
@@ -143,9 +143,12 @@ export default function RepairOrderPdfPage({ params }: RepairOrderPdfPageProps) 
         </DropdownMenu>
       </div>
       
-      <PdfViewer fileName={`GR_${repairOrder.gcaf || repairOrder.id}.pdf`}>
-        <RepairOrderTemplate repairOrder={repairOrder} />
-      </PdfViewer>
+      {/* Visualizador de PDF com download integrado */}
+      <div className="mt-4">
+        <EnhancedPdfViewer fileName={`ordem-reparo-${repairOrder.id}.pdf`}>
+          <RepairOrderTemplate repairOrder={repairOrder} />
+        </EnhancedPdfViewer>
+      </div>
     </div>
   );
 }

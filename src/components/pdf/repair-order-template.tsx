@@ -185,41 +185,25 @@ export const RepairOrderTemplate: React.FC<RepairOrderTemplateProps> = ({ repair
                     </div>
                   </div>
                   {service.photo && (
-                    <div className="mt-3 mb-3 service-photo-container">
+                    <div className="mt-4 flex flex-col items-center service-photo-container">
                       <p className="text-sm font-medium mb-2">Foto do Serviço:</p>
                       <img 
                         src={service.photo} 
-                        alt={`Foto do serviço: ${service.item?.name || 'Serviço'}`}
-                        className="service-photo max-w-full h-auto rounded-md"
+                        alt={`Foto do serviço: ${service.item?.name || 'N/A'}`}
+                        className="max-w-[90%] max-h-[300px] object-contain mx-auto block rounded border border-gray-200 service-photo"
                         crossOrigin="anonymous"
                         loading="eager"
                         onError={(e) => {
-                          // Tentar recarregar a imagem uma vez
+                          // Tentar recarregar a imagem com cache busting
                           const target = e.target as HTMLImageElement;
-                          if (!target.dataset.retried) {
-                            target.dataset.retried = 'true';
-                            // Adicionar timestamp para evitar cache
-                            const newSrc = target.src + (target.src.includes('?') ? '&' : '?') + 'retry=' + new Date().getTime();
-                            setTimeout(() => { target.src = newSrc; }, 500);
-                          } else {
-                            // Se falhar novamente, mostrar mensagem de erro
-                            target.style.display = 'none';
-                            const parent = target.parentElement;
-                            if (parent) {
-                              const errorMsg = document.createElement('p');
-                              errorMsg.textContent = 'Não foi possível carregar a imagem';
-                              errorMsg.className = 'text-sm text-red-500 italic';
-                              parent.appendChild(errorMsg);
-                            }
-                          }
-                        }}
-                        style={{
-                          maxHeight: '300px',
-                          objectFit: 'contain',
-                          margin: '0 auto',
-                          display: 'block'
+                          const originalSrc = target.src;
+                          target.src = '';
+                          setTimeout(() => {
+                            target.src = originalSrc + (originalSrc.includes('?') ? '&' : '?') + 'cachebust=' + new Date().getTime();
+                          }, 100);
                         }}
                       />
+                      <p className="text-xs text-gray-500 mt-1">{service.item?.name || 'Serviço'}</p>
                     </div>
                   )}
                   <Separator className="my-2" />
