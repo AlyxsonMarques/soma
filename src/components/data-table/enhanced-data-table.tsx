@@ -36,6 +36,7 @@ interface EnhancedDataTableProps<TData> {
   deleteConfirmationMessage?: string;
   bulkDeleteConfirmationTitle?: string;
   bulkDeleteConfirmationMessage?: string;
+  onSelectionChange?: (selectedRows: TData[]) => void;
 }
 
 export function EnhancedDataTable<TData>({
@@ -51,6 +52,7 @@ export function EnhancedDataTable<TData>({
   deleteConfirmationMessage = "Tem certeza que deseja excluir este item? Esta ação não pode ser desfeita.",
   bulkDeleteConfirmationTitle = "Confirmar exclusão em massa",
   bulkDeleteConfirmationMessage = "Tem certeza que deseja excluir todos os itens selecionados? Esta ação não pode ser desfeita.",
+  onSelectionChange,
 }: EnhancedDataTableProps<TData>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
@@ -98,6 +100,19 @@ export function EnhancedDataTable<TData>({
   };
 
   const hasSelectedRows = table.getFilteredSelectedRowModel().rows.length > 0;
+  
+  // Notificar sobre mudanças na seleção quando o estado de seleção mudar
+  // Usar uma referência para evitar loops infinitos
+  const prevRowSelectionRef = React.useRef(rowSelection);
+  
+  React.useEffect(() => {
+    // Verificar se a seleção realmente mudou para evitar chamadas desnecessárias
+    if (onSelectionChange && prevRowSelectionRef.current !== rowSelection) {
+      prevRowSelectionRef.current = rowSelection;
+      const selectedData = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+      onSelectionChange(selectedData);
+    }
+  }, [rowSelection]);
 
   return (
     <div className="space-y-4">

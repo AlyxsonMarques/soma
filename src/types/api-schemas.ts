@@ -39,6 +39,9 @@ export interface RepairOrderAPISchema {
   users?: Array<{
     id: string;
     name: string;
+    email?: string;
+    cpf?: string;
+    type?: string;
   }>;
   services?: RepairOrderServiceAPISchema[];
   createdAt: Date;

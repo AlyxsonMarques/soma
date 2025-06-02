@@ -5,6 +5,8 @@ import type { RepairOrderAPISchema } from "@/types/api-schemas";
 import { useEffect, useState } from "react";
 import { DashboardHeader } from "../../components/dashboard-header";
 import { createRepairOrderColumns } from "./components/orders-table-columns";
+import { ExportButtons } from "./components/export-buttons";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function RepairOrder() {
   const [data, setData] = useState<RepairOrderAPISchema[]>([]);
@@ -31,10 +33,24 @@ export default function RepairOrder() {
     onRefresh: fetchData
   });
 
+  // Estado para rastrear as linhas selecionadas
+  const [selectedRows, setSelectedRows] = useState<RepairOrderAPISchema[]>([]);
+
   return (
     <>
       <DashboardHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle>Exportar Guias de Remessa</CardTitle>
+            <CardDescription>
+              Exporte uma ou mais Guias de Remessa para PDF. Selecione as guias na tabela abaixo ou exporte todas de uma vez.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ExportButtons selectedRows={selectedRows} allData={data} />
+          </CardContent>
+        </Card>
         
         <EnhancedDataTable<RepairOrderAPISchema>
           columns={columns}
@@ -49,6 +65,7 @@ export default function RepairOrder() {
           deleteConfirmationMessage="Tem certeza que deseja excluir esta ordem de reparo? Esta ação não pode ser desfeita."
           bulkDeleteConfirmationTitle="Excluir ordens de reparo"
           bulkDeleteConfirmationMessage="Tem certeza que deseja excluir todas as ordens de reparo selecionadas? Esta ação não pode ser desfeita."
+          onSelectionChange={(rows) => setSelectedRows(rows)}
         />
       </div>
     </>
