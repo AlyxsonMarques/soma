@@ -56,7 +56,7 @@ export async function POST(request: Request) {
     }
 
     // Processar foto - obrigatória
-    const photo = formData.get("photo") as File | null;
+    const photo = formData.get("photo") as any | null;
     let photoUrl;
 
     if (photo && photo.size > 0) {

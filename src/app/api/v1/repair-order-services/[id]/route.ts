@@ -72,7 +72,7 @@ export async function PATCH(
     }
 
     // Processar foto - obrigatória
-    const photo = formData.get("photo") as File | null;
+    const photo = formData.get("photo") as any | null;
     const photoUrl = formData.get("photoUrl")?.toString();
     let finalPhotoUrl;
 
