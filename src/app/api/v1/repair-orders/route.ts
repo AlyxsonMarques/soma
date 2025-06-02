@@ -6,6 +6,7 @@ import prisma from "@/lib/prisma";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+// Schema para validação de requisições via formData (existente)
 const formSchema = z.object({
   plate: z.string().min(1, "Por favor, informe a placa do veículo").max(7, "A placa deve ter no máximo 7 caracteres").transform(val => val.toUpperCase()),
   kilometers: z.number().int().min(0, "Por favor, informe uma quilometragem válida (número positivo)"),
@@ -28,6 +29,18 @@ const formSchema = z.object({
       }),
     }),
   ),
+});
+
+// Schema para validação de requisições JSON (novo)
+const jsonSchema = z.object({
+  gcaf: z.coerce.number().int().positive("GCAF deve ser um número positivo"),
+  baseId: z.string().min(1, "Base é obrigatória"),
+  userIds: z.array(z.string()).min(1, "Pelo menos um usuário é obrigatório"),
+  plate: z.string().min(1, "Placa é obrigatória").transform(val => val.toUpperCase()),
+  kilometers: z.coerce.number().min(0, "Kilometragem deve ser maior ou igual a 0"),
+  status: z.enum(["PENDING", "REVISION", "APPROVED", "PARTIALLY_APPROVED", "INVOICE_APPROVED", "CANCELLED"]).default("PENDING"),
+  observations: z.string().optional(),
+  discount: z.coerce.number().min(0, "Desconto deve ser maior ou igual a 0").default(0),
 });
 
 export async function GET(req: NextRequest) {
@@ -89,7 +102,71 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Receber os dados do formulário
+    // Verificar o tipo de conteúdo para determinar como processar a requisição
+    const contentType = req.headers.get("content-type") || "";
+    
+    // Se for JSON, processar como JSON
+    if (contentType.includes("application/json")) {
+      const jsonData = await req.json();
+      
+      // Validar os dados JSON
+      const validationResult = jsonSchema.safeParse(jsonData);
+      
+      if (!validationResult.success) {
+        return NextResponse.json(
+          { error: true, message: "Dados inválidos", details: validationResult.error.issues },
+          { status: 400 }
+        );
+      }
+      
+      // Verificar se a base existe
+      const baseExists = await prisma.base.findUnique({
+        where: { id: validationResult.data.baseId },
+      });
+      
+      if (!baseExists) {
+        return NextResponse.json(
+          { error: true, message: "Base não encontrada" },
+          { status: 404 }
+        );
+      }
+      
+      // Verificar se todos os usuários existem
+      const userCount = await prisma.user.count({
+        where: {
+          id: {
+            in: validationResult.data.userIds
+          }
+        }
+      });
+      
+      if (userCount !== validationResult.data.userIds.length) {
+        return NextResponse.json(
+          { error: true, message: "Um ou mais usuários não foram encontrados" },
+          { status: 404 }
+        );
+      }
+      
+      // Criar a ordem de reparo
+      const repairOrder = await prisma.repairOrder.create({
+        data: {
+          plate: validationResult.data.plate,
+          kilometers: validationResult.data.kilometers,
+          baseId: validationResult.data.baseId,
+          gcaf: BigInt(validationResult.data.gcaf),
+          status: validationResult.data.status,
+          observations: validationResult.data.observations || "",
+          discount: validationResult.data.discount,
+          users: {
+            connect: validationResult.data.userIds.map(id => ({ id }))
+          }
+        },
+      });
+      
+      return NextResponse.json({ message: "Ordem de reparo criada com sucesso", id: repairOrder.id }, { status: 201 });
+    }
+    
+    // Caso contrário, processar como formData (comportamento existente)
     const formData = await req.formData();
     const plate = formData.get("plate") as string;
     const kilometers = Number(formData.get("kilometers"));

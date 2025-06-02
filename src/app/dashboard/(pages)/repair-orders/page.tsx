@@ -3,12 +3,16 @@
 import { EnhancedDataTable } from "@/components/data-table/enhanced-data-table";
 import type { RepairOrderAPISchema } from "@/types/api-schemas";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardHeader } from "../../components/dashboard-header";
 import { createRepairOrderColumns } from "./components/orders-table-columns";
 import { ExportButtons } from "./components/export-buttons";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export default function RepairOrder() {
+  const router = useRouter();
   const [data, setData] = useState<RepairOrderAPISchema[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -40,6 +44,13 @@ export default function RepairOrder() {
     <>
       <DashboardHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Guias de Reparo</h1>
+          <Button onClick={() => router.push("/dashboard/repair-orders/new")}>
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Guia de Reparo
+          </Button>
+        </div>
         <Card>
           <CardHeader className="pb-3">
             <CardTitle>Exportar Guias de Remessa</CardTitle>
