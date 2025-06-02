@@ -9,7 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { DashboardHeader } from "../../../components/dashboard-header";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
-import { Loader2, ArrowLeft, Edit, Plus } from "lucide-react";
+import { Loader2, ArrowLeft, Edit, Plus, FileText } from "lucide-react";
+import { viewRepairOrderPDF } from "@/lib/pdf-generator";
 import { RepairOrderDetailsForm } from "../components/repair-order-details-form";
 import { RepairOrderServicesTable } from "../components/repair-order-services-table";
 import type { RepairOrderAPISchema } from "@/types/api-schemas";
@@ -133,14 +134,31 @@ export default function RepairOrderDetails() {
             </div>
             <p className="text-muted-foreground">Placa: {repairOrder.plate}</p>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              variant={isEditing ? "default" : "outline"} 
-              onClick={handleEditToggle}
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              {isEditing ? "Cancelar Edição" : "Editar Ordem"}
+          <div className="flex justify-between items-center">
+            <Button variant="outline" size="sm" onClick={handleBackClick} className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
             </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => viewRepairOrderPDF(id)} 
+                className="flex items-center gap-2"
+              >
+                <FileText className="h-4 w-4" />
+                Visualizar PDF
+              </Button>
+              <Button 
+                variant={isEditing ? "default" : "outline"} 
+                onClick={handleEditToggle}
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                {isEditing ? "Cancelar Edição" : "Editar Ordem"}
+              </Button>
+            </div>
           </div>
         </div>
 

@@ -119,8 +119,7 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh, o
   const getCategoryLabel = (category: string) => {
     const categories: Record<string, string> = {
       "LABOR": "Mão de Obra",
-      "PART": "Peça",
-      "SERVICE": "Serviço",
+      "MATERIAL": "Material"
     };
     return categories[category] || category;
   };

@@ -40,8 +40,6 @@ export function ServiceDetailsDialog({ isOpen, onClose, service }: ServiceDetail
   const getCategoryLabel = (category: string) => {
     const categories: Record<string, string> = {
       "LABOR": "Mão de Obra",
-      "PART": "Peça",
-      "SERVICE": "Serviço",
       "MATERIAL": "Material"
     };
     return categories[category] || category;
