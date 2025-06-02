@@ -8,7 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { formatCurrency } from "@/lib/utils";
+
 import { formatImageUrl } from "@/lib/image-utils";
 import { Calendar, Car, FileText, MapPin, Wrench } from "lucide-react";
 import { useState } from "react";
@@ -26,7 +26,6 @@ interface RepairOrderDetailsProps {
       name: string;
     };
     createdAt: string;
-    discount: string;
     observation?: string;
     users: {
       id: string;
@@ -38,8 +37,7 @@ interface RepairOrderDetailsProps {
       category: string;
       type: string;
       quantity: number;
-      value: string;
-      discount: string;
+
       photo?: string;
       item: {
         id: string;
@@ -87,25 +85,7 @@ export function RepairOrderDetailsDialog({ repairOrder }: RepairOrderDetailsProp
     return typeMap[type] || type;
   };
 
-  // Calcular o valor total dos serviços
-  const calculateTotalValue = () => {
-    return repairOrder.services.reduce((total, service) => {
-      const serviceValue = parseFloat(service.value) || 0;
-      const serviceDiscount = parseFloat(service.discount) || 0;
-      return total + (serviceValue - serviceDiscount) * service.quantity;
-    }, 0);
-  };
 
-  // Calcular o valor do desconto total
-  const calculateTotalDiscount = () => {
-    const servicesDiscount = repairOrder.services.reduce((total, service) => {
-      const serviceDiscount = parseFloat(service.discount) || 0;
-      return total + serviceDiscount * service.quantity;
-    }, 0);
-    
-    const orderDiscount = parseFloat(repairOrder.discount) || 0;
-    return servicesDiscount + orderDiscount;
-  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -178,14 +158,7 @@ export function RepairOrderDetailsDialog({ repairOrder }: RepairOrderDetailsProp
                           <span className="text-xs">Quantidade: {service.quantity}</span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="font-medium">{formatCurrency(parseFloat(service.value) || 0)}</div>
-                        {parseFloat(service.discount) > 0 && (
-                          <div className="text-sm text-muted-foreground">
-                            Desconto: {formatCurrency(parseFloat(service.discount) || 0)}
-                          </div>
-                        )}
-                      </div>
+
                     </div>
                     
                     {service.photo && (
@@ -202,24 +175,7 @@ export function RepairOrderDetailsDialog({ repairOrder }: RepairOrderDetailsProp
               </div>
             </div>
             
-            <div className="border-t pt-3 mt-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Subtotal:</span>
-                <span>{formatCurrency(calculateTotalValue() + calculateTotalDiscount())}</span>
-              </div>
-              
-              {calculateTotalDiscount() > 0 && (
-                <div className="flex justify-between items-center text-muted-foreground">
-                  <span className="text-sm">Desconto total:</span>
-                  <span>-{formatCurrency(calculateTotalDiscount())}</span>
-                </div>
-              )}
-              
-              <div className="flex justify-between items-center font-bold mt-1">
-                <span>Total:</span>
-                <span>{formatCurrency(calculateTotalValue())}</span>
-              </div>
-            </div>
+
           </div>
         </ScrollArea>
       </DialogContent>
