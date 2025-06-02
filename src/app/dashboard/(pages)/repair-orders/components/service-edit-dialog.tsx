@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
-import Image from "next/image";
 import type { BaseAPISchema, RepairOrderServiceAPISchema, RepairOrderServiceItemAPISchema } from "@/types/api-schemas";
 
 // Schema para validação do formulário
@@ -434,12 +433,11 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
                             />
                           </div>
                           {photoPreview && (
-                            <div className="relative h-48 w-full overflow-hidden rounded-md">
-                              <Image
+                            <div className="h-48 w-full overflow-hidden rounded-md flex items-center justify-center">
+                              <img
                                 src={photoPreview}
                                 alt="Prévia da foto"
-                                fill
-                                className="object-contain"
+                                className="max-h-full max-w-full object-contain"
                               />
                             </div>
                           )}

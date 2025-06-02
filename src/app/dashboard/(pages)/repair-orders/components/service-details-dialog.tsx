@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import Image from "next/image";
+// Removendo a importação do Image do Next.js para usar a tag img padrão
 import { Badge } from "@/components/ui/badge";
 import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
 import type { RepairOrderServiceAPISchema, RepairOrderServiceItemAPISchema } from "@/types/api-schemas";
@@ -164,12 +164,11 @@ export function ServiceDetailsDialog({ isOpen, onClose, service }: ServiceDetail
             {service.photo && (
               <div className="col-span-2 space-y-2">
                 <p className="text-sm font-medium">Foto</p>
-                <div className="relative h-48 w-full overflow-hidden rounded-md border border-input">
-                  <Image
+                <div className="h-48 w-full overflow-hidden rounded-md border border-input flex items-center justify-center">
+                  <img
                     src={service.photo}
                     alt="Foto do serviço"
-                    fill
-                    className="object-contain"
+                    className="max-h-full max-w-full object-contain"
                   />
                 </div>
               </div>

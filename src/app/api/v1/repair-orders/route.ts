@@ -196,28 +196,24 @@ export async function POST(req: NextRequest) {
 
     for (const { key, value: photo } of photoEntries) {
       if (photo instanceof File) {
-        const bytes = await photo.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        const fileName = `${Date.now()}-${photo.name}`;
-        const uploadDir = path.join(process.cwd(), "public", "uploads");
-        const filePath = path.join(uploadDir, fileName);
-
-        // Extrair o índice do nome da chave (photos[0], photos[1], etc)
-        const indexMatch = key.match(/\[(\d+)\]/);
-        const index = indexMatch ? parseInt(indexMatch[1]) : photoPaths.length;
-
-        console.log(`Salvando arquivo ${fileName} no caminho ${filePath}`);
-
         try {
-          // Garantir que o diretório de uploads exista
-          await fs.mkdir(uploadDir, { recursive: true });
-          await fs.writeFile(filePath, buffer);
+          // Extrair o índice do nome da chave (photos[0], photos[1], etc)
+          const indexMatch = key.match(/\[(\d+)\]/);
+          const index = indexMatch ? parseInt(indexMatch[1]) : photoPaths.length;
+
+          console.log(`Processando imagem ${photo.name}`);
           
-          // Armazenar o caminho da foto com seu índice para associar corretamente depois
-          photoPaths[index] = `/uploads/${fileName}`;
-          console.log(`Arquivo salvo com sucesso: ${filePath}`);
+          // Converter a imagem para base64
+          const bytes = await photo.arrayBuffer();
+          const base64 = Buffer.from(bytes).toString('base64');
+          const mimeType = photo.type || 'image/jpeg';
+          const dataUrl = `data:${mimeType};base64,${base64}`;
+          
+          // Armazenar a imagem em base64 com seu índice para associar corretamente depois
+          photoPaths[index] = dataUrl;
+          console.log(`Imagem convertida para base64 com sucesso: ${photo.name} (${bytes.byteLength} bytes)`);
         } catch (error) {
-          console.error(`Erro ao salvar arquivo: ${error}`);
+          console.error(`Erro ao processar imagem ${photo.name}: ${error}`);
         }
       }
     }
