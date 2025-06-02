@@ -72,7 +72,7 @@ export function ServiceDetailsDialog({ isOpen, onClose, service }: ServiceDetail
     const types: Record<string, string> = {
       "PREVENTIVE": "Preventivo",
       "CORRECTIVE": "Corretivo",
-      "PREDICTIVE": "Preditivo"
+      "HELP": "Socorro"
     };
     return types[type] || type;
   };

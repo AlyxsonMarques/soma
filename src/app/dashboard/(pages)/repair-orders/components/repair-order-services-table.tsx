@@ -133,7 +133,7 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh, o
     const statusMap: Record<string, { label: string; variant: BadgeVariant; icon: React.ReactNode }> = {
       "PENDING": { label: "Pendente", variant: "outline", icon: <AlertCircle className="h-3 w-3 mr-1" /> },
       "APPROVED": { label: "Aprovado Integralmente", variant: "default", icon: <CheckCircle className="h-3 w-3 mr-1" /> },
-      "CANCELLED": { label: "Cancelado", variant: "destructive", icon: <XCircle className="h-3 w-3 mr-1" /> }
+      "CANCELLED": { label: "Cancelado", variant: "destructive", icon: <XCircle className="h-3 w-3 mr-1" /> },
     };
     
     const statusInfo = statusMap[status] || { label: status, variant: "default" as BadgeVariant, icon: <AlertCircle className="h-3 w-3 mr-1" /> };
@@ -150,6 +150,7 @@ export function RepairOrderServicesTable({ repairOrderId, services, onRefresh, o
     const types: Record<string, { label: string; variant: "default" | "destructive" | "outline" | "secondary" | "success" | "warning" }> = {
       "CORRECTIVE": { label: "Corretivo", variant: "destructive" },
       "PREVENTIVE": { label: "Preventivo", variant: "outline" },
+      "HELP": { label: "Socorro", variant: "warning" },
       "PREDICTIVE": { label: "Preditivo", variant: "secondary" },
     };
     

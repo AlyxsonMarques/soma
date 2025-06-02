@@ -39,36 +39,52 @@ export async function GET(req: NextRequest) {
   const where = plate ? { plate: { contains: plate, mode: 'insensitive' as const } } : {};
   
   // Buscar ordens de reparo com filtros aplicados
-  const repairOrders = await prisma.repairOrder.findMany({ 
-    where,
-    include: { 
-      users: true, 
-      base: true,
-      services: {
-        include: {
-          item: true
+  try {
+    // Primeiro, vamos atualizar qualquer serviço com foto nula para usar um placeholder
+    await prisma.$executeRaw`
+      UPDATE "RepairOrderService"
+      SET "photo" = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII='
+      WHERE "photo" IS NULL
+    `;
+    
+    // Agora podemos buscar normalmente
+    const repairOrders = await prisma.repairOrder.findMany({ 
+      where,
+      include: { 
+        users: true, 
+        base: true,
+        services: {
+          include: {
+            item: true
+          }
         }
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  });
-  
-  return NextResponse.json(
-    repairOrders.map((order) => ({
+    });
+    
+    // Converter os resultados para o formato esperado
+    const formattedOrders = (repairOrders as any[]).map((order: any) => ({
       ...order,
       gcaf: order.gcaf?.toString() ?? null,
       createdAt: new Date(order.createdAt),
       updatedAt: new Date(order.updatedAt),
-      services: order.services.map(service => ({
+      // Os serviços já estão formatados pela query SQL
+      // mas podemos garantir que os valores numéricos estão como strings
+      services: Array.isArray(order.services) ? order.services.map((service: any) => ({
         ...service,
-        value: service.value.toString(),
-        discount: service.discount.toString(),
-        duration: service.duration.toString()
-      }))
-    })),
-  );
+        value: service.value?.toString() || '0',
+        discount: service.discount?.toString() || '0',
+        duration: service.duration?.toString() || '0'
+      })) : []
+    }));
+    
+    return NextResponse.json(formattedOrders);
+  } catch (error) {
+    console.error("Error fetching repair orders:", error);
+    return NextResponse.json({ error: true, message: "Erro ao buscar ordens de reparo" }, { status: 500 });
+  }
 }
 
 export async function POST(req: NextRequest) {

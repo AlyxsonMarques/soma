@@ -21,7 +21,7 @@ const formSchema = z.object({
   quantity: z.coerce.number().min(1, "Quantidade deve ser maior que 0"),
   itemId: z.string().min(1, "Item é obrigatório"),
   category: z.enum(["LABOR", "MATERIAL"]),
-  type: z.enum(["PREVENTIVE", "CORRECTIVE"]),
+  type: z.enum(["PREVENTIVE", "CORRECTIVE", "HELP"]),
   status: z.enum(["PENDING", "APPROVED", "CANCELLED"]),
   labor: z.string().optional(),
   value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0"),
@@ -271,6 +271,7 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
                           <SelectContent>
                             <SelectItem value="PREVENTIVE">Preventivo</SelectItem>
                             <SelectItem value="CORRECTIVE">Corretivo</SelectItem>
+                            <SelectItem value="HELP">Socorro</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>

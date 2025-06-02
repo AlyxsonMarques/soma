@@ -297,7 +297,7 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
                           <SelectContent>
                             <SelectItem value="PREVENTIVE">Preventivo</SelectItem>
                             <SelectItem value="CORRECTIVE">Corretivo</SelectItem>
-                            <SelectItem value="HELP">Ajuda</SelectItem>
+                            <SelectItem value="HELP">Socorro</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormControl>
