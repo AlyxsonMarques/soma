@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-import { formatImageUrl } from "@/lib/image-utils";
+// Removed formatImageUrl import as we'll use base64 directly
 import { Calendar, Car, FileText, MapPin, Wrench } from "lucide-react";
 import { useState } from "react";
 
@@ -164,7 +164,7 @@ export function RepairOrderDetailsDialog({ repairOrder }: RepairOrderDetailsProp
                     {service.photo && (
                       <div className="mt-2">
                         <img 
-                          src={formatImageUrl(service.photo)} 
+                          src={service.photo} 
                           alt={`Foto do serviço ${service.labor}`} 
                           className="rounded-md max-h-32 object-cover"
                         />

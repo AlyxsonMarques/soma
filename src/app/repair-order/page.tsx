@@ -24,7 +24,7 @@ import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Base, RepairOrderServiceItem } from "@prisma/client";
 import { Camera, Trash2, Search, FileText, Calendar, Car } from "lucide-react";
-import { formatImageUrl } from "@/lib/image-utils";
+// Base64 images are used directly
 import { RepairOrderDetailsDialog } from "./components/repair-order-details-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect } from "react";
@@ -223,54 +223,92 @@ export default function GuiaDeRemessa() {
       return;
     }
     
-    const formData = new FormData();
-
-    formData.append("plate", values.plate);
-    formData.append("kilometers", values.kilometers.toString());
-    formData.append("base", values.base);
-    formData.append("userId", values.userId);
-    
-    // Sempre enviar o assistantId, mesmo que seja "none"
-    formData.append("assistantId", values.assistantId);
-
-    const servicesWithoutPhotos = values.services.map((service) => ({
-      quantity: service.quantity,
-      item: service.item,
-      category: service.category,
-      type: service.type,
-      labor: service.labor,
-      duration: {
-        from: service.duration.from.toISOString(),
-        to: service.duration.to.toISOString(),
-      },
-    }));
-    formData.append("services", JSON.stringify(servicesWithoutPhotos));
-
-    // Append each photo with its index to match the backend processing
-    values.services.forEach((service, index) => {
-      if (service.photo instanceof File) {
-        formData.append(`photos[${index}]`, service.photo);
-        console.log(`Appending photo for service ${index}: ${service.photo.name}`);
-      }
-    });
-
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders`, {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await response.json();
-
-    if (data.error) {
-      toast.error(data.message);
-    } else {
-      toast.success(data.message);
-      // Atualiza o histórico após criar uma nova GR
-      fetchRepairOrderHistory();
+    // Converter todas as fotos para base64 antes de enviar
+    try {
+      // Criar um array de promessas para converter todas as fotos para base64
+      const photoPromises = values.services.map(async (service, index) => {
+        if (service.photo instanceof File) {
+          return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              if (typeof reader.result === 'string') {
+                resolve(reader.result);
+              } else {
+                reject(new Error('Failed to convert image to base64'));
+              }
+            };
+            reader.onerror = () => reject(reader.error);
+            reader.readAsDataURL(service.photo as File);
+          });
+        }
+        return Promise.resolve('');
+      });
       
-      // Resetar o formulário
-      form.reset();
-      remove();
+      // Aguardar todas as conversões
+      const base64Photos = await Promise.all(photoPromises);
+      
+      // Preparar os dados para envio com as fotos em base64
+      const servicesWithPhotos = values.services.map((service, index) => ({
+        quantity: service.quantity,
+        item: service.item,
+        category: service.category,
+        type: service.type,
+        labor: service.labor,
+        duration: {
+          from: service.duration.from.toISOString(),
+          to: service.duration.to.toISOString(),
+        },
+        photo: base64Photos[index], // Incluir a foto como base64
+      }));
+      
+      // Criar o payload para envio em formato JSON
+      const payload = {
+        plate: values.plate,
+        kilometers: values.kilometers,
+        base: values.base,
+        userId: values.userId,
+        assistantId: values.assistantId || "none",
+        services: servicesWithPhotos
+      };
+
+      // Enviar como JSON com as fotos em base64 para o endpoint específico
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders-base64`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      const data = await response.json();
+
+      if (data.error) {
+        // Verificar se a mensagem é um objeto ou array e convertê-lo para string
+        if (typeof data.message === 'object') {
+          if (Array.isArray(data.message)) {
+            // Se for um array de erros, mostrar apenas o primeiro
+            toast.error(data.message[0]?.message || 'Erro ao processar a requisição');
+          } else {
+            // Se for um objeto, mostrar uma mensagem genérica
+            toast.error('Erro ao processar a requisição. Verifique os dados e tente novamente.');
+          }
+        } else {
+          // Se for uma string, mostrar diretamente
+          toast.error(data.message);
+        }
+      } else {
+        toast.success(data.message || 'Ordem de reparo criada com sucesso');
+        // Atualiza o histórico após criar uma nova GR
+        fetchRepairOrderHistory();
+        
+        // Resetar o formulário
+        form.reset();
+        remove();
+      }
+    } catch (error) {
+      console.error('Erro ao processar a requisição:', error);
+      toast.error('Erro ao processar a requisição. Por favor, tente novamente.');
+      return;
     }
   }
 
@@ -771,14 +809,17 @@ export default function GuiaDeRemessa() {
                                           const file = e.target.files?.[0];
                                           if (file) {
                                             field.onChange(file);
-                                            // Create a preview URL for the selected image
+                                            // Create a preview URL for the selected image and store as base64
                                             const reader = new FileReader();
                                             reader.onload = (e) => {
                                               const previewElement = document.getElementById(
                                                 `preview-${index}`,
                                               ) as HTMLImageElement;
                                               if (previewElement && e.target) {
-                                                previewElement.src = e.target.result as string;
+                                                const base64String = e.target.result as string;
+                                                previewElement.src = base64String;
+                                                // Armazenar o base64 como um atributo de dados para uso posterior
+                                                previewElement.setAttribute('data-base64', base64String);
                                               }
                                             };
                                             reader.readAsDataURL(file);
