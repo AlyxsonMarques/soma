@@ -10,6 +10,9 @@ const itemSchema = z.object({
 
 export async function GET() {
   const repairOrderServiceItems = await prisma.repairOrderServiceItem.findMany({
+    where: {
+      deletedAt: null // Filtrar apenas itens não deletados
+    },
     include: {
       base: true,
     },

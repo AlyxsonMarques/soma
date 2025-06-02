@@ -49,7 +49,9 @@ export async function GET(req: NextRequest) {
   const plate = searchParams.get('plate');
   
   // Construir o filtro de consulta
-  const where = plate ? { plate: { contains: plate, mode: 'insensitive' as const } } : {};
+  const where = plate 
+    ? { plate: { contains: plate, mode: 'insensitive' as const }, deletedAt: null } 
+    : { deletedAt: null };
   
   // Buscar ordens de reparo com filtros aplicados
   try {

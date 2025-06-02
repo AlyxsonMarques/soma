@@ -18,6 +18,9 @@ const baseSchema = z.object({
 
 export async function GET() {
   const bases = await prisma.base.findMany({
+    where: {
+      deletedAt: null // Filtrar apenas bases não deletadas
+    },
     include: {
       address: true,
     },

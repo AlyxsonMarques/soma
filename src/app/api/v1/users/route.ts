@@ -4,6 +4,9 @@ import { z } from "zod";
 
 export async function GET(request: NextRequest) {
   const users = await prisma.user.findMany({
+    where: {
+      deletedAt: null // Filtrar apenas usuários não deletados
+    },
     select: {
       id: true,
       name: true,
