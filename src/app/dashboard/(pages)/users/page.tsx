@@ -3,10 +3,14 @@
 import { EnhancedDataTable } from "@/components/data-table/enhanced-data-table";
 import type { UserAPISchema } from "@/types/api-schemas";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { DashboardHeader } from "../../components/dashboard-header";
 import { createUserColumns } from "./components/users-table-columns";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export default function UsersPage() {
+  const router = useRouter();
   const [data, setData] = useState<UserAPISchema[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,6 +48,13 @@ export default function UsersPage() {
     <>
       <DashboardHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Usuários</h1>
+          <Button onClick={() => router.push("/dashboard/users/new")}>
+            <Plus className="h-4 w-4 mr-2" />
+            Novo Usuário
+          </Button>
+        </div>
         
         <EnhancedDataTable<UserAPISchema>
           columns={columns}
