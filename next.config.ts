@@ -8,7 +8,6 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  devIndicators: false,
   images: {
     unoptimized: true,
     domains: ['localhost', '127.0.0.1', 'startmanutencao.com']

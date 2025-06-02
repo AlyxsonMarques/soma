@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DatePickerWithRange } from "@/components/ui/date-picker-range";
+import { DatePickerInput } from "@/components/ui/date-picker-input";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -28,9 +28,11 @@ const formSchema = z.object({
   labor: z.string().optional(),
   value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0"),
   discount: z.coerce.number().min(0, "Desconto deve ser maior ou igual a 0"),
-  duration: z.object({
-    from: z.date(),
-    to: z.date(),
+  startDate: z.date({
+    required_error: "Data de início é obrigatória",
+  }),
+  endDate: z.date({
+    required_error: "Data de término é obrigatória",
   }),
   photo: z.any().refine(val => val instanceof File, {
     message: "Foto é obrigatória",
@@ -101,10 +103,8 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
       labor: "",
       value: 0,
       discount: 0,
-      duration: {
-        from: new Date(),
-        to: new Date(),
-      },
+      startDate: new Date(),
+      endDate: new Date(),
       photo: undefined,
     },
   });
@@ -123,11 +123,15 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
       formData.append("status", values.status);
       formData.append("labor", values.labor || "");
       formData.append("value", values.value.toString());
+      
+      // Format dates as a duration object with from and to properties
+      const duration = {
+        from: values.startDate.toISOString(),
+        to: values.endDate.toISOString()
+      };
+      formData.append("duration", JSON.stringify(duration));
+      
       formData.append("discount", values.discount.toString());
-      formData.append("duration", JSON.stringify({
-        from: values.duration.from.toISOString(),
-        to: values.duration.to.toISOString(),
-      }));
       
       // Adicionar foto - obrigatória
       if (values.photo instanceof File) {
@@ -321,12 +325,26 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
 
                 <FormField
                   control={form.control}
-                  name="duration"
+                  name="startDate"
                   render={({ field }) => (
-                    <FormItem className="col-span-2">
-                      <FormLabel>Duração</FormLabel>
+                    <FormItem className="col-span-1">
+                      <FormLabel>Data de Início</FormLabel>
                       <FormControl>
-                        <DatePickerWithRange field={field} />
+                        <DatePickerInput field={field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="endDate"
+                  render={({ field }) => (
+                    <FormItem className="col-span-1">
+                      <FormLabel>Data de Término</FormLabel>
+                      <FormControl>
+                        <DatePickerInput field={field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
