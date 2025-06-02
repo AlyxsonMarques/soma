@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
     // Buscar todas as chaves do formData que começam com "photos["
     const photoEntries = Array.from(formData.entries())
       .filter(([key]) => key.startsWith('photos['))
-      .map(([key, value]) => ({ key, value: value as any }));
+      .map(([key, value]) => ({ key, value: value as File }));
 
     for (const { key, value: photo } of photoEntries) {
       if (photo instanceof any) {

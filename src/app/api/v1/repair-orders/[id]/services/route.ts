@@ -60,7 +60,7 @@ export async function POST(
     const value = formData.get("value");
     const discount = formData.get("discount");
     const durationString = formData.get("duration") as string;
-    const photo = formData.get("photo") as any;
+    const photo = formData.get("photo") as File;
     
     // Verificar se a foto foi enviada
     if (!photo || photo.size === 0) {
