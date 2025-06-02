@@ -24,6 +24,7 @@ import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { Base, RepairOrderServiceItem } from "@prisma/client";
 import { Camera, Trash2, Search, FileText, Calendar, Car } from "lucide-react";
+import { formatImageUrl } from "@/lib/image-utils";
 import { RepairOrderDetailsDialog } from "./components/repair-order-details-dialog";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useEffect } from "react";

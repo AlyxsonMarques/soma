@@ -20,6 +20,7 @@ import {
   translateServiceCategory, 
   translateServiceStatus 
 } from '@/lib/pdf-generator';
+import { formatImageUrl } from '@/lib/image-utils';
 
 // Usar fonte padrão para evitar problemas
 Font.register({

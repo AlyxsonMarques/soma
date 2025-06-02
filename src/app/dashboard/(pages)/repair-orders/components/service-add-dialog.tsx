@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { formatCurrency } from "@/lib/utils";
+import { formatImageUrl } from "@/lib/image-utils";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -13,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePickerWithRange } from "@/components/ui/date-picker-range";
 import { Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
-// Removendo a importação do Image do Next.js para usar a tag img padrão
+import Image from "next/image";
 import type { BaseAPISchema, RepairOrderServiceItemAPISchema } from "@/types/api-schemas";
 
 // Schema para validação do formulário
@@ -414,11 +416,11 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
                             />
                           </div>
                           {photoPreview && (
-                            <div className="h-48 w-full overflow-hidden rounded-md flex items-center justify-center">
+                            <div className="relative h-48 w-full overflow-hidden rounded-md">
                               <img
                                 src={photoPreview}
                                 alt="Prévia da foto"
-                                className="max-h-full max-w-full object-contain"
+                                className="w-full h-full object-contain"
                               />
                             </div>
                           )}

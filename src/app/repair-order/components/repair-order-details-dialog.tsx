@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { formatCurrency } from "@/lib/utils";
+import { formatImageUrl } from "@/lib/image-utils";
 import { Calendar, Car, FileText, MapPin, Wrench } from "lucide-react";
 import { useState } from "react";
 
@@ -190,7 +191,7 @@ export function RepairOrderDetailsDialog({ repairOrder }: RepairOrderDetailsProp
                     {service.photo && (
                       <div className="mt-2">
                         <img 
-                          src={service.photo} 
+                          src={formatImageUrl(service.photo)} 
                           alt={`Foto do serviço ${service.labor}`} 
                           className="rounded-md max-h-32 object-cover"
                         />

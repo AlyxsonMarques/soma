@@ -21,6 +21,7 @@ import {
   translateServiceCategory, 
   translateServiceStatus 
 } from '@/lib/pdf-generator';
+import { formatImageUrl } from '@/lib/image-utils';
 
 
 
@@ -188,20 +189,10 @@ export const RepairOrderTemplate: React.FC<RepairOrderTemplateProps> = ({ repair
                     <div className="mt-4 flex flex-col items-center service-photo-container">
                       <p className="text-sm font-medium mb-2">Foto do Serviço:</p>
                       <img 
-                        src={service.photo} 
+                        src={formatImageUrl(service.photo)} 
                         alt={`Foto do serviço: ${service.item?.name || 'N/A'}`}
                         className="max-w-[90%] max-h-[300px] object-contain mx-auto block rounded border border-gray-200 service-photo"
-                        crossOrigin="anonymous"
                         loading="eager"
-                        onError={(e) => {
-                          // Tentar recarregar a imagem com cache busting
-                          const target = e.target as HTMLImageElement;
-                          const originalSrc = target.src;
-                          target.src = '';
-                          setTimeout(() => {
-                            target.src = originalSrc + (originalSrc.includes('?') ? '&' : '?') + 'cachebust=' + new Date().getTime();
-                          }, 100);
-                        }}
                       />
                       <p className="text-xs text-gray-500 mt-1">{service.item?.name || 'Serviço'}</p>
                     </div>

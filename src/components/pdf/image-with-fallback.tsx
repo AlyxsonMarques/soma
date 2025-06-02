@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Image, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { formatImageUrl } from '@/lib/image-utils';
 
 const styles = StyleSheet.create({
   container: {
@@ -46,7 +47,7 @@ export const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({ src, alt }
   return (
     <View style={styles.container}>
       <Image 
-        src={src} 
+        src={formatImageUrl(src)} 
         style={styles.image}
         cache={true}
       />
