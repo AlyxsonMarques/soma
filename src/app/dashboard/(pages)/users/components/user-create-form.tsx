@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
+import { hash } from "bcrypt-ts";
 
 interface UserCreateFormProps {
   onSuccess: () => void;
@@ -59,6 +60,15 @@ export function UserCreateForm({ onSuccess, onCancel }: UserCreateFormProps) {
     setError("");
 
     try {
+      // Aplicar hash na senha antes de enviar para a API
+      const hashedPassword = await hash(formData.password, Number.parseInt(process.env.NEXT_PUBLIC_BCRYPT_ROUNDS || "12"));
+      
+      // Criar uma cópia do formData com a senha hasheada
+      const dataToSend = {
+        ...formData,
+        password: hashedPassword
+      };
+      
       // Usar try/catch para capturar erros de rede
       let response;
       try {
@@ -67,7 +77,7 @@ export function UserCreateForm({ onSuccess, onCancel }: UserCreateFormProps) {
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(formData)
+          body: JSON.stringify(dataToSend)
         });
       } catch (networkError) {
         console.error("Erro de rede ao criar usuário:", networkError);
