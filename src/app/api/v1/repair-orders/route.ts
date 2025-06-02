@@ -195,7 +195,7 @@ export async function POST(req: NextRequest) {
       .map(([key, value]) => ({ key, value: value as File }));
 
     for (const { key, value: photo } of photoEntries) {
-      if (photo instanceof any) {
+      if (photo instanceof File) {
         const bytes = await photo.arrayBuffer();
         const buffer = Buffer.from(bytes);
         const fileName = `${Date.now()}-${photo.name}`;
