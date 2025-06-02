@@ -13,11 +13,12 @@ import { Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import type { BaseAPISchema } from "@/types/api-schemas";
 import { cn } from "@/lib/utils";
+import { useSession } from "next-auth/react";
 
 // Schema para validação do formulário
 const formSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0"),
+  value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0").optional(),
   baseId: z.string().min(1, "Base é obrigatória"),
 });
 
@@ -95,6 +96,8 @@ function CustomModal({
 }
 
 export function ItemAddDialog({ isOpen, onClose, onSuccess }: ItemAddDialogProps) {
+  const { data: session } = useSession();
+  const isMechanic = session?.user?.type === "MECHANIC";
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bases, setBases] = useState<BaseAPISchema[]>([]);
   
@@ -234,31 +237,6 @@ export function ItemAddDialog({ isOpen, onClose, onSuccess }: ItemAddDialogProps
                 <FormLabel>Nome do Item</FormLabel>
                 <FormControl>
                   <Input placeholder="Ex: Troca de óleo" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="value"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Valor do Item</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
-                      R$ 
-                    </div>
-                    <Input 
-                      type="number" 
-                      placeholder="0,00" 
-                      className="pl-10"
-                      {...field} 
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const itemSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0"),
+  value: z.coerce.number().min(0, "Valor deve ser maior ou igual a 0").optional().default(0),
   baseId: z.string().min(1, "Base é obrigatória"),
 });
 
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     const newItem = await prisma.repairOrderServiceItem.create({
       data: {
         name: validationResult.data.name,
-        value: validationResult.data.value,
+        value: validationResult.data.value ?? 0, // Garante que o valor seja 0 se não for fornecido
         baseId: validationResult.data.baseId,
       },
       include: {
