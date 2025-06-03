@@ -135,7 +135,13 @@ export default function UserDetails() {
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium">Data de Nascimento</p>
-                <p>{new Date(user.birthDate).toLocaleDateString("pt-BR")}</p>
+                <p>{
+                  (() => {
+                    const date = new Date(user.birthDate);
+                    const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+                    return adjustedDate.toLocaleDateString("pt-BR");
+                  })()
+                }</p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium">Assistente</p>
@@ -143,11 +149,23 @@ export default function UserDetails() {
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium">Criado em</p>
-                <p>{new Date(user.createdAt).toLocaleDateString("pt-BR")}</p>
+                <p>{
+                  (() => {
+                    const date = new Date(user.createdAt);
+                    const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+                    return adjustedDate.toLocaleDateString("pt-BR");
+                  })()
+                }</p>
               </div>
               <div className="space-y-2">
                 <p className="text-sm font-medium">Atualizado em</p>
-                <p>{new Date(user.updatedAt).toLocaleDateString("pt-BR")}</p>
+                <p>{
+                  (() => {
+                    const date = new Date(user.updatedAt);
+                    const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+                    return adjustedDate.toLocaleDateString("pt-BR");
+                  })()
+                }</p>
               </div>
             </CardContent>
           </Card>

@@ -70,7 +70,11 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
     accessorKey: "birthDate",
     header: "Data de nascimento",
     cell: ({ row }) => {
-      return <span>{row.original.birthDate.toLocaleDateString("pt-BR")}</span>;
+      // Fix timezone issue by adjusting the date
+      const date = new Date(row.original.birthDate);
+      // Add timezone offset to get the correct date
+      const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+      return <span>{adjustedDate.toLocaleDateString("pt-BR")}</span>;
     },
     meta: {
       label: "Data de nascimento"
@@ -92,7 +96,11 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
       return <DataTableColumnHeader column={column} title="Criado em" />;
     },
     cell: ({ row }) => {
-      return <span>{row.original.createdAt.toLocaleDateString("pt-BR")}</span>;
+      // Fix timezone issue by adjusting the date
+      const date = new Date(row.original.createdAt);
+      // Add timezone offset to get the correct date
+      const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+      return <span>{adjustedDate.toLocaleDateString("pt-BR")}</span>;
     },
     meta: {
       label: "Criado em"
@@ -104,7 +112,11 @@ export function createUserColumns({ onRefresh }: CreateUserColumnsOptions) {
       return <DataTableColumnHeader column={column} title="Atualizado em" />;
     },
     cell: ({ row }) => {
-      return <span>{row.original.updatedAt.toLocaleDateString("pt-BR")}</span>;
+      // Fix timezone issue by adjusting the date
+      const date = new Date(row.original.updatedAt);
+      // Add timezone offset to get the correct date
+      const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+      return <span>{adjustedDate.toLocaleDateString("pt-BR")}</span>;
     },
     meta: {
       label: "Atualizado em"
