@@ -1,6 +1,6 @@
 # Start - Sistema de Ordens de Manutenção e Atendimento
 
-Este é um projeto [Next.js](https://nextjs.org) para gerenciamento de guias de reparo, bases, usuários e serviços.
+Este é um projeto [Next.js](https://nextjs.org) para gerenciamento de guias de remessa, bases, usuários e serviços.
 
 ## Disclaimer
 

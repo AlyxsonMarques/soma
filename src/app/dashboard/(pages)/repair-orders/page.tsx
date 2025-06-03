@@ -45,7 +45,7 @@ export default function RepairOrder() {
       <DashboardHeader />
       <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Guias de Reparo</h1>
+          <h1 className="text-2xl font-bold">Guias de Remessa</h1>
           <Button onClick={() => router.push("/dashboard/repair-orders/new")}>
             <Plus className="h-4 w-4 mr-2" />
             Nova Guia de Reparo
