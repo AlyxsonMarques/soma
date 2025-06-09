@@ -20,7 +20,7 @@ const formSchema = z.object({
   gcaf: z.coerce.number().int().positive("GCAF deve ser um número positivo"),
   baseId: z.string().min(1, "Base é obrigatória"),
   userIds: z.array(z.string()).min(1, "Pelo menos um usuário é obrigatório"),
-  plate: z.string().min(1, "Placa é obrigatória").transform(val => val.toUpperCase()),
+  plate: z.string().min(1, "Placa é obrigatória").max(7, "A placa deve ter no máximo 7 caracteres").transform(val => val.toUpperCase()),
   kilometers: z.coerce.number().min(0, "Kilometragem deve ser maior ou igual a 0"),
   status: z.enum(["PENDING", "REVISION", "APPROVED", "PARTIALLY_APPROVED", "INVOICE_APPROVED", "CANCELLED"]).default("PENDING"),
   observations: z.string().optional(),

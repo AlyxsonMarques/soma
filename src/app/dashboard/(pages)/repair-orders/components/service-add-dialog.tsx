@@ -503,8 +503,8 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
               
               <div className="space-y-2">
                 <Label htmlFor="new-item-base">Base</Label>
-                <Select>
-                  <SelectTrigger>
+                <Select onValueChange={(value) => document.getElementById('new-item-base')?.setAttribute('data-value', value)}>
+                  <SelectTrigger id="new-item-base">
                     <SelectValue placeholder="Selecione uma base" />
                   </SelectTrigger>
                   <SelectContent>
@@ -536,7 +536,7 @@ export function ServiceAddDialog({ isOpen, onClose, repairOrderId, onSuccess }: 
                 onClick={async () => {
                   const nameInput = document.getElementById('new-item-name') as HTMLInputElement;
                   const valueInput = document.getElementById('new-item-value') as HTMLInputElement;
-                  const baseSelect = document.querySelector('[data-value]') as HTMLElement;
+                  const baseSelect = document.getElementById('new-item-base') as HTMLElement;
                   
                   if (!nameInput?.value) {
                     toast.error("Nome do item é obrigatório");
