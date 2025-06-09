@@ -120,11 +120,19 @@ export default function GuiaDeRemessa() {
   
 
   
-  // Função para buscar o histórico de GRs
+  // Função para buscar o histórico de GRs do usuário logado
   const fetchRepairOrderHistory = async () => {
     setIsLoadingHistory(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders`);
+      // Verificar se há um usuário logado
+      if (!session?.user?.id) {
+        console.log("Usuário não está logado ou não tem ID");
+        setHistoryOrders([]);
+        return;
+      }
+      
+      // Buscar apenas as ordens de reparo associadas ao usuário logado
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-orders?userId=${session.user.id}`);
       
       if (!res.ok) {
         throw new Error("Falha ao buscar histórico de ordens de reparo");
@@ -216,36 +224,82 @@ export default function GuiaDeRemessa() {
   }, [session, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Verificar se todos os serviços têm fotos antes de enviar
-    const missingPhotos = values.services.some(service => !(service.photo instanceof File));
-    if (missingPhotos) {
-      toast.error("Todos os serviços devem ter uma foto. Por favor, adicione fotos para todos os serviços.");
-      return;
-    }
-    
-    // Converter todas as fotos para base64 antes de enviar
-    try {
-      // Criar um array de promessas para converter todas as fotos para base64
-      const photoPromises = values.services.map(async (service, index) => {
-        if (service.photo instanceof File) {
-          return new Promise<string>((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => {
-              if (typeof reader.result === 'string') {
-                resolve(reader.result);
-              } else {
-                reject(new Error('Failed to convert image to base64'));
-              }
-            };
-            reader.onerror = () => reject(reader.error);
-            reader.readAsDataURL(service.photo as File);
-          });
-        }
-        return Promise.resolve('');
-      });
+  // Verificar se todos os serviços têm fotos antes de enviar
+  const missingPhotos = values.services.some(service => !(service.photo instanceof File));
+  if (missingPhotos) {
+    toast.error("Todos os serviços devem ter uma foto. Por favor, adicione fotos para todos os serviços.");
+    return;
+  }
+  
+  // Função para comprimir e converter imagem para base64
+  const compressAndConvertToBase64 = async (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      // Criar um elemento canvas para redimensionar a imagem
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
       
-      // Aguardar todas as conversões
-      const base64Photos = await Promise.all(photoPromises);
+      // Configurar o carregamento da imagem
+      img.onload = () => {
+        // Definir dimensões máximas (800px é um bom equilíbrio entre qualidade e tamanho)
+        const maxWidth = 800;
+        const maxHeight = 800;
+        
+        // Calcular as novas dimensões mantendo a proporção
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round(height * maxWidth / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round(width * maxHeight / height);
+            height = maxHeight;
+          }
+        }
+        
+        // Redimensionar a imagem
+        canvas.width = width;
+        canvas.height = height;
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // Converter para base64 com qualidade reduzida (0.7 = 70% de qualidade)
+        const base64 = canvas.toDataURL('image/jpeg', 0.7);
+        resolve(base64);
+      };
+      
+      img.onerror = () => reject(new Error('Failed to load image'));
+      
+      // Carregar a imagem do arquivo
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          img.src = e.target.result as string;
+        } else {
+          reject(new Error('Failed to read file'));
+        }
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  };
+  
+  // Converter todas as fotos para base64 antes de enviar
+  try {
+    // Criar um array de promessas para comprimir e converter todas as fotos para base64
+    const photoPromises = values.services.map(async (service, index) => {
+      if (service.photo instanceof File) {
+        // Comprimir e converter para base64
+        return await compressAndConvertToBase64(service.photo);
+      }
+      return Promise.resolve('');
+    });
+    
+    // Aguardar todas as conversões
+    const base64Photos = await Promise.all(photoPromises);
       
       // Preparar os dados para envio com as fotos em base64
       const servicesWithPhotos = values.services.map((service, index) => ({

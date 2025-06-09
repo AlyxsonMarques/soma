@@ -47,11 +47,24 @@ export async function GET(req: NextRequest) {
   // Obter parâmetros de consulta
   const { searchParams } = new URL(req.url);
   const plate = searchParams.get('plate');
+  const userId = searchParams.get('userId');
   
   // Construir o filtro de consulta
-  const where = plate 
-    ? { plate: { contains: plate, mode: 'insensitive' as const }, deletedAt: null } 
-    : { deletedAt: null };
+  let where: any = { deletedAt: null };
+  
+  // Adicionar filtro por placa se fornecido
+  if (plate) {
+    where.plate = { contains: plate, mode: 'insensitive' as const };
+  }
+  
+  // Adicionar filtro por usuário se fornecido
+  if (userId) {
+    where.users = {
+      some: {
+        id: userId
+      }
+    };
+  }
   
   // Buscar ordens de reparo com filtros aplicados
   try {

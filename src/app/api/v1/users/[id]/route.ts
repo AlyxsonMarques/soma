@@ -1,8 +1,9 @@
 import { ERROR_500_NEXT } from "@/errors/500";
 import prisma from "@/lib/prisma";
-import { userIdSchema, userStatusSchema } from "@/types/user"; // Ajuste o caminho de importação
+import { userIdSchema, userStatusSchema } from "@/types/user";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { hash } from "bcrypt-ts";
 
 const userUpdateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -90,8 +91,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     
     // Se tiver uma nova senha, fazer hash dela
     if (updateData.password && updateData.password.trim() !== "") {
-      // Em um sistema real, você faria o hash da senha aqui
-      // updateData.password = await bcrypt.hash(updateData.password, 10);
+      // Obter o número de rounds do .env ou usar 10 como padrão
+      const bcryptRounds = parseInt(process.env.BCRYPT_ROUNDS || "10", 10);
+      updateData.password = await hash(updateData.password, bcryptRounds);
     } else {
       // Se não tiver senha, remover do objeto para não atualizar
       delete updateData.password;
