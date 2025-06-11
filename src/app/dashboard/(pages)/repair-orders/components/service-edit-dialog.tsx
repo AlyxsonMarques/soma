@@ -32,9 +32,7 @@ const formSchema = z.object({
     from: z.date(),
     to: z.date(),
   }),
-  photo: z.any().refine(val => val instanceof File || (typeof val === 'string' && val.length > 0), {
-    message: "Foto é obrigatória",
-  }),
+  photo: z.any().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -131,16 +129,14 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
         to: values.duration.to.toISOString(),
       }));
       
-      // Adicionar foto - é obrigatória
+      // Adicionar foto apenas se fornecida
       if (values.photo instanceof File) {
         formData.append("photo", values.photo);
       } else if (typeof values.photo === 'string' && values.photo.length > 0) {
         // Se a foto já existe e não foi alterada, enviar o URL existente
         formData.append("photoUrl", values.photo);
-      } else {
-        // Se não há foto, não permitir a submissão
-        throw new Error("Foto é obrigatória");
       }
+      // Se não houver foto, não adiciona nada ao formData
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/repair-order-services/${service.id}`, {
         method: "PATCH",
@@ -402,7 +398,7 @@ export function ServiceEditDialog({ isOpen, onClose, service, repairOrderId, onS
                   name="photo"
                   render={({ field: { onChange, value, ...field } }) => (
                     <FormItem className="col-span-2">
-                      <FormLabel>Foto <span className="text-destructive">*</span></FormLabel>
+                      <FormLabel>Foto {!service.photo && <span className="text-destructive">*</span>}</FormLabel>
                       <FormControl>
                         <div className="flex flex-col gap-4">
                           <div className="flex items-center gap-4">
